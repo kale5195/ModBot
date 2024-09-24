@@ -88,33 +88,33 @@ export async function action({ request, params }: ActionFunctionArgs) {
     getSession(request.headers.get("Cookie")),
   ]);
 
-  if (shouldFlipEnabled) {
-    toggleWebhook({ channelId: modChannel.id, active: true }).catch(console.error);
+  // if (shouldFlipEnabled) {
+  //   toggleWebhook({ channelId: modChannel.id, active: true }).catch(console.error);
 
-    if (isOnboarding) {
-      /**
-       * If the channel is being enabled for the first time, we want to
-       * run a sweep to catch up on any changed rules.
-       */
-      sweepQueue.add("sweep", {
-        channelId: modChannel.id,
-        moderatedChannel: modChannel,
-        limit: 250,
-      });
-    } else {
-      /**
-       * Always run a recovery post channel update. This helps in
-       * cases where a channel has been disabled for a while and
-       * then reenables. This way they don't have to run a sweep
-       * manually.
-       */
-      recoverQueue.add("recover", {
-        channelId: modChannel.id,
-        moderatedChannel: modChannel,
-        limit: 250,
-      });
-    }
-  }
+  //   if (isOnboarding) {
+  //     /**
+  //      * If the channel is being enabled for the first time, we want to
+  //      * run a sweep to catch up on any changed rules.
+  //      */
+  //     sweepQueue.add("sweep", {
+  //       channelId: modChannel.id,
+  //       moderatedChannel: modChannel,
+  //       limit: 250,
+  //     });
+  //   } else {
+  //     /**
+  //      * Always run a recovery post channel update. This helps in
+  //      * cases where a channel has been disabled for a while and
+  //      * then reenables. This way they don't have to run a sweep
+  //      * manually.
+  //      */
+  //     recoverQueue.add("recover", {
+  //       channelId: modChannel.id,
+  //       moderatedChannel: modChannel,
+  //       limit: 250,
+  //     });
+  //   }
+  // }
 
   session.flash("message", {
     id: uuid(),
@@ -187,7 +187,7 @@ export default function Screen() {
     <div className="space-y-4 w-full">
       <div className="">
         <p className="font-semibold">Rules</p>
-        <p className="text-gray-500">The following settings control what casts appear in Main.</p>
+        <p className="text-gray-500">The following settings control who can join this channel.</p>
       </div>
 
       <div className="py-4">

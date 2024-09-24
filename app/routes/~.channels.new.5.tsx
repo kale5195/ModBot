@@ -44,11 +44,11 @@ export default function Screen() {
           <ChannelHeader channel={channel} />
           <CardTitle>Install cast actions to moderate your channel</CardTitle>
           <CardDescription>
-            {" "}
-            Use cast actions to Curate, Hide, or Ban content directly in your Channel Feed.
+            Use cast actions to help you decide if a user can be invited to your
+            channel. Coming soon.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        {/* <CardContent>
           <div className="flex flex-col gap-4 text-sm">
             {castActions.map((ca) => (
               <div
@@ -72,7 +72,7 @@ export default function Screen() {
               </div>
             ))}
           </div>
-        </CardContent>
+        </CardContent> */}
         <CardFooter>
           <Button asChild>
             <Link to={dst} className="no-underline w-full sm:w-[150px]">

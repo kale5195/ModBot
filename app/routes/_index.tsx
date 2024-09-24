@@ -149,7 +149,7 @@ export default function Home() {
                 Put your channel on autopilot.
               </h1>
               <p className="text-white/80 text-md sm:text-xl mt-2 max-w-2xl mx-auto">
-                Choose from 25+ composable rules to automatically curate meaningful content in your channel.
+                Choose from 25+ composable rules to automatically curate great people in your channel.
               </p>
             </div>
 
@@ -328,7 +328,7 @@ export function LoginButton(props: {
   const navigate = useNavigate();
 
   const farcasterConfig = {
-    rpcUrl: `https://optimism-mainnet.infura.io/v3/${env.infuraProjectId}`,
+    rpcUrl: `https://mainnet.optimism.io`,
     domain: new URL(env.hostUrl).host.split(":")[0],
     siweUri: `${env.hostUrl}/login`,
   };

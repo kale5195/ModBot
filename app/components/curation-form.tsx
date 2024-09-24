@@ -146,7 +146,7 @@ export function CurationForm(props: {
                   <option value="OR">any</option>
                   <option value="AND">all</option>
                 </select>{" "}
-                of the following rules are met, include the cast in Main.
+                of the following rules are met, then invite the user to this channel.
               </div>
             </div>
 
@@ -177,7 +177,7 @@ export function CurationForm(props: {
                   <option value="OR">any</option>
                   <option value="AND">all</option>
                 </select>{" "}
-                of the following rules are met, then exclude the cast from Main.
+                of the following rules are met, then reject the user from this channel.
               </div>
             </div>
 
@@ -195,11 +195,11 @@ export function CurationForm(props: {
             </div>
           </fieldset>
 
-          <div className="py-6">
+          {/* <div className="py-6">
             <hr />
-          </div>
+          </div> */}
 
-          <fieldset disabled={isSubmitting} className="space-y-6">
+          {/* <fieldset disabled={isSubmitting} className="space-y-6">
             <div>
               <p className="font-medium">Bypass</p>
               <p className="text-gray-500 text-sm">
@@ -273,7 +273,7 @@ export function CurationForm(props: {
                 </p>
               </div>
             </FieldLabel>
-          </fieldset>
+          </fieldset> */}
 
           <div className="py-6">
             <hr />

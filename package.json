@@ -3,6 +3,7 @@
   "private": true,
   "sideEffects": false,
   "type": "module",
+  "packageManager": "pnpm@9.11.0",
   "scripts": {
     "build": "pnpm exec prisma generate && remix build --sourcemap && sentry-upload-sourcemaps --org double-play --project auto-mod",
     "db:reset": "./scripts/dbReset.sh",
@@ -20,8 +21,8 @@
     "@bull-board/express": "^5.15.1",
     "@bull-board/ui": "^5.15.1",
     "@faker-js/faker": "^8.4.1",
-    "@farcaster/auth-kit": "^0.3.1",
-    "@farcaster/hub-nodejs": "^0.10.23",
+    "@farcaster/auth-kit": "^0.6.0",
+    "@farcaster/hub-nodejs": "^0.12.3",
     "@neynar/nodejs-sdk": "^1.31.0",
     "@prisma/client": "^5.8.1",
     "@radix-ui/react-accordion": "^1.1.2",

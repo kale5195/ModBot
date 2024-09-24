@@ -42,7 +42,13 @@ export async function action({ request }: ActionFunctionArgs) {
   const result = z
     .object({
       comods: z
-        .array(z.object({ value: z.number(), label: z.string(), icon: z.string().optional() }))
+        .array(
+          z.object({
+            value: z.number(),
+            label: z.string(),
+            icon: z.string().optional(),
+          })
+        )
         .optional()
         .default([]),
       channelId: z.string(),
@@ -132,7 +138,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const moderatedChannel = await db.moderatedChannel.create({
     data: {
       id: result.data.channelId,
-      active: true,
+      active: false,
       userId: user.id,
       url: wcChannel.url,
       feedType: result.data.feed,
@@ -142,28 +148,28 @@ export async function action({ request }: ActionFunctionArgs) {
     },
   });
 
-  await Promise.all([
-    db.role.create({
-      data: {
-        channelId: moderatedChannel.id,
-        name: "Cohost",
-        isCohostRole: true,
-        description: "Primary moderators for your channel.",
-        permissions: JSON.stringify(permissionDefs.map((p) => p.id)),
-        delegates: {
-          create: result.data.comods.map((comod) => ({
-            fid: String(comod.value),
-            username: comod.label,
-            avatarUrl: comod.icon,
-            channelId: moderatedChannel.id,
-          })),
-        },
-      },
-    }),
-    await registerWebhook({
-      rootParentUrl: wcChannel.url,
-    }),
-  ]);
+  // await Promise.all([
+  //   db.role.create({
+  //     data: {
+  //       channelId: moderatedChannel.id,
+  //       name: "Cohost",
+  //       isCohostRole: true,
+  //       description: "Primary moderators for your channel.",
+  //       permissions: JSON.stringify(permissionDefs.map((p) => p.id)),
+  //       delegates: {
+  //         create: result.data.comods.map((comod) => ({
+  //           fid: String(comod.value),
+  //           username: comod.label,
+  //           avatarUrl: comod.icon,
+  //           channelId: moderatedChannel.id,
+  //         })),
+  //       },
+  //     },
+  //   }),
+  //   await registerWebhook({
+  //     rootParentUrl: wcChannel.url,
+  //   }),
+  // ]);
 
   return redirect(`/~/channels/new/4?channelId=${moderatedChannel.id}`);
 }
@@ -198,36 +204,17 @@ export default function Screen() {
       <Card>
         <CardHeader>
           <ChannelHeader channel={channel} />
-          <CardTitle>Who will you moderate with?</CardTitle>
+          <CardTitle>Set @automod-fc as your channel's moderator</CardTitle>
           <CardDescription>
-            Moderators control who and what can be casted in your channel's Main feed using cast actions.
+            @automod-fc will auto invite people who meet your channel rules. You
+            can also remove the people @autojoin invited at any time.
           </CardDescription>
         </CardHeader>
-        <form method="post" className="space-y-8" onSubmit={methods.handleSubmit(onSubmit)}>
-          <CardContent className="space-y-6">
-            <p className=" text-gray-500"></p>
-
-            <ClientOnly>
-              {() => (
-                <FieldLabel
-                  key={new Date().toISOString()}
-                  labelProps={{
-                    className: "w-full",
-                  }}
-                  label={
-                    <div className="flex justify-between gap-4 w-full">
-                      <p className="font-medium flex-auto">Farcaster Usernames</p>
-                    </div>
-                  }
-                  description=""
-                  className="flex-col items-start w-full"
-                >
-                  <UserPicker name="comods" isMulti={true} />
-                </FieldLabel>
-              )}
-            </ClientOnly>
-            <p className="text-sm text-gray-500">You can change this anytime.</p>
-          </CardContent>
+        <form
+          method="post"
+          className="space-y-8"
+          onSubmit={methods.handleSubmit(onSubmit)}
+        >
           <CardFooter>
             <Button type="submit" className="w-full sm:w-[150px]">
               Next

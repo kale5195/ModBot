@@ -82,7 +82,7 @@ export default function ChannelRoot() {
         <div>
           <h1 style={{ fontFamily: "Kode Mono" }}>/{channel.id}</h1>
         </div>
-        <div className="pl-2 flex items-center gap-7">
+        {/* <div className="pl-2 flex items-center gap-7">
           <form method="post" action={`/api/channels/${channel.id}/toggleEnable`}>
             <div className="flex items-center">
               <label htmlFor="enabled" className="text-sm p-3">
@@ -99,7 +99,7 @@ export default function ChannelRoot() {
               />{" "}
             </div>
           </form>
-        </div>
+        </div> */}
       </div>
 
       <div className="py-4">
@@ -114,10 +114,10 @@ export default function ChannelRoot() {
                 { to: `/~/channels/${channel.id}`, title: "Overview", end: true },
                 { to: `/~/channels/${channel.id}/activity`, title: "Activity" },
                 { to: `/~/channels/${channel.id}/edit`, title: "Moderation" },
-                {
-                  to: `/~/channels/${channel.id}/roles`,
-                  title: "Roles",
-                },
+                // {
+                //   to: `/~/channels/${channel.id}/roles`,
+                //   title: "Roles",
+                // },
                 { to: `/~/channels/${channel.id}/bans`, title: "Bans" },
                 { to: `/~/channels/${channel.id}/tools`, title: "Tools" },
                 user.id === channel.userId

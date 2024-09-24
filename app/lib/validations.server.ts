@@ -126,42 +126,42 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
     args: {},
   },
 
-  webhook: {
-    name: "webhook",
-    author: "automod",
-    authorUrl: "https://automod.sh",
-    authorIcon: `${hostUrl}/icons/automod.png`,
-    allowMultiple: false,
-    category: "all",
-    friendlyName: "Webhook",
-    checkType: "user",
-    description: "Use an external service to determine if the rule shoulud be triggered.",
-    hidden: false,
-    invertable: false,
-    minimumPlan: "prime",
-    args: {
-      url: {
-        type: "string",
-        friendlyName: "URL",
-        placeholder: "https://example.com/webhook",
-        required: true,
-        description:
-          "A post request will be made with { cast, user } data. If the webhook returns a 200, the rule will be triggered, if it returns a 400, it will not. Return a json response in either case with a message to include a reason in the activity logs. Maximum of 75 characters. A response must return within 5 seconds. Example: HTTP POST example.com/webhook { user, cast } -> 200 {'message': 'User belongs to mickey mouse club'}",
-      },
-      failureMode: {
-        type: "select",
-        required: true,
-        friendlyName: "If the webhook fails or times out...",
-        description:
-          "Example: Let's say you have only this rule in the section \"When any of the following rules are met, include the cast in Main\". If you choose 'Trigger this rule' and the webhook fails, the cast will be included in Main. If you choose 'Do not trigger this rule', the cast will not be included in Main.",
-        defaultValue: "doNotTrigger",
-        options: [
-          { value: "trigger", label: "Trigger this rule" },
-          { value: "doNotTrigger", label: "Do not trigger this rule" },
-        ],
-      },
-    },
-  },
+  // webhook: {
+  //   name: "webhook",
+  //   author: "automod",
+  //   authorUrl: "https://automod.sh",
+  //   authorIcon: `${hostUrl}/icons/automod.png`,
+  //   allowMultiple: false,
+  //   category: "all",
+  //   friendlyName: "Webhook",
+  //   checkType: "user",
+  //   description: "Use an external service to determine if the rule shoulud be triggered.",
+  //   hidden: false,
+  //   invertable: false,
+  //   minimumPlan: "prime",
+  //   args: {
+  //     url: {
+  //       type: "string",
+  //       friendlyName: "URL",
+  //       placeholder: "https://example.com/webhook",
+  //       required: true,
+  //       description:
+  //         "A post request will be made with { cast, user } data. If the webhook returns a 200, the rule will be triggered, if it returns a 400, it will not. Return a json response in either case with a message to include a reason in the activity logs. Maximum of 75 characters. A response must return within 5 seconds. Example: HTTP POST example.com/webhook { user, cast } -> 200 {'message': 'User belongs to mickey mouse club'}",
+  //     },
+  //     failureMode: {
+  //       type: "select",
+  //       required: true,
+  //       friendlyName: "If the webhook fails or times out...",
+  //       description:
+  //         "Example: Let's say you have only this rule in the section \"When any of the following rules are met, include the cast in Main\". If you choose 'Trigger this rule' and the webhook fails, the cast will be included in Main. If you choose 'Do not trigger this rule', the cast will not be included in Main.",
+  //       defaultValue: "doNotTrigger",
+  //       options: [
+  //         { value: "trigger", label: "Trigger this rule" },
+  //         { value: "doNotTrigger", label: "Do not trigger this rule" },
+  //       ],
+  //     },
+  //   },
+  // },
 
   subscribesOnParagraph: {
     name: "subscribesOnParagraph",
@@ -241,31 +241,6 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
     },
   },
 
-  containsText: {
-    name: "containsText",
-    author: "automod",
-    authorUrl: "https://automod.sh",
-    authorIcon: `${hostUrl}/icons/automod.png`,
-    allowMultiple: true,
-    category: "all",
-    friendlyName: "Contains Text",
-    checkType: "cast",
-    description: "Check if the text contains a specific string",
-    hidden: false,
-    invertable: true,
-    args: {
-      searchText: {
-        type: "string",
-        friendlyName: "Search Text",
-        description: "The text to search for",
-      },
-      caseSensitive: {
-        type: "boolean",
-        friendlyName: "Case Sensitive",
-        description: "If checked, 'abc' is different from 'ABC'",
-      },
-    },
-  },
 
   castInThread: {
     name: "castInThread",
@@ -305,86 +280,57 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
     invertable: false,
     args: {},
   },
-
-  containsEmbeds: {
-    name: "containsEmbeds",
-    author: "automod",
-    authorUrl: "https://automod.sh",
-    authorIcon: `${hostUrl}/icons/automod.png`,
-    allowMultiple: true,
-    category: "all",
-    friendlyName: "Contains Embedded Content",
-    checkType: "cast",
-    description: "Check if the cast contains images, gifs, videos, frames or links",
-    hidden: false,
-    invertable: true,
-    args: {
-      images: {
-        type: "boolean",
-        defaultValue: true,
-        friendlyName: "Images",
-        description: "Check for images or gifs",
-      },
-      videos: {
-        type: "boolean",
-        defaultValue: true,
-        friendlyName: "Videos",
-        description: "Check for videos",
-      },
-      frames: {
-        type: "boolean",
-        defaultValue: true,
-        friendlyName: "Frames",
-        description: "Check for frames",
-      },
-      links: {
-        type: "boolean",
-        defaultValue: true,
-        friendlyName: "Links",
-        description: "Check for links",
-      },
-      casts: {
-        type: "boolean",
-        defaultValue: true,
-        friendlyName: "Casts",
-        description: "Check for quote casts",
-      },
-      domain: {
-        type: "string",
-        friendlyName: "Domain",
-        placeholder: "e.g. glass.com",
-        description:
-          "Check for embeds from a specific domain. Example: if you check 'Frames' and add glass.com, this check will trigger for frames from glass.com.",
-      },
-    },
-  },
-
-  textMatchesPattern: {
-    name: "textMatchesPattern",
-    author: "automod",
-    authorUrl: "https://automod.sh",
-    authorIcon: `${hostUrl}/icons/automod.png`,
-    allowMultiple: true,
-    category: "all",
-    friendlyName: "Matches Pattern (Regex)",
-    checkType: "cast",
-    description: "Check if the text matches a specific pattern",
-    hidden: false,
-    invertable: true,
-    args: {
-      pattern: {
-        type: "string",
-        friendlyName: "Pattern",
-        required: true,
-        description: "The regular expression to match against. No leading or trailing slashes.",
-      },
-      caseInsensitive: {
-        type: "boolean",
-        friendlyName: "Ignore Case",
-        description: "If checked, 'abc' is the same as 'ABC'",
-      },
-    },
-  },
+  //   name: "containsEmbeds",
+  //   author: "automod",
+  //   authorUrl: "https://automod.sh",
+  //   authorIcon: `${hostUrl}/icons/automod.png`,
+  //   allowMultiple: true,
+  //   category: "all",
+  //   friendlyName: "Contains Embedded Content",
+  //   checkType: "cast",
+  //   description: "Check if the cast contains images, gifs, videos, frames or links",
+  //   hidden: false,
+  //   invertable: true,
+  //   args: {
+  //     images: {
+  //       type: "boolean",
+  //       defaultValue: true,
+  //       friendlyName: "Images",
+  //       description: "Check for images or gifs",
+  //     },
+  //     videos: {
+  //       type: "boolean",
+  //       defaultValue: true,
+  //       friendlyName: "Videos",
+  //       description: "Check for videos",
+  //     },
+  //     frames: {
+  //       type: "boolean",
+  //       defaultValue: true,
+  //       friendlyName: "Frames",
+  //       description: "Check for frames",
+  //     },
+  //     links: {
+  //       type: "boolean",
+  //       defaultValue: true,
+  //       friendlyName: "Links",
+  //       description: "Check for links",
+  //     },
+  //     casts: {
+  //       type: "boolean",
+  //       defaultValue: true,
+  //       friendlyName: "Casts",
+  //       description: "Check for quote casts",
+  //     },
+  //     domain: {
+  //       type: "string",
+  //       friendlyName: "Domain",
+  //       placeholder: "e.g. glass.com",
+  //       description:
+  //         "Check for embeds from a specific domain. Example: if you check 'Frames' and add glass.com, this check will trigger for frames from glass.com.",
+  //     },
+  //   },
+  // },
 
   textMatchesLanguage: {
     name: "textMatchesLanguage",
@@ -412,96 +358,6 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
     },
   },
 
-  castLength: {
-    name: "castLength",
-    author: "automod",
-    authorUrl: "https://automod.sh",
-    authorIcon: `${hostUrl}/icons/automod.png`,
-    allowMultiple: false,
-    category: "all",
-    friendlyName: "Cast Length",
-    checkType: "cast",
-    description: "Check if the cast length is within a range",
-    hidden: false,
-    invertable: false,
-    args: {
-      min: {
-        type: "number",
-        friendlyName: "Less than",
-        description: "Setting a value of 5 would trigger this rule if the length was 0 to 4 characters.",
-      },
-      max: {
-        type: "number",
-        friendlyName: "More than",
-        description: "Setting a value of 10 would trigger this rule if the length was 11 or more characters.",
-      },
-    },
-  },
-
-  containsTooManyMentions: {
-    name: "containsTooManyMentions",
-    author: "automod",
-    authorUrl: "https://automod.sh",
-    authorIcon: `${hostUrl}/icons/automod.png`,
-    allowMultiple: false,
-    category: "all",
-    friendlyName: "Contains Mentions",
-    checkType: "cast",
-    description: "Check if the text contains a certain amount of mentions",
-    invertable: true,
-    hidden: false,
-    args: {
-      maxMentions: {
-        type: "number",
-        required: true,
-        friendlyName: "Max Mentions",
-        placeholder: "0",
-        description: "The maximum number of mentions allowed",
-      },
-    },
-  },
-  containsLinks: {
-    name: "containsLinks",
-    author: "automod",
-    authorUrl: "https://automod.sh",
-    authorIcon: `${hostUrl}/icons/automod.png`,
-    allowMultiple: false,
-    category: "all",
-    friendlyName: "Contains Links",
-    checkType: "cast",
-    description: "Check if the text contains any links",
-    hidden: false,
-    invertable: true,
-    args: {
-      maxLinks: {
-        type: "number",
-        friendlyName: "Max Links",
-        description: "The maximum number of links allowed",
-      },
-    },
-  },
-
-  downvote: {
-    name: "downvote",
-    author: "automod",
-    authorUrl: "https://automod.sh",
-    authorIcon: `${hostUrl}/icons/automod.png`,
-    allowMultiple: false,
-    category: "all",
-    friendlyName: "Downvote",
-    checkType: "cast",
-    description: "Check if the cast has been downvoted by your community",
-    hidden: false,
-    invertable: false,
-    args: {
-      threshold: {
-        type: "number",
-        friendlyName: "Threshold",
-        description: "A threshold of 5 means when the 5th downvote is received, the rule will be violated.",
-        pattern: "[0-9]+",
-      },
-    },
-  },
 
   userDoesNotFollow: {
     name: "userDoesNotFollow",
@@ -766,20 +622,6 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
     args: {},
   },
 
-  userIsCohost: {
-    name: "userIsCohost",
-    author: "automod",
-    authorUrl: "https://automod.sh",
-    authorIcon: `${hostUrl}/icons/automod.png`,
-    allowMultiple: false,
-    category: "all",
-    friendlyName: "Cohosts or Owner",
-    checkType: "user",
-    description: "Check if the user is a cohost or owner of the channel",
-    hidden: false,
-    invertable: true,
-    args: {},
-  },
 
   userProfileContainsText: {
     author: "automod",

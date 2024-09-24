@@ -33,8 +33,10 @@ export default function Screen() {
     <Card>
       <CardHeader>
         <ChannelHeader channel={channel} />
-        <CardTitle>What kind of feed do you want?</CardTitle>
-        <CardDescription>All options can be mixed with manual moderation directly in feed.</CardDescription>
+        <CardTitle>Who can join your channel?</CardTitle>
+        <CardDescription>
+          All options can be mixed with manual moderation directly in feed.
+        </CardDescription>
       </CardHeader>
       <Form
         method="post"
@@ -59,7 +61,7 @@ export default function Screen() {
               label="Recommended"
               labelProps={{ htmlFor: "recommended" }}
               position="right"
-              description="A Warpcast-like feed based on power badge and users you follow."
+              description="People who have a power badge and users you follow."
             >
               <RadioGroupItem className="mt-[2px]" id="recommended" value="recommended" />
             </FieldLabel>
@@ -72,18 +74,10 @@ export default function Screen() {
             >
               <RadioGroupItem className="mt-[2px]" id="custom" value="custom" />
             </FieldLabel>
-
-            <FieldLabel
-              label="Manual"
-              labelProps={{ htmlFor: "manual" }}
-              position="right"
-              description="You and optional comoderators will curate good casts with cast actions."
-            >
-              <RadioGroupItem className="mt-[2px]" id="manual" value="manual" />
-            </FieldLabel>
           </RadioGroup>
           <p className="text-sm text-gray-500 mt-6">
-            You can change this anytime. If you're not sure, start with Recommended.
+            You can change this anytime. If you're not sure, start with
+            Recommended.
           </p>
         </CardContent>
         <CardFooter>

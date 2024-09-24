@@ -197,7 +197,7 @@ export default function Screen() {
         <p className="font-semibold">Tools</p>
       </div>
 
-      <hr />
+      {/* <hr />
 
       <div className="space-y-3">
         <div>
@@ -242,7 +242,7 @@ export default function Screen() {
             )}
           </Button>
         </Form>
-      </div>
+      </div> */}
 
       <hr />
 
@@ -250,7 +250,7 @@ export default function Screen() {
         <div>
           <p className="font-medium">Simulate Rules</p>
           <p className="text-sm text-gray-500">
-            Enter a cast hash or warpcast url to simulate your moderation rules against.
+            Enter a fid to simulate your moderation rules against.
           </p>
         </div>
       </div>
@@ -278,8 +278,8 @@ function SimulateCast(props: { actionDefs: typeof actionDefinitions }) {
       }}
       className="space-y-4"
     >
-      <FieldLabel label="Cast Hash or Warpcast URL" className="items-start flex-col">
-        <Input name="castHashOrWarpcastUrl" placeholder="e.g. https://warpcast.com/..." />
+      <FieldLabel label="Fid or Farcaster username" className="items-start flex-col">
+        <Input name="castHashOrWarpcastUrl" placeholder="3" />
       </FieldLabel>
 
       <Button
