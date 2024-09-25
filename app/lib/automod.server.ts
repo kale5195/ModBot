@@ -1,4 +1,4 @@
-import { Cast } from "@neynar/nodejs-sdk/build/neynar-api/v2";
+import { Cast, User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import * as Sentry from "@sentry/remix";
 import { ModeratedChannel, ModerationLog } from "@prisma/client";
 import { v4 as uuid } from "uuid";
@@ -12,209 +12,209 @@ import { getWarpcastChannelOwner } from "~/lib/warpcast.server";
 import { PlanType, userPlans } from "~/lib/utils";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export async function cooldown({ channel, cast, action }: { channel: string; cast: Cast; action: Action }) {
-  const { duration } = (action as any).args;
+export async function cooldown({ channel, user, action }: { channel: string; user: User; action: Action }) {
+  // const { duration } = (action as any).args;
 
-  return db.cooldown.upsert({
-    where: {
-      affectedUserId_channelId: {
-        affectedUserId: String(cast.author.fid),
-        channelId: channel,
-      },
-    },
-    update: {
-      active: true,
-      expiresAt: new Date(Date.now() + duration * 60 * 60 * 1000),
-    },
-    create: {
-      affectedUserId: String(cast.author.fid),
-      channelId: channel,
-      expiresAt: new Date(Date.now() + duration * 60 * 60 * 1000),
-    },
-  });
+  // return db.cooldown.upsert({
+  //   where: {
+  //     affectedUserId_channelId: {
+  //       affectedUserId: String(cast.author.fid),
+  //       channelId: channel,
+  //     },
+  //   },
+  //   update: {
+  //     active: true,
+  //     expiresAt: new Date(Date.now() + duration * 60 * 60 * 1000),
+  //   },
+  //   create: {
+  //     affectedUserId: String(cast.author.fid),
+  //     channelId: channel,
+  //     expiresAt: new Date(Date.now() + duration * 60 * 60 * 1000),
+  //   },
+  // });
 }
 
-export async function mute({ channel, cast }: { channel: string; cast: Cast; action: Action }) {
-  return db.cooldown.upsert({
-    where: {
-      affectedUserId_channelId: {
-        affectedUserId: String(cast.author.fid),
-        channelId: channel,
-      },
-    },
-    update: {
-      active: true,
-      expiresAt: null,
-    },
-    create: {
-      affectedUserId: String(cast.author.fid),
-      channelId: channel,
-      expiresAt: null,
-    },
-  });
+export async function mute({ channel, user }: { channel: string; user: User; action: Action }) {
+  // return db.cooldown.upsert({
+  //   where: {
+  //     affectedUserId_channelId: {
+  //       affectedUserId: String(cast.author.fid),
+  //       channelId: channel,
+  //     },
+  //   },
+  //   update: {
+  //     active: true,
+  //     expiresAt: null,
+  //   },
+  //   create: {
+  //     affectedUserId: String(cast.author.fid),
+  //     channelId: channel,
+  //     expiresAt: null,
+  //   },
+  // });
 }
 
 export async function hideQuietly({
   channel,
-  cast,
+  user,
   options,
 }: {
   channel: string;
-  cast: Cast;
+  user?: User;
   action: Action;
   options?: {
     executeOnProtocol?: boolean;
   };
 }) {
   if (options?.executeOnProtocol) {
-    await unlike({ channel, cast });
+    // await unlike({ channel, user });
   } else {
     return Promise.resolve();
   }
 }
 
-export async function addToBypass({ channel, cast }: { channel: string; cast: Cast; action: Action }) {
-  const moderatedChannel = await db.moderatedChannel.findFirstOrThrow({
-    where: {
-      id: channel,
-    },
-  });
+export async function addToBypass({ channel, user }: { channel: string; user: User; action: Action }) {
+  // const moderatedChannel = await db.moderatedChannel.findFirstOrThrow({
+  //   where: {
+  //     id: channel,
+  //   },
+  // });
 
-  const existing = moderatedChannel.excludeUsernamesParsed || [];
+  // const existing = moderatedChannel.excludeUsernamesParsed || [];
 
-  if (existing.some((u) => u.value === cast.author.fid)) {
-    return;
-  }
+  // if (existing.some((u) => u.value === cast.author.fid)) {
+  //   return;
+  // }
 
-  existing.push({
-    value: cast.author.fid,
-    label: cast.author.username,
-    icon: cast.author.pfp_url,
-  });
+  // existing.push({
+  //   value: cast.author.fid,
+  //   label: cast.author.username,
+  //   icon: cast.author.pfp_url,
+  // });
 
-  return db.moderatedChannel.update({
-    where: {
-      id: channel,
-    },
-    data: {
-      excludeUsernames: JSON.stringify(existing),
-    },
-  });
+  // return db.moderatedChannel.update({
+  //   where: {
+  //     id: channel,
+  //   },
+  //   data: {
+  //     excludeUsernames: JSON.stringify(existing),
+  //   },
+  // });
 }
 
-export async function downvote({ channel, cast, action }: { channel: string; cast: Cast; action: Action }) {
-  if (action.type !== "downvote") {
-    return;
-  }
+export async function downvote({ channel, user, action }: { channel: string; user: User; action: Action }) {
+  // if (action.type !== "downvote") {
+  //   return;
+  // }
 
-  const { voterFid, voterAvatarUrl, voterUsername } = action.args;
-  await db.moderatedChannel.findFirstOrThrow({
-    where: {
-      id: channel,
-    },
-  });
+  // const { voterFid, voterAvatarUrl, voterUsername } = action.args;
+  // await db.moderatedChannel.findFirstOrThrow({
+  //   where: {
+  //     id: channel,
+  //   },
+  // });
 
-  await db.downvote.upsert({
-    where: {
-      fid_castHash: {
-        fid: String(voterFid),
-        castHash: cast.hash,
-      },
-    },
-    update: {},
-    create: {
-      castHash: cast.hash,
-      channelId: channel,
-      fid: voterFid,
-      username: voterUsername,
-      avatarUrl: voterAvatarUrl,
-    },
-  });
+  // await db.downvote.upsert({
+  //   where: {
+  //     fid_castHash: {
+  //       fid: String(voterFid),
+  //       castHash: cast.hash,
+  //     },
+  //   },
+  //   update: {},
+  //   create: {
+  //     castHash: cast.hash,
+  //     channelId: channel,
+  //     fid: voterFid,
+  //     username: voterUsername,
+  //     avatarUrl: voterAvatarUrl,
+  //   },
+  // });
 }
 
 /**
  * This does not check permissions
  */
-export async function grantRole({ channel, cast, action }: { channel: string; cast: Cast; action: Action }) {
-  const { roleId } = (action as any).args;
-  await db.role.findFirstOrThrow({
-    where: {
-      channelId: channel,
-      id: roleId,
-    },
-  });
+export async function grantRole({ channel, user, action }: { channel: string; user: User; action: Action }) {
+  // const { roleId } = (action as any).args;
+  // await db.role.findFirstOrThrow({
+  //   where: {
+  //     channelId: channel,
+  //     id: roleId,
+  //   },
+  // });
 
-  const user = await neynar.lookupUserByUsername(cast.author.username);
+  // const user = await neynar.lookupUserByUsername(cast.author.username);
 
-  return db.delegate.upsert({
-    where: {
-      fid_roleId_channelId: {
-        fid: String(cast.author.fid),
-        roleId,
-        channelId: channel,
-      },
-    },
-    update: {},
-    create: {
-      fid: String(cast.author.fid),
-      roleId,
-      channelId: channel,
-      avatarUrl: user.result.user.pfp.url,
-      username: cast.author.username,
-    },
-  });
+  // return db.delegate.upsert({
+  //   where: {
+  //     fid_roleId_channelId: {
+  //       fid: String(cast.author.fid),
+  //       roleId,
+  //       channelId: channel,
+  //     },
+  //   },
+  //   update: {},
+  //   create: {
+  //     fid: String(cast.author.fid),
+  //     roleId,
+  //     channelId: channel,
+  //     avatarUrl: user.result.user.pfp.url,
+  //     username: cast.author.username,
+  //   },
+  // });
 }
 
-export async function unlike(props: { cast: Cast; channel: string }) {
-  const signerAlloc = await db.signerAllocation.findFirst({
-    where: {
-      channelId: props.channel,
-    },
-    include: {
-      signer: true,
-    },
-  });
+export async function unlike(props: { user: User; channel: string }) {
+  // const signerAlloc = await db.signerAllocation.findFirst({
+  //   where: {
+  //     channelId: props.channel,
+  //   },
+  //   include: {
+  //     signer: true,
+  //   },
+  // });
 
-  const uuid = signerAlloc?.signer.signerUuid || process.env.NEYNAR_SIGNER_UUID!;
+  // const uuid = signerAlloc?.signer.signerUuid || process.env.NEYNAR_SIGNER_UUID!;
 
-  console.log(
-    `Unliking with @${signerAlloc ? signerAlloc.signer.username : "automod"}, cast: ${props.cast.hash}`
-  );
+  // console.log(
+  //   `Unliking with @${signerAlloc ? signerAlloc.signer.username : "automod"}, cast: ${props.cast.hash}`
+  // );
 
-  await neynar.deleteReactionFromCast(uuid, "like", props.cast.hash);
+  // await neynar.deleteReactionFromCast(uuid, "like", props.cast.hash);
 }
 
-export async function ban({ channel, cast }: { channel: string; cast: Cast; action: Action }) {
+export async function ban({ channel, user }: { channel: string; user: User; action: Action }) {
   // indefinite cooldown
-  return db.cooldown.upsert({
-    where: {
-      affectedUserId_channelId: {
-        affectedUserId: String(cast.author.fid),
-        channelId: channel,
-      },
-    },
-    update: {
-      active: true,
-      expiresAt: null,
-    },
-    create: {
-      affectedUserId: String(cast.author.fid),
-      channelId: channel,
-      expiresAt: null,
-    },
-  });
+  // return db.cooldown.upsert({
+  //   where: {
+  //     affectedUserId_channelId: {
+  //       affectedUserId: String(cast.author.fid),
+  //       channelId: channel,
+  //     },
+  //   },
+  //   update: {
+  //     active: true,
+  //     expiresAt: null,
+  //   },
+  //   create: {
+  //     affectedUserId: String(cast.author.fid),
+  //     channelId: channel,
+  //     expiresAt: null,
+  //   },
+  // });
 }
 
 export type ValidateCastArgs = {
   moderatedChannel: FullModeratedChannel;
-  cast: WebhookCast;
+  user: User;
   executeOnProtocol?: boolean;
   simulation?: boolean;
 };
 
 export async function validateCast({
   moderatedChannel,
-  cast,
+  user,
   executeOnProtocol = false,
   simulation = false,
 }: ValidateCastArgs): Promise<Array<ModerationLog>> {
@@ -223,7 +223,7 @@ export async function validateCast({
   if (!moderatedChannel) {
     Sentry.captureMessage(`Moderated channel not found`, {
       extra: {
-        cast,
+        user,
       },
     });
     throw new Error("Moderated channel not found");
@@ -238,112 +238,30 @@ export async function validateCast({
     },
   });
 
-  // dear future, some casts are missing an author, assuming a
-  // race/error with cast hydration and webhooks.
-  // refetch, if it fails throw w/exponential backoff.
-  if (!cast.author) {
-    Sentry.captureMessage(`Cast ${cast.hash} has no author`);
-    // typings are wrong, root_parent_url exists on actual response
-    const refreshedCast = (await neynar
-      .fetchBulkCasts([cast.hash])
-      .then((r) => r.result.casts[0])) as WebhookCast;
 
-    if (!refreshedCast.author) {
-      Sentry.captureMessage(`Retried, cast ${cast.hash} still has no author`);
-      throw new Error(`Cast ${cast.hash} has no author`);
-    } else {
-      cast = refreshedCast;
-    }
+  if (!user) {
+    Sentry.captureMessage(`User not found`);
   }
 
-  const isExcluded = moderatedChannel.excludeUsernamesParsed?.some((u) => u.value === cast.author.fid);
+  const isExcluded = moderatedChannel.excludeUsernamesParsed?.some((u) => u.value === user.fid);
   const channelOwner = await getWarpcastChannelOwner({ channel: moderatedChannel.id });
-  const isOwner = channelOwner === cast.author.fid;
+  const isOwner = channelOwner === user.fid;
 
   if (isExcluded || isOwner) {
     const message = isOwner
-      ? `@${cast.author.username} is the channel owner`
-      : `@${cast.author.username} is in the bypass list.`;
+      ? `@${user.username} is the channel owner`
+      : `@${user.username} is in the bypass list.`;
 
     console.log(message);
 
     const [, log] = await Promise.all([
       simulation
         ? Promise.resolve()
-        : actionFunctions["like"]({
-            channel: moderatedChannel.id,
-            cast,
-            action: { type: "like" },
-          }),
-      logModerationAction(moderatedChannel.id, "like", message, cast, simulation),
+        : Promise.resolve(), // invite to channel
+      logModerationAction(moderatedChannel.id, "like", message, user, simulation),
     ]);
 
     logs.push(log);
-    return logs;
-  }
-
-  if (moderatedChannel.excludeCohosts) {
-    const mods = await getModerators({ channel: moderatedChannel.id });
-    if (mods.find((c) => c.fid === String(cast.author.fid))) {
-      console.log(`[${moderatedChannel.id}] @${cast.author.username} is a moderator. Curating.`);
-
-      const [, log] = await Promise.all([
-        simulation
-          ? Promise.resolve()
-          : actionFunctions["like"]({
-              channel: moderatedChannel.id,
-              cast,
-              action: { type: "like" },
-            }),
-        logModerationAction(
-          moderatedChannel.id,
-          "like",
-          `@${cast.author.username} is in the bypass list.`,
-          cast,
-          simulation
-        ),
-      ]);
-
-      logs.push(log);
-      return logs;
-    }
-  }
-
-  const cooldown = await db.cooldown.findFirst({
-    where: {
-      affectedUserId: String(cast.author.fid),
-      channelId: moderatedChannel.id,
-      active: true,
-      OR: [
-        {
-          expiresAt: {
-            gte: new Date(),
-          },
-        },
-        {
-          // if null then its a ban
-          expiresAt: null,
-        },
-      ],
-    },
-  });
-
-  if (cooldown) {
-    if (cooldown.expiresAt) {
-      logs.push(
-        await logModerationAction(
-          moderatedChannel.id,
-          "hideQuietly",
-          `User is in cooldown until ${cooldown.expiresAt.toISOString()}`,
-          cast,
-          simulation
-        )
-      );
-    } else {
-      console.log(`[${moderatedChannel.id}] User @${cast.author.username} is banned. Skipping.`);
-      // they're banned, logging is noise so skip
-    }
-
     return logs;
   }
 
@@ -353,7 +271,7 @@ export async function validateCast({
       moderatedChannel.id,
       "hideQuietly",
       "No automated curation rules configured.",
-      cast,
+      user,
       simulation
     );
     return logs;
@@ -362,7 +280,7 @@ export async function validateCast({
   if (moderatedChannel.exclusionRuleSetParsed?.ruleParsed?.conditions?.length) {
     const exclusionCheck = await evaluateRules(
       moderatedChannel,
-      cast,
+      user,
       moderatedChannel.exclusionRuleSetParsed?.ruleParsed
     );
 
@@ -375,7 +293,7 @@ export async function validateCast({
 
           await actionFn({
             channel: moderatedChannel.id,
-            cast,
+            user,
             action,
             options: {
               executeOnProtocol,
@@ -383,7 +301,7 @@ export async function validateCast({
           }).catch((e) => {
             Sentry.captureMessage(`Error in ${action.type} action`, {
               extra: {
-                cast,
+                user,
                 action,
               },
             });
@@ -397,7 +315,7 @@ export async function validateCast({
             moderatedChannel.id,
             action.type,
             exclusionCheck.explanation,
-            cast,
+            user,
             simulation
           )
         );
@@ -409,8 +327,8 @@ export async function validateCast({
 
   const inclusionCheck = await evaluateRules(
     moderatedChannel,
-    cast,
-    moderatedChannel.inclusionRuleSetParsed.ruleParsed
+    user,
+    moderatedChannel.inclusionRuleSetParsed?.ruleParsed
   );
 
   if (inclusionCheck.passedRule) {
@@ -420,7 +338,7 @@ export async function validateCast({
 
         await actionFn({
           channel: moderatedChannel.id,
-          cast,
+          user,
           action,
           options: {
             executeOnProtocol,
@@ -428,7 +346,7 @@ export async function validateCast({
         }).catch((e) => {
           Sentry.captureMessage(`Error in ${action.type} action`, {
             extra: {
-              cast,
+              user,
               action,
             },
           });
@@ -441,12 +359,12 @@ export async function validateCast({
             where: {
               affectedUserId_channelId: {
                 channelId: moderatedChannel.id,
-                affectedUserId: String(cast.author.fid),
+                affectedUserId: String(user.fid),
               },
             },
             create: {
               channelId: moderatedChannel.id,
-              affectedUserId: String(cast.author.fid),
+              affectedUserId: String(user.fid),
               active: true,
               expiresAt: new Date(Date.now() + moderatedChannel.slowModeHours * 60 * 60 * 1000),
             },
@@ -463,7 +381,7 @@ export async function validateCast({
           moderatedChannel.id,
           action.type,
           inclusionCheck.explanation,
-          cast,
+          user,
           simulation
         )
       );
@@ -473,7 +391,7 @@ export async function validateCast({
     if (!simulation) {
       await actionFunctions["hideQuietly"]({
         channel: moderatedChannel.id,
-        cast,
+        user,
         action: { type: "hideQuietly" },
         options: {
           executeOnProtocol,
@@ -485,7 +403,7 @@ export async function validateCast({
         moderatedChannel.id,
         "hideQuietly",
         inclusionCheck.explanation,
-        cast,
+        user,
         simulation
       )
     );
@@ -498,7 +416,7 @@ export async function logModerationAction(
   moderatedChannelId: string,
   actionType: string,
   reason: string,
-  cast: Cast,
+  user: User,
   simulation: boolean,
   options?: {
     actor?: string;
@@ -511,11 +429,11 @@ export async function logModerationAction(
         action: actionType,
         actor: options?.actor || "system",
         reason,
-        affectedUsername: cast.author.username || String(cast.author.fid) || "unknown",
-        affectedUserAvatarUrl: cast.author.pfp_url,
-        affectedUserFid: String(cast.author.fid),
-        castText: cast.text,
-        castHash: cast.hash,
+        affectedUsername: user.username || String(user.fid) || "unknown",
+        affectedUserAvatarUrl: user.pfp_url,
+        affectedUserFid: String(user.fid),
+        castText: '',
+        castHash: '',
       },
     });
   } else {
@@ -525,11 +443,11 @@ export async function logModerationAction(
       action: actionType,
       actor: "system",
       reason,
-      affectedUsername: cast.author.username,
-      affectedUserAvatarUrl: cast.author.pfp_url || null,
-      affectedUserFid: String(cast.author.fid),
-      castHash: cast.hash,
-      castText: cast.text,
+      affectedUsername: user.username || String(user.fid) || "unknown",
+      affectedUserAvatarUrl: user.pfp_url || null,
+      affectedUserFid: String(user.fid),
+      castHash: '',
+      castText: '',
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -538,18 +456,18 @@ export async function logModerationAction(
 
 async function evaluateRules(
   moderatedChannel: ModeratedChannel,
-  cast: WebhookCast,
+  user: User,
   rule: Rule
 ): Promise<{
   passedRule: boolean;
   explanation: string;
 }> {
   if (rule.type === "CONDITION") {
-    return evaluateRule(moderatedChannel, cast, rule);
+    return evaluateRule(moderatedChannel, user, rule);
   } else if (rule.type === "LOGICAL" && rule.conditions) {
     if (rule.operation === "AND") {
       const evaluations = await Promise.all(
-        rule.conditions.map((subRule) => evaluateRules(moderatedChannel, cast, subRule))
+        rule.conditions.map((subRule) => evaluateRules(moderatedChannel, user, subRule))
       );
       if (evaluations.every((e) => e.passedRule)) {
         return {
@@ -562,7 +480,7 @@ async function evaluateRules(
       }
     } else if (rule.operation === "OR") {
       const results = await Promise.all(
-        rule.conditions.map((subRule) => evaluateRules(moderatedChannel, cast, subRule))
+        rule.conditions.map((subRule) => evaluateRules(moderatedChannel, user, subRule))
       );
 
       const onePassed = results.find((r) => r.passedRule);
@@ -587,7 +505,7 @@ async function evaluateRules(
 
 async function evaluateRule(
   channel: ModeratedChannel,
-  cast: WebhookCast,
+  user: User,
   rule: Rule
 ): Promise<{ passedRule: boolean; explanation: string }> {
   const check = ruleFunctions[rule.name];
@@ -595,7 +513,7 @@ async function evaluateRule(
     throw new Error(`No function for rule ${rule.name}`);
   }
 
-  const result = await check({ channel, cast, rule });
+  const result = await check({ channel, user, rule });
 
   return {
     passedRule: result.result,

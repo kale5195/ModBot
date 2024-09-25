@@ -24,7 +24,7 @@ import { erc1155Abi, hypersubAbi721 } from "./abis";
 import { languages } from "./languages";
 import { chainIdToChainName, nftsByWallets } from "./simplehash.server";
 import { db } from "./db.server";
-import { Cast, CastId } from "@neynar/nodejs-sdk/build/neynar-api/v2";
+import { Cast, CastId, User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import axios, { AxiosError } from "axios";
 import { base, polygon } from "viem/chains";
 import {
@@ -120,7 +120,7 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
     category: "inclusion",
     friendlyName: "Always Include",
     checkType: "cast",
-    description: "Always includes the cast. Useful if you want to default all in except for a few rules.",
+    description: "Always includes the member. Useful if you want to default all in except for a few rules.",
     hidden: false,
     invertable: false,
     args: {},
@@ -240,31 +240,6 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
       },
     },
   },
-
-
-  castInThread: {
-    name: "castInThread",
-    author: "automod",
-    authorUrl: "https://automod.sh",
-    authorIcon: `${hostUrl}/icons/automod.png`,
-    allowMultiple: true,
-    category: "all",
-    friendlyName: "Cast is in Thread",
-    checkType: "cast",
-    description: "Check if a cast is a part of a thread",
-    hidden: true,
-    invertable: true,
-    args: {
-      identifiers: {
-        type: "textarea",
-        friendlyName: "Warpcast Links or Thread Hashes",
-        required: true,
-        placeholder: "0x05cf...c9mdi\nhttps://warpcast.com/jtgi/0x05cf551b",
-        description: "The first cast in the thread. One per line.",
-      },
-    },
-  },
-
   isHuman: {
     name: "isHuman",
     author: "botornot",
@@ -280,85 +255,6 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
     invertable: false,
     args: {},
   },
-  //   name: "containsEmbeds",
-  //   author: "automod",
-  //   authorUrl: "https://automod.sh",
-  //   authorIcon: `${hostUrl}/icons/automod.png`,
-  //   allowMultiple: true,
-  //   category: "all",
-  //   friendlyName: "Contains Embedded Content",
-  //   checkType: "cast",
-  //   description: "Check if the cast contains images, gifs, videos, frames or links",
-  //   hidden: false,
-  //   invertable: true,
-  //   args: {
-  //     images: {
-  //       type: "boolean",
-  //       defaultValue: true,
-  //       friendlyName: "Images",
-  //       description: "Check for images or gifs",
-  //     },
-  //     videos: {
-  //       type: "boolean",
-  //       defaultValue: true,
-  //       friendlyName: "Videos",
-  //       description: "Check for videos",
-  //     },
-  //     frames: {
-  //       type: "boolean",
-  //       defaultValue: true,
-  //       friendlyName: "Frames",
-  //       description: "Check for frames",
-  //     },
-  //     links: {
-  //       type: "boolean",
-  //       defaultValue: true,
-  //       friendlyName: "Links",
-  //       description: "Check for links",
-  //     },
-  //     casts: {
-  //       type: "boolean",
-  //       defaultValue: true,
-  //       friendlyName: "Casts",
-  //       description: "Check for quote casts",
-  //     },
-  //     domain: {
-  //       type: "string",
-  //       friendlyName: "Domain",
-  //       placeholder: "e.g. glass.com",
-  //       description:
-  //         "Check for embeds from a specific domain. Example: if you check 'Frames' and add glass.com, this check will trigger for frames from glass.com.",
-  //     },
-  //   },
-  // },
-
-  textMatchesLanguage: {
-    name: "textMatchesLanguage",
-    author: "automod",
-    authorUrl: "https://automod.sh",
-    authorIcon: `${hostUrl}/icons/automod.png`,
-    allowMultiple: true,
-    category: "all",
-    friendlyName: "Matches Language",
-    checkType: "cast",
-    description: "Check if the text matches a specific language",
-    invertedDescription: "Check if the text is any language *but* the one specified.",
-    hidden: true,
-    invertable: true,
-    args: {
-      language: {
-        type: "select",
-        friendlyName: "Language",
-        description: "The language to check for",
-        options: languages.map((l) => ({
-          label: l.name,
-          value: l.code,
-        })),
-      },
-    },
-  },
-
-
   userDoesNotFollow: {
     name: "userDoesNotFollow",
     author: "automod",
@@ -982,15 +878,6 @@ export const ruleNames = [
   "isHuman",
   "alwaysInclude",
   "airstackSocialCapitalRank",
-  "containsText",
-  "containsEmbeds",
-  "downvote",
-  "castInThread",
-  "textMatchesPattern",
-  "textMatchesLanguage",
-  "containsTooManyMentions",
-  "containsLinks",
-  "castLength",
   "openRankGlobalEngagement",
   "openRankChannel",
   "subscribesOnParagraph",
@@ -1005,12 +892,10 @@ export const ruleNames = [
   "userDoesNotHoldPowerBadge",
   "userFidInList",
   "userFidInRange",
-  "userIsCohost",
   "requireActiveHypersub",
   "requiresErc1155",
   "requiresErc721",
   "requiresErc20",
-  "webhook",
 ] as const;
 
 export const actionTypes = [
@@ -1035,7 +920,7 @@ export type ActionType = (typeof actionTypes)[number];
 
 export type CheckFunctionArgs = {
   channel: ModeratedChannel;
-  cast: WebhookCast;
+  user: User;
   rule: Rule;
 };
 
@@ -1046,7 +931,7 @@ export type CheckFunctionResult = {
 export type CheckFunction = (props: CheckFunctionArgs) => CheckFunctionResult | Promise<CheckFunctionResult>;
 export type ActionFunction<T = any> = (args: {
   channel: string;
-  cast: Cast;
+  user: User;
   action: Action;
   options?: { executeOnProtocol?: boolean };
 }) => Promise<T>;
@@ -1109,46 +994,6 @@ export const RuleSchema: z.ZodType<Rule> = BaseRuleSchema.extend({
   )
   .refine(
     async (data) => {
-      if (data.name === "castInThread") {
-        const ids = data.args.identifiers.split(/\r?\n/);
-        if (!ids.length) {
-          return false;
-        }
-
-        for (const id of ids) {
-          const cast = await neynar
-            .lookUpCastByHashOrWarpcastUrl(id.trim(), isWarpcastCastUrl(id) ? "url" : "hash")
-            .catch(() => false);
-          return cast !== false;
-        }
-      } else {
-        return true;
-      }
-    },
-    {
-      message: "Couldn't find that cast. Double check your identifiers.",
-    }
-  )
-  .refine(
-    (data) => {
-      if (data.name === "textMatchesPattern") {
-        try {
-          new RE2(data.args.pattern);
-        } catch (e) {
-          return false;
-        }
-
-        return true;
-      } else {
-        return true;
-      }
-    },
-    (value) => ({
-      message: `The pattern "${value.name}" is no good. It should be javascript compatible. Backreferences and lookahead assertions are not supported.`,
-    })
-  )
-  .refine(
-    async (data) => {
       if (data.name === "requiresErc721") {
         return await validateErc721({
           chainId: data.args.chainId,
@@ -1194,19 +1039,7 @@ export const RuleSchema: z.ZodType<Rule> = BaseRuleSchema.extend({
     }
   )
   .transform(async (data) => {
-    if (data.name === "castInThread") {
-      const ids = data.args.identifiers.split(/\r?\n/).map((h: string) => h.trim());
-
-      return {
-        ...data,
-        args: {
-          ...data.args,
-          identifiers: ids.join("\n"),
-        },
-      };
-    } else {
       return data;
-    }
   });
 
 export const ActionSchema = z.discriminatedUnion("type", [
@@ -1287,16 +1120,7 @@ export const ruleFunctions: Record<RuleName, CheckFunction> = {
   alwaysInclude: () => ({ result: true, message: "Everything included by default" }),
   airstackSocialCapitalRank: airstackSocialCapitalRank,
   subscribesOnParagraph: subscribesOnParagraph,
-  textMatchesPattern: textMatchesPattern,
-  textMatchesLanguage: textMatchesLanguage,
-  containsText: containsText,
-  containsTooManyMentions: containsTooManyMentions,
-  containsLinks: containsLinks,
-  containsEmbeds: containsEmbeds,
   isHuman: isHuman,
-  castInThread: castInThread,
-  castLength: castLength,
-  downvote: downvoteRule,
   holdsChannelFanToken: holdsChannelFanToken,
   holdsFanToken: holdsFanToken,
   openRankChannel: openRankChannel,
@@ -1304,7 +1128,6 @@ export const ruleFunctions: Record<RuleName, CheckFunction> = {
   userProfileContainsText: userProfileContainsText,
   userDoesNotFollow: userFollows,
   userIsNotFollowedBy: userFollowedBy,
-  userIsCohost: userIsCohostOrOwner,
   userDisplayNameContainsText: userDisplayNameContainsText,
   userFollowsChannel: userFollowsChannel,
   userFollowerCount: userFollowerCount,
@@ -1315,7 +1138,7 @@ export const ruleFunctions: Record<RuleName, CheckFunction> = {
   requiresErc721: holdsErc721,
   requiresErc20: holdsErc20,
   requiresErc1155: holdsErc1155,
-  webhook: webhook,
+  // webhook: webhook,
 };
 
 export const actionFunctions: Record<ActionType, ActionFunction> = {
@@ -1335,42 +1158,29 @@ export const actionFunctions: Record<ActionType, ActionFunction> = {
   grantRole: grantRole,
 } as const;
 
-export async function like(props: { cast: Cast; channel: string }) {
-  const signerAlloc = await db.signerAllocation.findFirst({
-    where: {
-      channelId: props.channel,
-    },
-    include: {
-      signer: true,
-    },
-  });
+export async function like(props: { user: User; channel: string }) {
+  // const signerAlloc = await db.signerAllocation.findFirst({
+  //   where: {
+  //     channelId: props.channel,
+  //   },
+  //   include: {
+  //     signer: true,
+  //   },
+  // });
 
-  const uuid = signerAlloc?.signer.signerUuid || process.env.NEYNAR_SIGNER_UUID!;
-  console.log(`Liking with @${signerAlloc ? signerAlloc.signer.username : "automod"}, ${uuid}`);
-  await neynar.publishReactionToCast(uuid, "like", props.cast.hash);
+  // const uuid = signerAlloc?.signer.signerUuid || process.env.NEYNAR_SIGNER_UUID!;
+  // console.log(`Liking with @${signerAlloc ? signerAlloc.signer.username : "automod"}, ${uuid}`);
+  // await neynar.publishReactionToCast(uuid, "like", props.cast.hash);
 }
 
-// Rule: contains text, option to ignore case
-export function containsText(props: CheckFunctionArgs) {
-  const { cast, rule } = props;
-  const { searchText, caseSensitive } = rule.args;
 
-  const text = caseSensitive ? cast.text : cast.text.toLowerCase();
-  const search = caseSensitive ? searchText : searchText.toLowerCase();
-
-  const result = text.includes(search);
-  return {
-    result,
-    message: result ? `Cast contains "${searchText}"` : `Cast does not contain "${searchText}"`,
-  };
-}
 
 type BotOrNotResponse = { fid: number; result: { bot?: boolean; status: "complete" | "analyzing" } };
 
 export async function isHuman(args: CheckFunctionArgs) {
-  const { cast } = args;
+  const { user } = args;
   const rsp = await axios.get<BotOrNotResponse>(
-    `https://cast-action-bot-or-not.vercel.app/api/botornot/mod/v1?fid=${cast.author.fid}&forceAnalyzeIfEmpty=true`,
+    `https://cast-action-bot-or-not.vercel.app/api/botornot/mod/v1?fid=${user.fid}&forceAnalyzeIfEmpty=true`,
     {
       timeout: 5_000,
       timeoutErrorMessage: "Bot or Not API timed out",
@@ -1390,230 +1200,33 @@ export async function isHuman(args: CheckFunctionArgs) {
   };
 }
 
-export async function castInThread(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
-  const { identifiers } = rule.args;
-
-  const hashes = await Promise.all(
-    identifiers.split(/\r?\n/).map((h: string) => {
-      if (isWarpcastCastUrl(h)) {
-        return getSetCache({
-          key: `cast:${h}`,
-          ttlSeconds: 60 * 60 * 24 * 365,
-          get: () => neynar.lookUpCastByHashOrWarpcastUrl(h, "url").then((c) => c.cast.hash.toLowerCase()),
-        });
-      } else {
-        return h.toLowerCase().trim();
-      }
-    })
-  );
-
-  if (!cast.thread_hash) {
-    throw new Error(`Cast ${cast.hash} has not thread_hash`);
-  }
-
-  const result = hashes.includes(cast.thread_hash.toLowerCase());
-  return {
-    result,
-    message: result
-      ? `Cast is in thread ${formatHash(cast.thread_hash)}`
-      : `Cast is not in thread ${formatHash(cast.thread_hash)}`,
-  };
-}
 
 export async function userFidInList(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
+  const { user, rule } = args;
   const { fids } = rule.args as { fids: Array<{ value: number; icon: string; label: string }> };
 
-  const result = fids.some((f) => f.value === cast.author.fid);
+  const result = fids.some((f) => f.value === user.fid);
 
   return {
     result,
     message: result
-      ? `@${cast.author.username} is in the list`
-      : `@${cast.author.username} is not in the list`,
-  };
-}
-
-export function castLength(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
-  const { min, max } = rule.args as { min?: number; max?: number };
-
-  if (min) {
-    if (cast.text.length > min) {
-      return {
-        result: false,
-        message: `Cast is greater than ${min} characters`,
-      };
-    }
-  }
-
-  if (max) {
-    if (cast.text.length < max) {
-      return {
-        result: false,
-        message: `Cast is less than ${max} characters`,
-      };
-    }
-  }
-
-  return {
-    result: true,
-    message: "Cast is within length limits",
-  };
-}
-
-export async function downvoteRule(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
-  const { threshold } = rule.args;
-
-  const downvotes = await db.downvote.count({
-    where: {
-      castHash: cast.hash,
-    },
-  });
-
-  const result = downvotes >= parseInt(threshold);
-  return {
-    result,
-    message: result ? `Cast reached downvote threshold of ${downvotes}` : `Cast has ${downvotes} downvotes`,
-  };
-}
-
-export async function containsEmbeds(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
-  const { images, videos, frames, links, casts, domain } = rule.args;
-
-  const checkForEmbeds: string[] = [];
-  images && checkForEmbeds.push("image");
-  videos && checkForEmbeds.push("video");
-  frames && checkForEmbeds.push("frame");
-  links && checkForEmbeds.push("link");
-  casts && checkForEmbeds.push("casts");
-
-  let embedsFound: string[] = [];
-  const embedTypesFound: string[] = [];
-
-  const foundCasts = cast.embeds.filter((embed): embed is { cast_id: CastId } => {
-    return "cast_id" in embed;
-  });
-
-  if (foundCasts.length > 0) {
-    embedTypesFound.push("casts");
-    embedsFound = embedsFound.concat(foundCasts.map((c) => c.cast_id.hash));
-  }
-
-  const knownImageCdnHostnames = ["imagedelivery.net", "imgur.com"];
-  // even if not specified in args we always search for
-  // images and videos because they may only be filtering
-  // for `link` embeds in which case these need to be
-  // ruled out. its also free and fast.
-  const foundImages = cast.embeds.filter((embed): embed is { url: string } => {
-    if ("url" in embed) {
-      const url = tryParseUrl(embed.url);
-      if (!url) {
-        return false;
-      }
-
-      if (domain && !embed.url.includes(domain)) {
-        return false;
-      }
-
-      const mime = mimeType.lookup(embed.url);
-      return (mime && mime.startsWith("image")) || knownImageCdnHostnames.includes(url.hostname);
-    } else {
-      return false;
-    }
-  });
-
-  if (foundImages.length > 0) {
-    embedTypesFound.push("image");
-    embedsFound = embedsFound.concat(foundImages.map((i) => i.url));
-  }
-
-  const foundVideos = cast.embeds.filter((embed): embed is { url: string } => {
-    if ("url" in embed) {
-      if (domain && !embed.url.includes(domain)) {
-        return false;
-      }
-
-      const mime = mimeType.lookup(embed.url);
-      return !!mime && (mime.startsWith("video") || mime.startsWith("application/vnd.apple.mpegurl"));
-    } else {
-      return false;
-    }
-  });
-
-  if (foundVideos.length > 0) {
-    embedTypesFound.push("video");
-    embedsFound = embedsFound.concat(foundVideos.map((i) => i.url));
-  }
-
-  // if either is specified we need to fetch the cast
-  // since a frame_url looks just like a link url.
-  // its debatable whether you'd ever want to filter
-  // on this but so it goes..
-  if (links || frames) {
-    const rsp = await neynar.fetchBulkCasts([cast.hash]);
-    const castWithInteractions = rsp.result.casts[0];
-
-    if (!castWithInteractions) {
-      throw new Error(`Cast not found. Should be impossible. hash: ${cast.hash}`);
-    }
-
-    if (castWithInteractions.frames && castWithInteractions.frames.length > 0) {
-      let frames = [...castWithInteractions.frames];
-      if (domain) {
-        frames = frames.filter((f) => f.frames_url.includes(domain));
-      }
-
-      if (frames.length > 0) {
-        embedTypesFound.push("frame");
-        embedsFound = embedsFound.concat(frames.map((f) => f.frames_url) || []);
-      }
-    }
-
-    const remainingUrls = castWithInteractions.embeds.filter((e): e is { url: string } => {
-      if ("url" in e) {
-        if (domain && !e.url.includes(domain)) {
-          return false;
-        }
-        return !embedsFound.includes(e.url);
-      } else {
-        return false;
-      }
-    });
-
-    if (remainingUrls.length > 0) {
-      embedTypesFound.push("link");
-      embedsFound = embedsFound.concat(remainingUrls.map((i) => i.url));
-    }
-  }
-
-  const violatingEmbeds = checkForEmbeds.filter((embedType) => embedTypesFound.includes(embedType));
-  const result = violatingEmbeds.length > 0;
-
-  const domainMessage = domain ? ` from ${domain}` : "";
-  return {
-    result,
-    message: result
-      ? `Cast contains ${violatingEmbeds.join(", ")}` + domainMessage
-      : `Cast doesn't contain ${checkForEmbeds.join(", ")}` + domainMessage,
+      ? `@${user.username} is in the list`
+      : `@${user.username} is not in the list`,
   };
 }
 
 export async function airstackSocialCapitalRank(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
+  const { user, rule } = args;
   const { minRank } = rule.args as { minRank: number };
 
   const rank = await getSetCache({
-    key: `airstack-social-capital-rank:${cast.author.fid}`,
+    key: `airstack-social-capital-rank:${user.fid}`,
     ttlSeconds: 60 * 60 * 24,
-    get: () => farRank({ fid: cast.author.fid }).then((res) => (res === null ? Infinity : res)),
+    get: () => farRank({ fid: user.fid }).then((res) => (res === null ? Infinity : res)),
   });
 
   if (rank === Infinity) {
-    console.error(`User's FarRank is not available: ${cast.author.fid}`);
+    console.error(`User's FarRank is not available: ${user.fid}`);
     return {
       result: false,
       message: "User's social FarRank is not available",
@@ -1630,15 +1243,15 @@ export async function airstackSocialCapitalRank(args: CheckFunctionArgs) {
 }
 
 export async function subscribesOnParagraph(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
+  const { user, rule } = args;
   const { farcasterUser } = rule.args as { farcasterUser: { value: number; label: string; icon: string } };
 
   const isSubbed = await getSetCache({
-    key: `paragraph-subscribers:${farcasterUser.value}:${cast.author.fid}`,
+    key: `paragraph-subscribers:${farcasterUser.value}:${user.fid}`,
     ttlSeconds: 60 * 5,
     get: async () => {
       const rsp = await neynar.fetchSubscribersForFid(farcasterUser.value, "paragraph");
-      const isSubbed = rsp.subscribers?.some((s) => s.user.fid === cast.author.fid) || false;
+      const isSubbed = rsp.subscribers?.some((s) => s.user.fid === user.fid) || false;
       return isSubbed;
     },
   });
@@ -1651,91 +1264,13 @@ export async function subscribesOnParagraph(args: CheckFunctionArgs) {
   };
 }
 
-export function textMatchesPattern(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
-  const { pattern, caseInsensitive } = rule.args;
-
-  const re2 = new RE2(pattern, caseInsensitive ? "i" : "");
-  const isMatch = re2.test(cast.text);
-
-  return {
-    result: isMatch,
-    message: isMatch ? `Cast matches pattern ${pattern}` : `Cast does not match pattern ${pattern}`,
-  };
-}
-
-export function textMatchesLanguage(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
-  const { language } = rule.args;
-
-  if (!cast.text.length) {
-    return {
-      result: false,
-      message: "Language detection is not available for empty casts.",
-    };
-  }
-
-  try {
-    new URL(cast.text);
-    return {
-      result: false,
-      message: "URLs are not supported for language detection.",
-    };
-  } catch (e) {
-    // not a url
-  }
-
-  const regex = emojiRegex();
-  const withoutEmojis = cast.text.replaceAll(regex, "");
-
-  if (cast.text.length < 20) {
-    // model not reliable here
-    return {
-      result: true,
-      message: "Language detection is not reliable for short casts.",
-    };
-  }
-
-  const isLanguage = detect(withoutEmojis, { only: [language] }) !== "";
-  return {
-    result: isLanguage,
-    message: isLanguage ? `Cast is in ${language}` : `Cast is not in ${language}`,
-  };
-}
-
-export function containsTooManyMentions(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
-  const { maxMentions } = rule.args;
-
-  const mentions = cast.text.match(/@\w+/g) || [];
-
-  const result = mentions.length > maxMentions;
-
-  return {
-    result,
-    message: result ? `Too many mentions. Max is ${maxMentions}` : `Mentions are within limits`,
-  };
-}
-
-export function containsLinks(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
-  const maxLinks = rule.args.maxLinks || 0;
-  const regex = /https?:\/\/\S+/gi;
-  const matches = cast.text.match(regex) || [];
-
-  const result = matches.length > maxLinks;
-  return {
-    result,
-    message: result ? `Too many links. Max is ${maxLinks}` : `Links are within limits`,
-  };
-}
 
 export function userProfileContainsText(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
+  const { user, rule } = args;
   const { searchText, caseSensitive } = rule.args;
   const containsText = !caseSensitive
-    ? cast.author.profile.bio.text?.toLowerCase().includes(searchText.toLowerCase())
-    : cast.author.profile.bio.text?.includes(searchText);
+    ? user.profile.bio.text?.toLowerCase().includes(searchText.toLowerCase())
+    : user.profile.bio.text?.includes(searchText);
 
   return {
     result: containsText,
@@ -1744,13 +1279,13 @@ export function userProfileContainsText(args: CheckFunctionArgs) {
 }
 
 export async function holdsChannelFanToken(args: CheckFunctionArgs) {
-  const { cast, rule, channel } = args;
+  const { user, rule, channel } = args;
   const { contractAddress, minBalance } = rule.args;
 
-  const authorAddresses = [cast.author.custody_address, ...cast.author.verifications];
+  const authorAddresses = [user.custody_address, ...user.verifications];
 
   const vestingContracts = await getSetCache({
-    key: `vesting-contract-address:${cast.author.fid}`,
+    key: `vesting-contract-address:${user.fid}`,
     get: async () => getVestingContractsForAddresses({ addresses: authorAddresses }),
     ttlSeconds: 60 * 60,
   });
@@ -1778,16 +1313,16 @@ export async function holdsChannelFanToken(args: CheckFunctionArgs) {
 }
 
 export async function holdsFanToken(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
+  const { user, rule } = args;
   const {
     minBalance,
     fanToken: { value: contractAddress, label },
   } = rule.args;
 
-  const authorAddresses = [cast.author.custody_address, ...cast.author.verifications];
+  const authorAddresses = [user.custody_address, ...user.verifications];
 
   const vestingContracts = await getSetCache({
-    key: `vesting-contract-address:${cast.author.fid}`,
+    key: `vesting-contract-address:${user.fid}`,
     get: async () => getVestingContractsForAddresses({ addresses: authorAddresses }),
     ttlSeconds: 60 * 60,
   });
@@ -1816,13 +1351,13 @@ export async function holdsFanToken(args: CheckFunctionArgs) {
 }
 
 export async function userFollowsChannel(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
+  const { user, rule } = args;
   const { channelSlug } = rule.args;
 
   const follows = await getSetCache({
-    key: `follows:${channelSlug}:${cast.author.fid}`,
+    key: `follows:${channelSlug}:${user.fid}`,
     ttlSeconds: 60 * 5,
-    get: () => airstackUserFollowsChannel({ fid: cast.author.fid, channelId: channelSlug }),
+    get: () => airstackUserFollowsChannel({ fid: user.fid, channelId: channelSlug }),
   });
 
   return {
@@ -1832,13 +1367,13 @@ export async function userFollowsChannel(args: CheckFunctionArgs) {
 }
 
 export function userDisplayNameContainsText(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
+  const { user, rule } = args;
   const { searchText, caseSensitive } = rule.args;
 
-  if (!cast.author.display_name) {
-    Sentry.captureMessage(`Cast author has no display name: ${cast.author.fid}`, {
+  if (!user.display_name) {
+    Sentry.captureMessage(`Cast author has no display name: ${user.fid}`, {
       extra: {
-        cast,
+        user,
       },
     });
 
@@ -1849,8 +1384,8 @@ export function userDisplayNameContainsText(args: CheckFunctionArgs) {
   }
 
   const containsText = !caseSensitive
-    ? cast.author.display_name.toLowerCase().includes(searchText.toLowerCase())
-    : cast.author.display_name.includes(searchText);
+    ? user.display_name.toLowerCase().includes(searchText.toLowerCase())
+    : user.display_name.includes(searchText);
 
   return {
     result: containsText,
@@ -1861,11 +1396,11 @@ export function userDisplayNameContainsText(args: CheckFunctionArgs) {
 }
 
 export function userFollowerCount(props: CheckFunctionArgs) {
-  const { cast, rule } = props;
+  const { user, rule } = props;
   const { min, max } = rule.args as { min?: number; max?: number };
 
   if (min) {
-    if (cast.author.follower_count < min) {
+    if (user.follower_count < min) {
       return {
         result: true,
         message: `User has less than ${min} followers`,
@@ -1874,7 +1409,7 @@ export function userFollowerCount(props: CheckFunctionArgs) {
   }
 
   if (max) {
-    if (cast.author.follower_count > max) {
+    if (user.follower_count > max) {
       return {
         result: true,
         message: `User has more than ${max} followers`,
@@ -1889,10 +1424,10 @@ export function userFollowerCount(props: CheckFunctionArgs) {
 }
 
 export async function userFollowedBy(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
+  const { user, rule } = args;
   const { users } = rule.args as { users: SelectOption[] };
 
-  if (users.some((u) => u.value === cast.author.fid)) {
+  if (users.some((u) => u.value === user.fid)) {
     return {
       result: true,
       message: "User implicitly followed by themselves",
@@ -1903,14 +1438,14 @@ export async function userFollowedBy(args: CheckFunctionArgs) {
     key: `followedby:${users
       .map((u) => u.value)
       .sort()
-      .join(":")}:${cast.author.fid}`,
+      .join(":")}:${user.fid}`,
     ttlSeconds: 60,
     get: () =>
       neynar
         .fetchBulkUsers(
           users.map((u) => u.value),
           {
-            viewerFid: cast.author.fid,
+            viewerFid: user.fid,
           }
         )
         .then((rsp) => rsp.users),
@@ -1921,8 +1456,8 @@ export async function userFollowedBy(args: CheckFunctionArgs) {
   return {
     result: !!isFollowing,
     message: isFollowing
-      ? `@${cast.author.username} is followed by @${isFollowing.username}`
-      : `@${cast.author.username} is not followed by ${
+      ? `@${user.username} is followed by @${isFollowing.username}`
+      : `@${user.username} is not followed by ${
           users.length > 1 ? `any of ${users.map((u) => `@${u.label}`).join(", ")}` : `@${users[0].label}`
         }`,
   };
@@ -1935,10 +1470,10 @@ export type SelectOption = {
 };
 
 export async function userFollows(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
+  const { user, rule } = args;
   const { users } = rule.args as { users: SelectOption[] };
 
-  if (users.some((u) => u.value === cast.author.fid)) {
+  if (users.some((u) => u.value === user.fid)) {
     return {
       result: true,
       message: "User implicitly follow themselves",
@@ -1949,14 +1484,14 @@ export async function userFollows(args: CheckFunctionArgs) {
     key: `follows:${users
       .map((u) => u.value)
       .sort()
-      .join(":")}:${cast.author.fid}`,
+      .join(":")}:${user.fid}`,
     ttlSeconds: 60,
     get: () =>
       neynar
         .fetchBulkUsers(
           users.map((u) => u.value),
           {
-            viewerFid: cast.author.fid,
+            viewerFid: user.fid,
           }
         )
         .catch((err) => {
@@ -1970,25 +1505,25 @@ export async function userFollows(args: CheckFunctionArgs) {
   return {
     result: !!isFollowing,
     message: isFollowing
-      ? `@${cast.author.username} follows @${isFollowing.username}`
-      : `@${cast.author.username} does not follow ${
+      ? `@${user.username} follows @${isFollowing.username}`
+      : `@${user.username} does not follow ${
           users.length > 1 ? `any of ${users.map((u) => `@${u.label}`).join(", ")}` : `@${users[0].label}`
         }`,
   };
 }
 
 export async function userIsCohostOrOwner(args: CheckFunctionArgs) {
-  const { channel } = args;
+  const { user, channel } = args;
 
   const [isUserCohost, ownerFid] = await Promise.all([
     isCohost({
-      fid: args.cast.author.fid,
+      fid: user.fid,
       channel: channel.id,
     }),
     getWarpcastChannelOwner({ channel: channel.id }),
   ]);
 
-  const isOwner = ownerFid === args.cast.author.fid;
+  const isOwner = ownerFid === user.fid;
   const isCohostOrOwner = isUserCohost || isOwner;
 
   return {
@@ -1998,8 +1533,8 @@ export async function userIsCohostOrOwner(args: CheckFunctionArgs) {
 }
 
 export function userHoldsPowerBadge(args: CheckFunctionArgs) {
-  const { cast } = args;
-  const author = cast.author as Cast["author"] & { power_badge: boolean };
+  const { user } = args;
+  const author = user as User & { power_badge: boolean };
 
   return {
     result: author.power_badge,
@@ -2008,7 +1543,7 @@ export function userHoldsPowerBadge(args: CheckFunctionArgs) {
 }
 
 export async function holdsErc721(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
+  const { user, rule } = args;
   const { chainId, contractAddress, tokenId } = rule.args;
   const client = clientsByChainId[chainId];
 
@@ -2028,14 +1563,14 @@ export async function holdsErc721(args: CheckFunctionArgs) {
       key: `erc721-owner:${contractAddress}:${tokenId}`,
       get: async () => {
         const owner = await contract.read.ownerOf([BigInt(tokenId)]);
-        return [cast.author.custody_address, ...cast.author.verifications].some(
+        return [user.custody_address, ...user.verifications].some(
           (address) => address.toLowerCase() === owner.toLowerCase()
         );
       },
       ttlSeconds: 60 * 60 * 2,
     });
   } else {
-    for (const address of [cast.author.custody_address, ...cast.author.verifications]) {
+    for (const address of [user.custody_address, ...user.verifications]) {
       const balance = await getSetCache({
         key: `erc721-balance:${contractAddress}:${address}`,
         get: () => contract.read.balanceOf([getAddress(address)]),
@@ -2058,7 +1593,7 @@ export async function holdsErc721(args: CheckFunctionArgs) {
 }
 
 export async function holdsActiveHypersub(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
+  const { user, rule } = args;
   const { chainId, contractAddress } = rule.args;
   const client = clientsByChainId[chainId];
 
@@ -2073,7 +1608,7 @@ export async function holdsActiveHypersub(args: CheckFunctionArgs) {
     client,
   });
 
-  for (const address of [cast.author.custody_address, ...cast.author.verifications]) {
+  for (const address of [user.custody_address, ...user.verifications]) {
     const balance = await getSetCache({
       key: `hypersub:${contractAddress}:${address}`,
       get: () => contract.read.balanceOf([getAddress(address)]),
@@ -2094,68 +1629,67 @@ export async function holdsActiveHypersub(args: CheckFunctionArgs) {
   };
 }
 
-export async function webhook(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
-  const { url, failureMode } = rule.args;
+// export async function webhook(args: CheckFunctionArgs) {
+//   const { user, rule } = args;
+//   const { url, failureMode } = rule.args;
 
-  const maxTimeout = 5_000;
+//   const maxTimeout = 5_000;
 
-  // dont throw on 400
-  return axios
-    .post(
-      url,
-      {
-        cast,
-        user: cast.author,
-      },
-      {
-        timeout: maxTimeout,
-        validateStatus: (status) => (status >= 200 && status < 300) || status === 400,
-      }
-    )
-    .then((response) => {
-      let message = response.data.message?.substring(0, 75);
-      if (!message) {
-        message = response.status === 200 ? "Webhook rule triggered" : "Webhook rule did not trigger";
-      }
+//   // dont throw on 400
+//   return axios
+//     .post(
+//       url,
+//       {
+//         user,
+//       },
+//       {
+//         timeout: maxTimeout,
+//         validateStatus: (status) => (status >= 200 && status < 300) || status === 400,
+//       }
+//     )
+//     .then((response) => {
+//       let message = response.data.message?.substring(0, 75);
+//       if (!message) {
+//         message = response.status === 200 ? "Webhook rule triggered" : "Webhook rule did not trigger";
+//       }
 
-      return {
-        result: response.status === 200,
-        message,
-      };
-    })
-    .catch((err: AxiosError) => {
-      console.error(
-        `[${args.channel.id}] webhook to ${url} failed`,
-        err.response?.status,
-        err.response?.statusText,
-        err.response?.data
-      );
+//       return {
+//         result: response.status === 200,
+//         message,
+//       };
+//     })
+//     .catch((err: AxiosError) => {
+//       console.error(
+//         `[${args.channel.id}] webhook to ${url} failed`,
+//         err.response?.status,
+//         err.response?.statusText,
+//         err.response?.data
+//       );
 
-      if (err.code === "ECONNABORTED") {
-        return {
-          result: failureMode === "trigger" ? true : false,
-          message:
-            failureMode === "trigger"
-              ? `Webhook didn't respond within ${maxTimeout / 1000}s, rule is set to trigger on failure`
-              : `Webhook did not respond within ${
-                  maxTimeout / 1000
-                }s, rule is set to not trigger on failure. `,
-        };
-      } else {
-        return {
-          result: failureMode === "trigger" ? true : false,
-          message:
-            failureMode === "trigger"
-              ? "Webhook failed but rule is set to trigger on failure"
-              : "Webhook failed and rule is set to not trigger on failure",
-        };
-      }
-    });
-}
+//       if (err.code === "ECONNABORTED") {
+//         return {
+//           result: failureMode === "trigger" ? true : false,
+//           message:
+//             failureMode === "trigger"
+//               ? `Webhook didn't respond within ${maxTimeout / 1000}s, rule is set to trigger on failure`
+//               : `Webhook did not respond within ${
+//                   maxTimeout / 1000
+//                 }s, rule is set to not trigger on failure. `,
+//         };
+//       } else {
+//         return {
+//           result: failureMode === "trigger" ? true : false,
+//           message:
+//             failureMode === "trigger"
+//               ? "Webhook failed but rule is set to trigger on failure"
+//               : "Webhook failed and rule is set to not trigger on failure",
+//         };
+//       }
+//     });
+// }
 
 export async function holdsErc1155(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
+  const { user, rule } = args;
   const { chainId, contractAddress, tokenId } = rule.args;
   const client = clientsByChainId[chainId];
 
@@ -2171,7 +1705,7 @@ export async function holdsErc1155(args: CheckFunctionArgs) {
     }
 
     const nfts = await nftsByWallets({
-      wallets: [cast.author.custody_address, ...cast.author.verifications.filter((v) => v.startsWith("0x"))],
+      wallets: [user.custody_address, ...user.verifications.filter((v) => v.startsWith("0x"))],
       contractAddresses: [contractAddress],
       chains: [chain],
     });
@@ -2191,7 +1725,7 @@ export async function holdsErc1155(args: CheckFunctionArgs) {
     });
 
     let isOwner = false;
-    for (const address of [cast.author.custody_address, ...cast.author.verifications]) {
+    for (const address of [user.custody_address, ...user.verifications]) {
       const balance = await getSetCache({
         key: `erc1155-${contractAddress}-${address}-${tokenId}`,
         get: () => contract.read.balanceOf([getAddress(address), BigInt(tokenId)]),
@@ -2214,7 +1748,7 @@ export async function holdsErc1155(args: CheckFunctionArgs) {
 }
 
 export async function holdsErc20(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
+  const { user, rule } = args;
   const { chainId, contractAddress, minBalance } = rule.args;
   const client = clientsByChainId[chainId];
 
@@ -2223,14 +1757,14 @@ export async function holdsErc20(args: CheckFunctionArgs) {
   }
 
   const cacheKey = `erc20-balance:${contractAddress}:${minBalance}:${
-    cast.author.custody_address
-  }:${cast.author.verifications.join(`,`)}`;
+    user.custody_address
+  }:${user.verifications.join(`,`)}`;
 
   const { result: hasEnough } = await getSetCache({
     key: cacheKey,
     get: async () =>
       verifyErc20Balance({
-        wallets: [cast.author.custody_address, ...cast.author.verifications],
+        wallets: [user.custody_address, ...user.verifications],
         chainId,
         contractAddress,
         minBalanceRequired: minBalance,
@@ -2280,34 +1814,34 @@ export async function verifyErc20Balance({
 
 // Rule: user fid must be in range
 export function userFidInRange(args: CheckFunctionArgs) {
-  const { cast, rule } = args;
+  const { user, rule } = args;
   const { minFid, maxFid } = rule.args as { minFid?: number; maxFid?: number };
 
   if (minFid) {
-    if (cast.author.fid < minFid) {
+    if (user.fid < minFid) {
       return {
         result: true,
-        message: `FID #${cast.author.fid} is less than ${minFid}`,
+        message: `FID #${user.fid} is less than ${minFid}`,
       };
     }
   }
 
   if (maxFid) {
-    if (cast.author.fid > maxFid) {
+    if (user.fid > maxFid) {
       return {
         result: true,
-        message: `FID #${cast.author.fid} is greater than ${maxFid}`,
+        message: `FID #${user.fid} is greater than ${maxFid}`,
       };
     }
   }
 
   let failureMessage = "";
   if (minFid && maxFid) {
-    failureMessage = `FID #${cast.author.fid} is not between ${minFid} and ${maxFid}`;
+    failureMessage = `FID #${user.fid} is not between ${minFid} and ${maxFid}`;
   } else if (minFid) {
-    failureMessage = `FID #${cast.author.fid} is greater than ${minFid}`;
+    failureMessage = `FID #${user.fid} is greater than ${minFid}`;
   } else if (maxFid) {
-    failureMessage = `FID #${cast.author.fid} is less than ${maxFid}`;
+    failureMessage = `FID #${user.fid} is less than ${maxFid}`;
   }
 
   return {
@@ -2360,30 +1894,30 @@ export function getRuleDefinitions(fid: string, channelId?: string): Record<Rule
 }
 
 async function openRankChannel(props: CheckFunctionArgs) {
-  const { cast, rule, channel } = props;
+  const { user:member, rule, channel } = props;
   const { minRank } = rule.args as { minRank: number };
 
   const user = await getSetCache({
-    key: `openrank:channel-rank:${channel.id}:${cast.author.fid}`,
+    key: `openrank:channel-rank:${channel.id}:${member.fid}`,
     ttlSeconds: 60 * 60 * 6,
     get: () =>
       axios
         .post<GlobalRankResponse>(
           `https://graph.cast.k3l.io/priority/channels/rankings/${channel.id}/fids`,
-          [cast.author.fid],
+          [member.fid],
           {
             headers: {
               "API-Key": process.env.OPENRANK_API_KEY,
             },
           }
         )
-        .then((res) => res.data.result.find((u) => u.fid === cast.author.fid)),
+        .then((res) => res.data.result.find((u) => u.fid === member.fid)),
   });
 
   if (!user) {
     return {
       result: false,
-      message: `@${cast.author.username} is not in /${channel.id} rankings`,
+      message: `@${member.username} is not in /${channel.id} rankings`,
     };
   }
 
@@ -2391,8 +1925,8 @@ async function openRankChannel(props: CheckFunctionArgs) {
     result: user.rank <= minRank,
     message:
       user.rank <= minRank
-        ? `@${cast.author.username} is ranked #${user.rank} in /${channel.id}`
-        : `@${cast.author.username} is not a top ${minRank} account in ${channel.id}. Their current rank is #${user.rank}.`,
+        ? `@${member.username} is ranked #${user.rank} in /${channel.id}`
+        : `@${member.username} is not a top ${minRank} account in ${channel.id}. Their current rank is #${user.rank}.`,
   };
 }
 
@@ -2408,30 +1942,30 @@ type GlobalRankResponse = {
 };
 
 async function openRankGlobalEngagement(props: CheckFunctionArgs) {
-  const { cast, rule } = props;
+  const { user:member, rule } = props;
   const { minRank } = rule.args as { minRank: number };
 
   const user = await getSetCache({
-    key: `openrank:global-rank:${cast.author.fid}`,
+    key: `openrank:global-rank:${member.fid}`,
     ttlSeconds: 60 * 60 * 6,
     get: () =>
       axios
         .post<GlobalRankResponse>(
           `https://graph.cast.k3l.io/priority/scores/global/engagement/fids`,
-          [cast.author.fid],
+          [member.fid],
           {
             headers: {
               "API-Key": process.env.OPENRANK_API_KEY,
             },
           }
         )
-        .then((res) => res.data.result.find((u) => u.fid === cast.author.fid)),
+        .then((res) => res.data.result.find((u) => u.fid === member.fid)),
   });
 
   if (!user) {
     return {
       result: false,
-      message: `@${cast.author.fid} not found in global rankings`,
+      message: `@${member.username} not found in global rankings`,
     };
   }
 
@@ -2439,7 +1973,7 @@ async function openRankGlobalEngagement(props: CheckFunctionArgs) {
     result: user.rank <= minRank,
     message:
       user.rank <= minRank
-        ? `@${cast.author.username} is ranked #${user.rank}`
-        : `@${cast.author.username} is not a top ${minRank} account. Their current rank is #${user.rank}.`,
+        ? `@${member.username} is ranked #${user.rank}`
+        : `@${member.username} is not a top ${minRank} account. Their current rank is #${user.rank}.`,
   };
 }

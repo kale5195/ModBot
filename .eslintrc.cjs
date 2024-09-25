@@ -22,7 +22,6 @@ module.exports = {
 
   // Base config
   extends: ["eslint:recommended"],
-
   overrides: [
     // React
     {
@@ -33,6 +32,9 @@ module.exports = {
         "plugin:react/jsx-runtime",
         "plugin:react-hooks/recommended",
       ],
+      rules: {
+        "react/no-unescaped-entities": "off",
+      },
       settings: {
         react: {
           version: "detect",
@@ -63,6 +65,9 @@ module.exports = {
             alwaysTryTypes: true,
           },
         },
+      },
+      rules: {
+        "@typescript-eslint/no-unused-vars": "off",
       },
       extends: [
         "plugin:@typescript-eslint/recommended",

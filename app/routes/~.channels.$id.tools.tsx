@@ -29,7 +29,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Alert } from "~/components/ui/alert";
 import { ActionType, actionDefinitions } from "~/lib/validations.server";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
-import { CastWithInteractions } from "@neynar/nodejs-sdk/build/neynar-api/v2";
+import { CastWithInteractions, User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { validateCast } from "~/lib/automod.server";
 
@@ -135,31 +135,18 @@ export async function action({ request, params }: ActionFunctionArgs) {
       message: "Sweeping! This will take a while. Monitor progress in the logs.",
     });
   } else if (result.data.intent === "testCast") {
-    const castHashOrWarpcastUrl = rawData.castHashOrWarpcastUrl as string;
-    if (!castHashOrWarpcastUrl) {
+    const fidOrUsername = rawData.fidOrUsername as string;
+    if (!fidOrUsername) {
       return errorResponse({
         request,
-        message: "Cast hash or warpcast url is required",
+        message: "Fid or username is required",
       });
     }
 
-    const castResult = await getSetCache({
-      key: `cast:${castHashOrWarpcastUrl}`,
-      get: () => {
-        const isWarpcastUrl = castHashOrWarpcastUrl.includes("warpcast.com");
-        return neynar.lookUpCastByHashOrWarpcastUrl(castHashOrWarpcastUrl, isWarpcastUrl ? "url" : "hash");
-      },
-    }).catch(() => null);
-
-    if (!castResult) {
-      return errorResponse({
-        request,
-        message: "Couldn't find that cast. Got another?",
-      });
-    }
-
+    const userRes = await neynar.fetchBulkUsers([Number(fidOrUsername)]);
+    const user = userRes.users[0];
     const logs = await validateCast({
-      cast: castResult.cast as WebhookCast,
+      user,
       moderatedChannel,
       simulation: true,
     });
@@ -278,8 +265,8 @@ function SimulateCast(props: { actionDefs: typeof actionDefinitions }) {
       }}
       className="space-y-4"
     >
-      <FieldLabel label="Fid or Farcaster username" className="items-start flex-col">
-        <Input name="castHashOrWarpcastUrl" placeholder="3" />
+      <FieldLabel label="Fid" className="items-start flex-col">
+        <Input name="fidOrUsername" placeholder="Enter Fid" />
       </FieldLabel>
 
       <Button
@@ -363,45 +350,7 @@ export type SweepArgs = {
 };
 
 export async function sweep(args: SweepArgs) {
-  let castsChecked = 0;
-  for await (const page of pageChannelCasts({ id: args.channelId })) {
-    const modOverrides = await db.moderationLog.findMany({
-      select: {
-        castHash: true,
-      },
-      where: {
-        castHash: {
-          in: page.casts.map((cast) => cast.hash),
-        },
-        actor: {
-          not: "system",
-        },
-      },
-    });
-
-    const modOverrideHashes = new Set(
-      modOverrides.filter((log): log is { castHash: string } => !!log.castHash).map((log) => log.castHash)
-    );
-
-    const unprocessedCasts = page.casts.filter((cast) => !modOverrideHashes.has(cast.hash));
-
-    for (const cast of unprocessedCasts) {
-      if (isFinished(args.channelId, cast, castsChecked, args)) {
-        return;
-      }
-
-      console.log(`${args.channelId} sweep: processing cast ${cast.hash}...`);
-
-      await validateCast({
-        cast: cast as unknown as WebhookCast,
-        moderatedChannel: args.moderatedChannel,
-        executeOnProtocol: true,
-      });
-
-      castsChecked++;
-      await sleep(500);
-    }
-  }
+  
 }
 
 /**
@@ -508,49 +457,49 @@ export type SimulationResult = Array<{
 }>;
 
 export async function simulate(args: SimulateArgs) {
-  const aggregatedResults: SimulationResult = [];
-  let castsChecked = 0;
-  for await (const page of pageChannelCasts({ id: args.channelId })) {
-    if (castsChecked >= args.limit) {
-      console.log(
-        `${args.channelId} sweep: reached limit of ${args.limit} casts checked, stopping simulation`
-      );
-      break;
-    }
+  // const aggregatedResults: SimulationResult = [];
+  // let castsChecked = 0;
+  // for await (const page of pageChannelCasts({ id: args.channelId })) {
+  //   if (castsChecked >= args.limit) {
+  //     console.log(
+  //       `${args.channelId} sweep: reached limit of ${args.limit} casts checked, stopping simulation`
+  //     );
+  //     break;
+  //   }
 
-    castsChecked += page.casts.length;
-    for (const cast of page.casts) {
-      console.log(`${args.channelId} sweep: processing cast ${cast.hash}...`);
+  //   castsChecked += page.casts.length;
+  //   for (const cast of page.casts) {
+  //     console.log(`${args.channelId} sweep: processing cast ${cast.hash}...`);
 
-      const [existing, proposed] = await Promise.all([
-        args.moderatedChannel
-          ? validateCast({
-              // neynars typings are wrong, casts include root_parent_urls
-              cast: cast as unknown as WebhookCast,
-              moderatedChannel: args.moderatedChannel,
-              simulation: true,
-            })
-          : Promise.resolve([]),
-        validateCast({
-          // neynars typings are wrong
-          cast: cast as unknown as WebhookCast,
-          moderatedChannel: args.proposedModeratedChannel,
-          simulation: true,
-        }),
-      ]);
+  //     const [existing, proposed] = await Promise.all([
+  //       args.moderatedChannel
+  //         ? validateCast({
+  //             // neynars typings are wrong, casts include root_parent_urls
+  //             cast: cast as unknown as WebhookCast,
+  //             moderatedChannel: args.moderatedChannel,
+  //             simulation: true,
+  //           })
+  //         : Promise.resolve([]),
+  //       validateCast({
+  //         // neynars typings are wrong
+  //         cast: cast as unknown as WebhookCast,
+  //         moderatedChannel: args.proposedModeratedChannel,
+  //         simulation: true,
+  //       }),
+  //     ]);
 
-      aggregatedResults.push({
-        hash: cast.hash,
-        existing,
-        proposed,
-      });
-      await args.onProgress?.(castsChecked);
+  //     aggregatedResults.push({
+  //       hash: cast.hash,
+  //       existing,
+  //       proposed,
+  //     });
+  //     await args.onProgress?.(castsChecked);
 
-      await sleep(500);
-    }
-  }
+  //     await sleep(500);
+  //   }
+  // }
 
-  return aggregatedResults;
+  // return aggregatedResults;
 }
 
 function isFinished(channelId: string, cast: CastWithInteractions, castsChecked: number, args: SweepArgs) {
