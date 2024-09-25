@@ -104,13 +104,6 @@ export default function FrameConfig() {
                 + New Bot
               </Link>
             </Button>
-            {Date.now() < new Date("2024-12-01").getTime() && (
-              <Button variant={"ghost"} asChild>
-                <Link to="/~/import/airstack" className="no-underline text-muted-foreground">
-                  Import from Airstack
-                </Link>
-              </Button>
-            )}
           </CardContent>
         </Card>
       )}

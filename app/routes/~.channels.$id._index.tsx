@@ -33,8 +33,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     channelId: params.id,
   });
 
-  const stats = getChannelStats({ channelId: channel.id });
-  const topUsers = getTopEngagers({ channelId: channel.id });
+  // const stats = getChannelStats({ channelId: channel.id });
+  // const topUsers = getTopEngagers({ channelId: channel.id });
   const moderationStats = getModerationStats30Days({ channelId: channel.id });
 
   return typeddefer({
@@ -42,14 +42,14 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     channel,
     actionDefinitions: actionDefinitions,
     env: getSharedEnv(),
-    channelStats: stats,
+    // channelStats: stats,
     moderationStats,
-    topUsers,
+    // topUsers,
   });
 }
 
 export default function Screen() {
-  const { channelStats, channel, topUsers, moderationStats } = useTypedLoaderData<typeof loader>();
+  const { channel, moderationStats } = useTypedLoaderData<typeof loader>();
 
   return (
     <div>
@@ -68,7 +68,7 @@ export default function Screen() {
         </div>
       )}
 
-      <div className="mt-8">
+      {/* <div className="mt-8">
         <div className="flex items-end justify-between mb-2">
           <div>
             <p className="font-medium">Engagement</p>
@@ -94,7 +94,7 @@ export default function Screen() {
             </Await>
           </Suspense>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

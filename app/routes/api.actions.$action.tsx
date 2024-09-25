@@ -147,69 +147,69 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
     const cast = await neynar.fetchBulkCasts([message.action.cast.hash]);
 
-    if (validation.data.action === "downvote") {
-      const actionFunction = actionFunctions[validation.data.action];
-      await actionFunction({
-        channel: moderatedChannel.id,
-        cast: cast.result.casts[0],
-        action: {
-          type: validation.data.action,
-          args: {
-            voterFid: String(message.action.interactor.fid),
-            voterAvatarUrl: message.action.interactor.pfp_url,
-            voterUsername: message.action.interactor.username,
-          },
-        },
-      });
+    // if (validation.data.action === "downvote") {
+    //   const actionFunction = actionFunctions[validation.data.action];
+    //   await actionFunction({
+    //     channel: moderatedChannel.id,
+    //     cast: cast.result.casts[0],
+    //     action: {
+    //       type: validation.data.action,
+    //       args: {
+    //         voterFid: String(message.action.interactor.fid),
+    //         voterAvatarUrl: message.action.interactor.pfp_url,
+    //         voterUsername: message.action.interactor.username,
+    //       },
+    //     },
+    //   });
 
-      await logModerationAction(
-        moderatedChannel.id,
-        validation.data.action,
-        `Applied by @${message.action.interactor.username}`,
-        cast.result.casts[0],
-        false,
-        {
-          actor: `@${message.action.interactor.username}`,
-        }
-      );
+    //   await logModerationAction(
+    //     moderatedChannel.id,
+    //     validation.data.action,
+    //     `Applied by @${message.action.interactor.username}`,
+    //     cast.result.casts[0],
+    //     false,
+    //     {
+    //       actor: `@${message.action.interactor.username}`,
+    //     }
+    //   );
 
-      castQueue.add(
-        "processCast",
-        {
-          moderatedChannel,
-          cast: cast.result.casts[0],
-          executeOnProtocol: true,
-        },
-        {
-          jobId: `cast-${cast.result.casts[0].hash}-downvote-${message.action.interactor.fid}`,
-        }
-      );
+    //   castQueue.add(
+    //     "processCast",
+    //     {
+    //       moderatedChannel,
+    //       cast: cast.result.casts[0],
+    //       executeOnProtocol: true,
+    //     },
+    //     {
+    //       jobId: `cast-${cast.result.casts[0].hash}-downvote-${message.action.interactor.fid}`,
+    //     }
+    //   );
 
-      return json({
-        message: `Downvoted`,
-      });
-    } else {
-      const actionFunction = actionFunctions[validation.data.action];
-      await actionFunction({
-        channel: moderatedChannel.id,
-        cast: cast.result.casts[0],
-        action: {
-          type: validation.data.action,
-          args,
-        },
-      });
+    //   return json({
+    //     message: `Downvoted`,
+    //   });
+    // } else {
+    //   const actionFunction = actionFunctions[validation.data.action];
+    //   await actionFunction({
+    //     channel: moderatedChannel.id,
+    //     cast: cast.result.casts[0],
+    //     action: {
+    //       type: validation.data.action,
+    //       args,
+    //     },
+    //   });
 
-      logModerationAction(
-        moderatedChannel.id,
-        validation.data.action,
-        `Applied by @${message.action.interactor.username}`,
-        cast.result.casts[0],
-        false,
-        {
-          actor: `@${message.action.interactor.username}`,
-        }
-      );
-    }
+    //   logModerationAction(
+    //     moderatedChannel.id,
+    //     validation.data.action,
+    //     `Applied by @${message.action.interactor.username}`,
+    //     cast.result.casts[0],
+    //     false,
+    //     {
+    //       actor: `@${message.action.interactor.username}`,
+    //     }
+    //   );
+    // }
 
     return json({
       message: `Applied`,

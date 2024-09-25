@@ -127,7 +127,7 @@ export const propagationDelayWorker = new Worker(
   },
   {
     connection,
-    autorun: process.env.NODE_ENV === "production" || !!process.env.ENABLE_QUEUES,
+    autorun: !!process.env.ENABLE_QUEUES,
   }
 );
 
@@ -139,7 +139,7 @@ export const subscriptionWorker = new Worker(
   },
   {
     connection,
-    autorun: process.env.NODE_ENV === "production" || !!process.env.ENABLE_QUEUES,
+    autorun: !!process.env.ENABLE_QUEUES,
   }
 );
 
@@ -344,7 +344,7 @@ export const webhookWorker = new Worker(
     connection,
     lockDuration: 30_000,
     concurrency: 25,
-    autorun: process.env.NODE_ENV === "production" || !!process.env.ENABLE_QUEUES,
+    autorun: !!process.env.ENABLE_QUEUES,
   }
 );
 
@@ -369,7 +369,7 @@ export const castWorker = new Worker(
     connection,
     lockDuration: 30_000,
     concurrency: 10,
-    autorun: process.env.NODE_ENV === "production" || !!process.env.ENABLE_QUEUES,
+    autorun: !!process.env.ENABLE_QUEUES,
   }
 );
 castWorker.on("error", (err: Error) => {
@@ -381,66 +381,66 @@ castWorker.on("active", async (job) => {
     console.log(`[${job.data.moderatedChannel.id}]: ${job.id} is now active`);
   }
 
-  await db.castLog.upsert({
-    where: {
-      hash: job.data.cast.hash,
-    },
-    create: {
-      hash: job.data.cast.hash,
-      replyCount: job.data.cast.replies.count,
-      channelId: job.data.moderatedChannel.id,
-      status: "active",
-    },
-    update: {
-      status: "active",
-    },
-  });
+  // await db.castLog.upsert({
+  //   where: {
+  //     hash: job.data.cast.hash,
+  //   },
+  //   create: {
+  //     hash: job.data.cast.hash,
+  //     replyCount: job.data.cast.replies.count,
+  //     channelId: job.data.moderatedChannel.id,
+  //     status: "active",
+  //   },
+  //   update: {
+  //     status: "active",
+  //   },
+  // });
 });
 
 castWorker.on("completed", async (job) => {
-  if (process.env.NODE_ENV === "development") {
-    console.log(`${job.data.moderatedChannel.id}: cast ${job.data.cast.hash} completed`);
-  }
+  // if (process.env.NODE_ENV === "development") {
+  //   console.log(`${job.data.moderatedChannel.id}: cast ${job.data.cast.hash} completed`);
+  // }
 
-  await db.castLog.upsert({
-    where: {
-      hash: job.data.cast.hash,
-    },
-    create: {
-      hash: job.data.cast.hash,
-      replyCount: job.data.cast.replies.count,
-      channelId: job.data.moderatedChannel.id,
-      status: "completed",
-    },
-    update: {
-      status: "completed",
-    },
-  });
+  // await db.castLog.upsert({
+  //   where: {
+  //     hash: job.data.cast.hash,
+  //   },
+  //   create: {
+  //     hash: job.data.cast.hash,
+  //     replyCount: job.data.cast.replies.count,
+  //     channelId: job.data.moderatedChannel.id,
+  //     status: "completed",
+  //   },
+  //   update: {
+  //     status: "completed",
+  //   },
+  // });
 });
 
 castWorker.on("failed", async (job, err: any) => {
-  const message = err?.response?.data || err?.message || "unknown error";
+  // const message = err?.response?.data || err?.message || "unknown error";
 
-  if (job) {
-    console.error(`[${job.data.moderatedChannel?.id}]: cast ${job.data.cast?.hash} failed`, message);
+  // if (job) {
+  //   console.error(`[${job.data.moderatedChannel?.id}]: cast ${job.data.cast?.hash} failed`, message);
 
-    await db.castLog.upsert({
-      where: {
-        hash: job.data.cast.hash,
-      },
-      create: {
-        hash: job.data.cast.hash,
-        replyCount: job.data.cast.replies.count,
-        channelId: job.data.moderatedChannel.id,
-        status: "failed",
-      },
-      update: {
-        status: "failed",
-      },
-    });
-  } else {
-    console.error("job failed", message);
-  }
+  //   await db.castLog.upsert({
+  //     where: {
+  //       hash: job.data.cast.hash,
+  //     },
+  //     create: {
+  //       hash: job.data.cast.hash,
+  //       replyCount: job.data.cast.replies.count,
+  //       channelId: job.data.moderatedChannel.id,
+  //       status: "failed",
+  //     },
+  //     update: {
+  //       status: "failed",
+  //     },
+  //   });
+  // } else {
+  //   console.error("job failed", message);
+  // }
 });
 
 export const recoverQueue = new Queue("recoverQueue", {
@@ -472,7 +472,7 @@ export const recoverWorker = new Worker(
   {
     connection,
     concurrency: 25,
-    autorun: process.env.NODE_ENV === "production" || !!process.env.ENABLE_QUEUES,
+    autorun: !!process.env.ENABLE_QUEUES,
   }
 );
 
@@ -500,7 +500,7 @@ export const sweepWorker = new Worker(
   {
     connection,
     concurrency: 25,
-    autorun: process.env.NODE_ENV === "production" || !!process.env.ENABLE_QUEUES,
+    autorun: !!process.env.ENABLE_QUEUES,
   }
 );
 
@@ -546,7 +546,7 @@ export const simulationWorker = new Worker(
   },
   {
     connection,
-    autorun: process.env.NODE_ENV === "production" || !!process.env.ENABLE_QUEUES,
+    autorun: !!process.env.ENABLE_QUEUES,
   }
 );
 
@@ -628,7 +628,7 @@ export const syncWorker = new Worker(
       }
     }
   },
-  { connection, autorun: process.env.NODE_ENV === "production" || !!process.env.ENABLE_QUEUES }
+  { connection, autorun: !!process.env.ENABLE_QUEUES }
 );
 
 syncWorker.on("error", (err) => {

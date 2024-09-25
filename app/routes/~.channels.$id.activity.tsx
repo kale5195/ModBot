@@ -178,39 +178,39 @@ export async function action({ request, params }: ActionFunctionArgs) {
       });
     }
   } else if (result.data.intent === "like") {
-    invariant(log.castHash, "castHash is required");
+    // invariant(log.castHash, "castHash is required");
 
-    await like({ cast: { hash: log.castHash } as any, channel: moderatedChannel.id });
-    await db.moderationLog.create({
-      data: {
-        action: "like",
-        affectedUserFid: log.affectedUserFid,
-        affectedUsername: log.affectedUsername,
-        affectedUserAvatarUrl: log.affectedUserAvatarUrl,
-        castHash: log.castHash,
-        castText: log.castText,
-        actor: user.id,
-        channelId: moderatedChannel.id,
-        reason: `Applied manually by @${user.name}`,
-      },
-    });
+    // await like({ cast: { hash: log.castHash } as any, channel: moderatedChannel.id });
+    // await db.moderationLog.create({
+    //   data: {
+    //     action: "like",
+    //     affectedUserFid: log.affectedUserFid,
+    //     affectedUsername: log.affectedUsername,
+    //     affectedUserAvatarUrl: log.affectedUserAvatarUrl,
+    //     castHash: log.castHash,
+    //     castText: log.castText,
+    //     actor: user.id,
+    //     channelId: moderatedChannel.id,
+    //     reason: `Applied manually by @${user.name}`,
+    //   },
+    // });
   } else if (result.data.intent === "hideQuietly") {
     invariant(log.castHash, "castHash is required");
 
-    await unlike({ cast: { hash: log.castHash } as any, channel: moderatedChannel.id });
-    await db.moderationLog.create({
-      data: {
-        action: "hideQuietly",
-        affectedUserFid: log.affectedUserFid,
-        affectedUsername: log.affectedUsername,
-        affectedUserAvatarUrl: log.affectedUserAvatarUrl,
-        castHash: log.castHash,
-        castText: log.castText,
-        actor: user.id,
-        channelId: moderatedChannel.id,
-        reason: `Applied manually by @${user.name}`,
-      },
-    });
+    // await unlike({ cast: { hash: log.castHash } as any, channel: moderatedChannel.id });
+    // await db.moderationLog.create({
+    //   data: {
+    //     action: "hideQuietly",
+    //     affectedUserFid: log.affectedUserFid,
+    //     affectedUsername: log.affectedUsername,
+    //     affectedUserAvatarUrl: log.affectedUserAvatarUrl,
+    //     castHash: log.castHash,
+    //     castText: log.castText,
+    //     actor: user.id,
+    //     channelId: moderatedChannel.id,
+    //     reason: `Applied manually by @${user.name}`,
+    //   },
+    // });
   } else {
     return typedjson(
       {
@@ -239,7 +239,7 @@ export default function Screen() {
           <p className="font-semibold">Activity</p>
         </div>
 
-        <DropdownMenu>
+        {/* <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="rounded-full">
               <SlidersHorizontalIcon className="w-4 h-4" />
@@ -250,7 +250,7 @@ export default function Screen() {
               Show Cast Text
             </DropdownMenuCheckboxItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
       </div>
       {moderationLogs.length === 0 ? (
         <Alert className="mt-2">

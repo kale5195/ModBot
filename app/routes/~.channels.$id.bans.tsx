@@ -120,7 +120,7 @@ export default function Screen() {
         )}
       </section>
 
-      <section className="space-y-2">
+      {/* <section className="space-y-2">
         <div className="flex justify-between items-end border-b pb-2">
           <p className="font-medium">Cooldowns</p>
           <Link
@@ -166,7 +166,7 @@ export default function Screen() {
             </Table>
           </div>
         )}
-      </section>
+      </section> */}
     </div>
   );
 }
