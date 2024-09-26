@@ -15,12 +15,10 @@ import axios from "axios";
 import { userPlans } from "./utils";
 import { getUsage, validateCast, ValidateCastArgs } from "./automod.server";
 
-const connection = new IORedis({
-  host: process.env.REDIS_HOST,
-  port: Number(process.env.REDIS_PORT),
-  password: process.env.REDIS_PASSWORD,
+const connection = new IORedis(process.env.REDIS_URL || "redis://localhost:6379", {
   maxRetriesPerRequest: null,
 });
+
 
 export const subscriptionQueue = new Queue("subscriptionQueue", {
   connection,
