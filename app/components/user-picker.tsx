@@ -9,7 +9,7 @@ import { FarcasterIcon } from "~/components/FarcasterIcon";
 import { Controller, useFormContext } from "react-hook-form";
 import { useCallback } from "react";
 
-export function UserPicker(props: { name: string; isMulti: boolean; required?: boolean }) {
+export function UserPicker(props: { name: string; isMulti: boolean; required?: boolean; isDisabled?: boolean }) {
   const { control } = useFormContext();
 
   const loadOptions = useCallback(
@@ -41,6 +41,7 @@ export function UserPicker(props: { name: string; isMulti: boolean; required?: b
         <AsyncSelect
           {...field}
           instanceId={props.name}
+          isDisabled={props.isDisabled}
           noOptionsMessage={(e) => (e.inputValue ? "No users found. Weird." : null)}
           isMulti={props.isMulti}
           required={props.required}

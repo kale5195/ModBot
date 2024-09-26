@@ -9,7 +9,7 @@ import { useCallback } from "react";
 import { SubjectTokensResponse } from "~/lib/airstack.server";
 import axios from "axios";
 
-export function MoxieMemberPicker(props: { name: string; isMulti: boolean; required?: boolean }) {
+export function MoxieMemberPicker(props: { name: string; isMulti: boolean; required?: boolean; isDisabled?: boolean }) {
   const { control } = useFormContext();
 
   const loadOptions = useCallback(
@@ -45,6 +45,7 @@ export function MoxieMemberPicker(props: { name: string; isMulti: boolean; requi
           required={props.required}
           cacheOptions
           isMulti={props.isMulti}
+          isDisabled={props.isDisabled}
           defaultOptions
           isClearable={!props.isMulti}
           styles={{
