@@ -267,6 +267,46 @@ export async function parseMessage(payload: any) {
   return message;
 }
 
+export async function parseMessageWithAirstack(payload: any) {
+  const res = await fetch("https://api.airstack.xyz/graphql", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: process.env.AIRSTACK_API_KEY!, 
+    },
+    body: JSON.stringify({ query: `query MyQuery(
+  $messageBytes: String!
+) {
+  FarcasterValidateFrameMessage(
+    input: {filter: {messageBytes: $messageBytes}}
+  ) {
+    isValid
+    message {
+      data {
+        fid
+      }
+    }
+  }
+}`, variables: { messageBytes: payload.trustedData.messageBytes } }),
+  });
+  const jsonRes = await res.json() as {
+    data: {
+      FarcasterValidateFrameMessage: {
+        isValid: boolean;
+        message: {
+          data: {
+            fid: string;
+          };
+        };
+      };
+    };
+  };
+  const data = jsonRes.data.FarcasterValidateFrameMessage;
+  if (!data.isValid) {
+    throw new Error("Invalid message");
+  }
+  return data.message.data.fid;
+}
 export async function redirectWithMessage({
   request,
   message,

@@ -179,7 +179,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }
   } else if (result.data.intent === "like") {
     // invariant(log.castHash, "castHash is required");
-
+    console.log("approve", log.affectedUsername);
     // await like({ cast: { hash: log.castHash } as any, channel: moderatedChannel.id });
     // await db.moderationLog.create({
     //   data: {
@@ -195,8 +195,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
     //   },
     // });
   } else if (result.data.intent === "hideQuietly") {
-    invariant(log.castHash, "castHash is required");
-
+    // invariant(log.castHash, "castHash is required");
+    console.log("remove", log.affectedUsername);
     // await unlike({ cast: { hash: log.castHash } as any, channel: moderatedChannel.id });
     // await db.moderationLog.create({
     //   data: {
@@ -351,7 +351,7 @@ export default function Screen() {
                                 value="hideQuietly"
                                 className="w-full h-full cursor-default text-left"
                               >
-                                Hide
+                                Remove
                               </button>
                             </DropdownMenuItem>
                           </Form>
@@ -380,7 +380,7 @@ export default function Screen() {
                                 value="like"
                                 className="w-full h-full cursor-default text-left"
                               >
-                                Curate
+                                Approve
                               </button>
                             </DropdownMenuItem>
                           </Form>

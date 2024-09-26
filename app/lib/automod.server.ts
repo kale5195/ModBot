@@ -66,11 +66,13 @@ export async function hideQuietly({
     executeOnProtocol?: boolean;
   };
 }) {
-  if (options?.executeOnProtocol) {
-    // await unlike({ channel, user });
-  } else {
-    return Promise.resolve();
-  }
+  console.log("cannot join", channel, user?.username);
+  return Promise.resolve();
+  // if (options?.executeOnProtocol) {
+  //   await unlike({ channel, user });
+  // } else {
+  //   return Promise.resolve();
+  // }
 }
 
 export async function addToBypass({ channel, user }: { channel: string; user: User; action: Action }) {
@@ -316,7 +318,8 @@ export async function validateCast({
             action.type,
             exclusionCheck.explanation,
             user,
-            simulation
+            simulation,
+            exclusionCheck.rule
           )
         );
       }
@@ -354,35 +357,35 @@ export async function validateCast({
           throw e;
         });
 
-        if (moderatedChannel.slowModeHours > 0) {
-          await db.cooldown.upsert({
-            where: {
-              affectedUserId_channelId: {
-                channelId: moderatedChannel.id,
-                affectedUserId: String(user.fid),
-              },
-            },
-            create: {
-              channelId: moderatedChannel.id,
-              affectedUserId: String(user.fid),
-              active: true,
-              expiresAt: new Date(Date.now() + moderatedChannel.slowModeHours * 60 * 60 * 1000),
-            },
-            update: {
-              active: true,
-              expiresAt: new Date(Date.now() + moderatedChannel.slowModeHours * 60 * 60 * 1000),
-            },
-          });
-        }
+        // if (moderatedChannel.slowModeHours > 0) {
+        //   await db.cooldown.upsert({
+        //     where: {
+        //       affectedUserId_channelId: {
+        //         channelId: moderatedChannel.id,
+        //         affectedUserId: String(user.fid),
+        //       },
+        //     },
+        //     create: {
+        //       channelId: moderatedChannel.id,
+        //       affectedUserId: String(user.fid),
+        //       active: true,
+        //       expiresAt: new Date(Date.now() + moderatedChannel.slowModeHours * 60 * 60 * 1000),
+        //     },
+        //     update: {
+        //       active: true,
+        //       expiresAt: new Date(Date.now() + moderatedChannel.slowModeHours * 60 * 60 * 1000),
+        //     },
+        //   });
+        // }
       }
-
       logs.push(
         await logModerationAction(
           moderatedChannel.id,
           action.type,
           inclusionCheck.explanation,
           user,
-          simulation
+          simulation,
+          inclusionCheck.rule
         )
       );
     }
@@ -418,6 +421,7 @@ export async function logModerationAction(
   reason: string,
   user: User,
   simulation: boolean,
+  rule?: Rule,
   options?: {
     actor?: string;
   }
@@ -434,6 +438,7 @@ export async function logModerationAction(
         affectedUserFid: String(user.fid),
         castText: '',
         castHash: '',
+        rule: rule ? JSON.stringify(rule) : "{}",
       },
     });
   } else {
@@ -450,6 +455,7 @@ export async function logModerationAction(
       castText: '',
       createdAt: new Date(),
       updatedAt: new Date(),
+      rule: rule ? JSON.stringify(rule) : "{}",
     };
   }
 }
@@ -461,6 +467,7 @@ async function evaluateRules(
 ): Promise<{
   passedRule: boolean;
   explanation: string;
+  rule: Rule;
 }> {
   if (rule.type === "CONDITION") {
     return evaluateRule(moderatedChannel, user, rule);
@@ -473,10 +480,11 @@ async function evaluateRules(
         return {
           passedRule: true,
           explanation: `${evaluations.map((e) => e.explanation).join(", ")}`,
+          rule,
         };
       } else {
         const failure = evaluations.find((e) => !e.passedRule)!;
-        return { passedRule: false, explanation: `${failure.explanation}` };
+        return { passedRule: false, explanation: `${failure.explanation}`, rule };
       }
     } else if (rule.operation === "OR") {
       const results = await Promise.all(
@@ -495,19 +503,20 @@ async function evaluateRules(
         return {
           passedRule: false,
           explanation,
+          rule,
         };
       }
     }
   }
 
-  return { passedRule: false, explanation: "No rules" };
+  return { passedRule: false, explanation: "No rules", rule };
 }
 
 async function evaluateRule(
   channel: ModeratedChannel,
   user: User,
   rule: Rule
-): Promise<{ passedRule: boolean; explanation: string }> {
+): Promise<{ passedRule: boolean; explanation: string; rule: Rule }> {
   const check = ruleFunctions[rule.name];
   if (!check) {
     throw new Error(`No function for rule ${rule.name}`);
@@ -518,6 +527,7 @@ async function evaluateRule(
   return {
     passedRule: result.result,
     explanation: result.message,
+    rule,
   };
 }
 

@@ -288,7 +288,7 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
     category: "all",
     friendlyName: "Followed By",
     checkType: "user",
-    description: "Check if the cast author is followed by certain accounts",
+    description: "Check if the user is followed by certain accounts",
     hidden: false,
     invertable: true,
     args: {
@@ -766,10 +766,10 @@ export const actionDefinitions = {
     args: {},
   },
   hideQuietly: {
-    friendlyName: "Hide",
+    friendlyName: "Rejected",
     hidden: false,
     castScope: "all",
-    description: "Hide the cast from the Main feed",
+    description: "Reject the user from the channel",
     args: {},
   },
   addToBypass: {
@@ -802,10 +802,10 @@ export const actionDefinitions = {
     args: {},
   },
   like: {
-    friendlyName: "Curate",
+    friendlyName: "Approved",
     hidden: true,
     castScope: "root",
-    description: "Curate a cast into the Main feed.",
+    description: "Invite the user to the channel.",
     args: {},
   },
   unlike: {
@@ -1159,6 +1159,8 @@ export const actionFunctions: Record<ActionType, ActionFunction> = {
 } as const;
 
 export async function like(props: { user: User; channel: string }) {
+  const { user, channel } = props;
+  console.log("invite", user, channel);
   // const signerAlloc = await db.signerAllocation.findFirst({
   //   where: {
   //     channelId: props.channel,

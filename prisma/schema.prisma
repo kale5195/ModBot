@@ -152,6 +152,7 @@ model ModerationLog {
   affectedUserAvatarUrl String?
   channelId             String
   castText              String?
+  rule                  String          @default("{}")
   channel               ModeratedChannel @relation(fields: [channelId], references: [id])
 
   @@index([channelId, createdAt])

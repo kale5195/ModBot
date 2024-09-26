@@ -150,7 +150,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       moderatedChannel,
       simulation: true,
     });
-
+    // console.log("logs", logs);
     return typedjson({
       logs,
     });

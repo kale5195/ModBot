@@ -280,7 +280,7 @@ export function CurationForm(props: {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            {props.defaultValues.id || channelId ? (
+            {/* {props.defaultValues.id || channelId ? (
               <SimulateButton
                 // @ts-ignore
                 channelId={props.defaultValues.id || channelId}
@@ -290,7 +290,7 @@ export function CurationForm(props: {
               <Button variant={"secondary"} className="w-full" disabled>
                 Simulate
               </Button>
-            )}
+            )} */}
 
             <Button type="submit" size={"lg"} className="w-full" disabled={fetcher.state !== "idle"}>
               {fetcher.state !== "idle" ? (
