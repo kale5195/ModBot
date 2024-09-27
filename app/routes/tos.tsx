@@ -80,7 +80,7 @@ const TermsOfService = () => {
       <section className="mb-6">
         <h2 className="text-2xl font-semibold mb-3">Contact Us</h2>
         <p>
-          If you have any questions or concerns about these terms, please contact us at support@automod.sh.
+          If you have any questions or concerns about these terms, please contact us at admin@modbot.sh.
         </p>
       </section>
     </div>

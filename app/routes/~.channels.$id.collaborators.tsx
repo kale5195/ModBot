@@ -135,7 +135,7 @@ export default function Screen() {
     <div>
       <p className="font-semibold">Collaborators</p>
       <p className="text-gray-500">
-        Collaborators have access to automod and can manage all moderation settings.
+        Collaborators have access to ModBot and can manage all moderation settings.
       </p>
 
       <div className="py-4">

@@ -29,8 +29,8 @@ import { MagicWandIcon } from "@radix-ui/react-icons";
 
 export const meta: MetaFunction<typeof loader> = (data) => {
   return [
-    { title: "Automod - Put your channel on autopilot" },
-    { property: "og:title", content: "automod - Put your channel on autopilot" },
+    { title: "ModBot - Farcaster Channel Moderation helper" },
+    { property: "og:title", content: "ModBot - Farcaster Channel Moderation helper" },
     {
       name: "description",
       content: "Automate channel moderation with customizable rules and team-based moderation.",
@@ -40,7 +40,7 @@ export const meta: MetaFunction<typeof loader> = (data) => {
       content: "Automate channel moderation with customizable rules and team-based moderation.",
     },
     { name: "twitter:card", content: "summary_large_image" },
-    { name: "twitter:title", content: "automod - Put your channel on autopilot" },
+    { name: "twitter:title", content: "ModBot - Farcaster Channel Moderation helper" },
     {
       name: "twitter:description",
       content: "Automate channel moderation with customizable rules and team-based moderation.",
@@ -137,7 +137,7 @@ export default function Home() {
         {/* hero */}
         <div className="flex flex-col items-center justify-center space-y-6 p-7 pb-10 pt-20">
           <section className="text-center max-w-3xl mx-auto">
-            <h1 className="text-3xl logo text-white mb-4">automod</h1>
+            <h1 className="text-3xl logo text-white mb-4">ModBot</h1>
             <div className="py-4 sm:py-8">
               <h1
                 className="text-center text-5xl sm:text-6xl text-[#f9ffd9] tracking-tighter leading-1"
@@ -158,9 +158,20 @@ export default function Home() {
             </div>
 
             <section className="flex flex-col items-center mt-12">
-              <p className="mb-2 text-[#f9ffd9]/80 text-xs">
-                Used by hundreds of beloved{" "}
-                <FarcasterIcon className="-mt-[2px] inline w-3 h-3 text-white/80" /> channels
+              <p className="mb-2 text-[#f9ffd9]/80 text-sm">
+                Built on top of{" "}
+                <a href="https://automod.sh" className="text-white no-underline" rel="noreferrer" target="_blank">
+                  automod
+                </a>{" "}
+                by{" "}
+                <a
+                  href="https://warpcast.com/jtgi"
+                  className="text-white no-underline"
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  @jtgi
+                </a>{" "}
               </p>
               <div className="flex -space-x-1">
                 {activeChannels
@@ -184,7 +195,7 @@ export default function Home() {
                         </PopoverTrigger>
                         <PopoverContent className="flex gap-1 p-1 pr-4 rounded-full items-center w-auto">
                           <img
-                            src={channel.imageUrl ?? "/icons/automod.png"}
+                            src={channel.imageUrl ?? "/icons/modbot.png"}
                             className="h-8 w-8 rounded-full block flex-1"
                           />
                           <div>
@@ -254,7 +265,7 @@ export default function Home() {
               <FeatureCard
                 Icon={DollarSign}
                 title="Generous pricing"
-                description="Automod has a generous free tier fit for 90% of channels on Farcaster."
+                description="ModBot has a generous free tier fit for 90% of channels on Farcaster."
               />
             </div>
           </div>
@@ -278,9 +289,9 @@ export default function Home() {
         >
           <div className="max-w-5xl mx-auto flex justify-between">
             <p className="flex items-center gap-4">
-              <Link to="/disclosure" className="text-white/40 no-underline">
+              {/* <Link to="/disclosure" className="text-white/40 no-underline">
                 Disclosure
-              </Link>
+              </Link> */}
               <Link to="/privacy" className="text-white/40 no-underline">
                 Privacy
               </Link>
@@ -289,12 +300,15 @@ export default function Home() {
               </Link>
             </p>
             <p style={{ fontFamily: "Kode Mono" }} className="text-white/20">
-              made in tokyo
+              Built upon the great work by{" "}
+              <a href="https://warpcast.com/jtgi" className="text-white/40 no-underline">
+                @jtgi
+              </a>
             </p>
           </div>
         </footer>
       </div>
-      <FarcasterIcon className="w-screen h-screen absolute -top-12 left-0 opacity-5 mix-blend-multiply" />
+      <FarcasterIcon className="w-full justify-center items-center h-screen absolute -top-12 left-0 opacity-5 mix-blend-multiply" />
     </main>
   );
 }
@@ -318,11 +332,7 @@ function FeatureCard(props: {
   );
 }
 
-export function LoginButton(props: {
-  user: User | null;
-  error: string | null;
-  env: ReturnType<typeof getSharedEnv>;
-}) {
+export function LoginButton(props: { user: User | null; error: string | null; env: ReturnType<typeof getSharedEnv> }) {
   const { user, error, env } = props;
   const [loggingIn, setLoggingIn] = useState(false);
   const navigate = useNavigate();
@@ -366,7 +376,7 @@ export function LoginButton(props: {
           variant={"outline"}
         >
           <Link to="/~" className="w-full">
-            Use Automod <ArrowRight className="w-4 h-4 ml-2" />
+            Use ModBot <ArrowRight className="w-4 h-4 ml-2" />
           </Link>
         </Button>
       ) : (
@@ -402,139 +412,3 @@ export function LoginButton(props: {
     </section>
   );
 }
-
-// function PricingTable() {
-//   const frequencies = [
-//     { value: "monthly", label: "Monthly", priceSuffix: "/month" },
-//     { value: "annually", label: "Annually", priceSuffix: "/year" },
-//   ];
-//   const tiers = [
-//     {
-//       name: "Basic",
-//       id: "tier-freelancer",
-//       href: "#",
-//       price: { monthly: "FREE", annually: "FREE" },
-//       description: "The essentials to provide your best work for clients.",
-//       features: ["Process 3000 casts", "Up to 3 channels", "Basic analytics", "1 Moderator Role"],
-//       mostPopular: false,
-//     },
-//     {
-//       name: "Prime",
-//       id: "tier-startup",
-//       href: "#",
-//       price: { monthly: "$14.99", annually: "$179.88" },
-//       description: "A plan that scales with your rapidly growing channel.",
-//       features: ["Process 25,000 casts", "Up to 5 channels", "Webhooks", "Unlimited Moderator Roles"],
-//       mostPopular: false,
-//     },
-//     {
-//       name: "Ultra",
-//       id: "tier-enterprise",
-//       href: "#",
-//       price: { monthly: "$39.99", annually: "$479.99" },
-//       description: "Channels at scale",
-//       features: [
-//         "Process 250,000 casts",
-//         "Unlimited channels",
-//         "Priority Support",
-//         "Automod Team Support",
-//         "Unlimited Moderator Roles",
-//         "Webhooks",
-//       ],
-//       mostPopular: false,
-//     },
-//   ];
-
-//   const [frequency, setFrequency] = useState(frequencies[0]);
-
-//   return (
-//     <div className="bg-white py-24 sm:py-32">
-//       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-//         <div className="mx-auto max-w-4xl text-center">
-//           <h2 className="text-base font-semibold leading-7 text-indigo-600">Pricing</h2>
-//           <p className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-//             Pricing plans for teams of&nbsp;all&nbsp;sizes
-//           </p>
-//         </div>
-//         <p className="mx-auto mt-6 max-w-2xl text-center text-lg leading-8 text-gray-600">
-//           Choose an affordable plan that’s packed with the best features for engaging your audience, creating
-//           customer loyalty, and driving sales.
-//         </p>
-//         <div className="mt-16 flex justify-center">
-//           <fieldset aria-label="Payment frequency">
-//             <RadioGroup
-//               value={frequency.value}
-//               onValueChange={(value) => setFrequency(frequencies.find((f) => f.value === value)!)}
-//               className="grid grid-cols-2 gap-x-1 rounded-full p-1 text-center text-xs font-semibold leading-5 ring-1 ring-inset ring-gray-200"
-//             >
-//               {frequencies.map((option) => (
-//                 <RadioGroupItem
-//                   key={option.value}
-//                   value={option.value}
-//                   className="cursor-pointer rounded-full px-2.5 py-1 text-gray-500 data-[checked]:bg-indigo-600 data-[checked]:text-white"
-//                 >
-//                   {option.label}
-//                 </RadioGroupItem>
-//               ))}
-//             </RadioGroup>
-//           </fieldset>
-//         </div>
-//         <div className="isolate mx-auto mt-10 grid max-w-md grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-//           {tiers.map((tier) => (
-//             <div
-//               key={tier.id}
-//               className={cn(
-//                 tier.mostPopular ? "ring-2 ring-indigo-600" : "ring-1 ring-gray-200",
-//                 "rounded-3xl p-8 xl:p-10"
-//               )}
-//             >
-//               <div className="flex items-center justify-between gap-x-4">
-//                 <h3
-//                   id={tier.id}
-//                   className={cn(
-//                     tier.mostPopular ? "text-indigo-600" : "text-gray-900",
-//                     "text-lg font-semibold leading-8"
-//                   )}
-//                 >
-//                   {tier.name}
-//                 </h3>
-//                 {tier.mostPopular ? (
-//                   <p className="rounded-full bg-indigo-600/10 px-2.5 py-1 text-xs font-semibold leading-5 text-indigo-600">
-//                     Most popular
-//                   </p>
-//                 ) : null}
-//               </div>
-//               <p className="mt-4 text-sm leading-6 text-gray-600">{tier.description}</p>
-//               <p className="mt-6 flex items-baseline gap-x-1">
-//                 <span className="text-4xl font-bold tracking-tight text-gray-900">
-//                   {tier.price[frequency.value]}
-//                 </span>
-//                 <span className="text-sm font-semibold leading-6 text-gray-600">{frequency.priceSuffix}</span>
-//               </p>
-//               <a
-//                 href={tier.href}
-//                 aria-describedby={tier.id}
-//                 className={cn(
-//                   tier.mostPopular
-//                     ? "bg-indigo-600 text-white shadow-sm hover:bg-indigo-500"
-//                     : "text-indigo-600 ring-1 ring-inset ring-indigo-200 hover:ring-indigo-300",
-//                   "mt-6 block rounded-md px-3 py-2 text-center text-sm font-semibold leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-//                 )}
-//               >
-//                 Buy plan
-//               </a>
-//               <ul role="list" className="mt-8 space-y-3 text-sm leading-6 text-gray-600 xl:mt-10">
-//                 {tier.features.map((feature) => (
-//                   <li key={feature} className="flex gap-x-3">
-//                     <Check aria-hidden="true" className="h-6 w-5 flex-none text-indigo-600" />
-//                     {feature}
-//                   </li>
-//                 ))}
-//               </ul>
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }

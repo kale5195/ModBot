@@ -7,7 +7,7 @@ import { Link } from "@remix-run/react";
 
 export const meta: MetaFunction = () => [
   {
-    title: "Farcaster Channels Managed by automod",
+    title: "Farcaster Channels Managed by ModBot",
   },
 ];
 export async function loader() {

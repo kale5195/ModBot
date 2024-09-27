@@ -1,11 +1,6 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { db } from "~/lib/db.server";
-import {
-  convertSvgToPngBase64,
-  frameResponse,
-  getSharedEnv,
-  parseMessage,
-} from "~/lib/utils.server";
+import { convertSvgToPngBase64, frameResponse, getSharedEnv, parseMessage } from "~/lib/utils.server";
 import invariant from "tiny-invariant";
 import { CSSProperties } from "react";
 import satori from "satori";
@@ -37,7 +32,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const logs = await validateCast({
     user: message.action.interactor as User,
     moderatedChannel: channel,
-    simulation: true,
+    simulation: false,
   });
   const log = logs[0];
   const action = log.action;
@@ -45,20 +40,24 @@ export async function action({ request, params }: ActionFunctionArgs) {
     title: `Join ${channelId}`,
     description: "Join the channel through automod.",
     image: await generateFrame({
-      message: action === 'like' ? 'Invite sent!' : 'You are not eligible to join',
+      message: action === "like" ? "Invite sent!" : "You are not eligible to join",
       channelAvatarUrl: `https://preview.recaster.org/api/avatar/channel/${channelId}`,
     }),
     postUrl: `${getSharedEnv().hostUrl}/frames/${channelId}/invite`,
-    buttons: action === 'like' ? [
-      {
-        text: "Accept Invite",
-        link: `https://warpcast.com`,
-      },
-    ] : [
-      {
-        text: "Check rules",
-        link: "https://warpcast.com",
-    }],
+    buttons:
+      action === "like"
+        ? [
+            {
+              text: "Accept Invite",
+              link: `https://warpcast.com`,
+            },
+          ]
+        : [
+            {
+              text: "Check rules",
+              link: `${getSharedEnv().hostUrl}/channels/${channelId}`,
+            },
+          ],
     cacheTtlSeconds: 3600,
   });
 }
@@ -75,9 +74,9 @@ export async function loader({ params }: LoaderFunctionArgs) {
   if (!channel) {
     return frameResponse({
       title: "Channel not configured",
-      description: "This channel is not configured to use automod.",
+      description: "This channel is not configured to use ModBot.",
       image: await generateFrame({
-        message: "This channel is not configured to use automod.",
+        message: "This channel is not configured to use ModBot.",
       }),
     });
   }
@@ -89,7 +88,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
       message: `Welcome to /${channelId}`,
       channelAvatarUrl: `https://preview.recaster.org/api/avatar/channel/${channelId}`,
     }),
-    postUrl: `${getSharedEnv().hostUrl}/frames/${channelId}/invite`,
+    postUrl: `${getSharedEnv().hostUrl}/frames/${channelId}/join`,
     buttons: [
       {
         text: "Join Now",
@@ -99,10 +98,8 @@ export async function loader({ params }: LoaderFunctionArgs) {
   });
 }
 
-async function generateFrame(props: { message: string, channelAvatarUrl?: string }) {
-  const response = await fetch(
-    `${getSharedEnv().hostUrl}/fonts/kode-mono-bold.ttf`
-  );
+async function generateFrame(props: { message: string; channelAvatarUrl?: string }) {
+  const response = await fetch(`${getSharedEnv().hostUrl}/fonts/kode-mono-bold.ttf`);
   const fontBuffer = await response.arrayBuffer();
   const styles: CSSProperties = {
     display: "flex",
@@ -124,28 +121,31 @@ async function generateFrame(props: { message: string, channelAvatarUrl?: string
 
   const svg = await satori(
     <div style={styles}>
-      {props.channelAvatarUrl && <img
-        src={props.channelAvatarUrl}
-        style={{
-          height: 120,
-          width: 120,
-          borderRadius: 100,
-          marginBottom: 50,
-        }}
-      />}
+      {props.channelAvatarUrl && (
+        <img
+          src={props.channelAvatarUrl}
+          style={{
+            height: 120,
+            width: 120,
+            borderRadius: 100,
+            marginBottom: 50,
+          }}
+        />
+      )}
       {props.message}
     </div>,
     {
       width: 800,
-    height: 418,
-    fonts: [
-      {
-        name: "Kode Mono",
-        data: fontBuffer,
-        style: "normal",
-      },
-    ],
-  });
+      height: 418,
+      fonts: [
+        {
+          name: "Kode Mono",
+          data: fontBuffer,
+          style: "normal",
+        },
+      ],
+    }
+  );
 
   return convertSvgToPngBase64(svg);
 }

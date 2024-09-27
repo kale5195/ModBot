@@ -11,7 +11,7 @@ import { ArrowUpRight, Check, CheckCircle2, CopyIcon, Loader } from "lucide-reac
 import { useClipboard } from "~/lib/utils";
 import axios from "axios";
 import { useState, useEffect } from "react";
-import { automodFid } from "./~.channels.$id";
+import { modbotFid } from "./~.channels.$id";
 
 export const airstackFid = 440220;
 
@@ -22,7 +22,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const allChannels = await getWarpcastChannels();
 
   const setupComplete = channelIds.every((channelId) => {
-    return allChannels.find((channel) => channel.id === channelId)?.moderatorFid === automodFid;
+    return allChannels.find((channel) => channel.id === channelId)?.moderatorFid === modbotFid;
   });
 
   return typedjson({
@@ -46,7 +46,7 @@ export default function Screen() {
         const updatedFidSet: Record<string, boolean> = {};
         responses.forEach((response, index) => {
           const channelId = channelIds[index];
-          updatedFidSet[channelId] = response.data.result.channel.moderatorFid === automodFid;
+          updatedFidSet[channelId] = response.data.result.channel.moderatorFid === modbotFid;
         });
         setFidSet(updatedFidSet);
         if (complete) {
@@ -76,12 +76,12 @@ export default function Screen() {
                   {copied ? (
                     <>
                       <Check className="w-3 h-3 inline mr-1" />
-                      automod
+                      modbot
                     </>
                   ) : (
                     <>
                       <CopyIcon className="w-3 h-3 inline mr-1" />
-                      automod
+                      modbot
                     </>
                   )}
                 </Button>{" "}

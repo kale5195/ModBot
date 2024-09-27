@@ -14,8 +14,8 @@ import { db } from "~/lib/db.server";
 import { requireUser, requireUserCanModerateChannel } from "~/lib/utils.server";
 import { getWarpcastChannel } from "~/lib/warpcast.server";
 
-export const automodFid = 368422;
-export const automodUsername = "automod";
+export const modbotFid = 861203;
+export const modbotUsername = "modbot";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   invariant(params.id, "id is required");
@@ -45,8 +45,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         user,
         channel,
         warpcastChannel,
-        signerFid: signerAlloc?.signer.fid || automodFid,
-        signerUsername: signerAlloc?.signer.username || automodUsername,
+        signerFid: signerAlloc?.signer.fid || modbotFid,
+        signerUsername: signerAlloc?.signer.username || modbotUsername,
       },
       {
         headers: {
@@ -65,9 +65,9 @@ export default function ChannelRoot() {
   const enableFetcher = useFetcher();
   const [isNotConfigured, setIsNotConfigured] = useState<boolean>(false);
 
-  useEffect(() => {
-    setIsNotConfigured(!signerFid || warpcastChannel.moderatorFid !== +signerFid);
-  }, []);
+  // useEffect(() => {
+  //   setIsNotConfigured(!signerFid || warpcastChannel.moderatorFid !== +signerFid);
+  // }, []);
 
   return (
     <div>
@@ -118,7 +118,7 @@ export default function ChannelRoot() {
                 //   to: `/~/channels/${channel.id}/roles`,
                 //   title: "Roles",
                 // },
-                { to: `/~/channels/${channel.id}/bans`, title: "Bans" },
+                // { to: `/~/channels/${channel.id}/bans`, title: "Bans" },
                 { to: `/~/channels/${channel.id}/tools`, title: "Tools" },
                 { to: `/~/channels/${channel.id}/activity`, title: "Activity" },
                 user.id === channel.userId

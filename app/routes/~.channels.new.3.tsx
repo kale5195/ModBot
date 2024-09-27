@@ -204,10 +204,10 @@ export default function Screen() {
       <Card>
         <CardHeader>
           <ChannelHeader channel={channel} />
-          <CardTitle>Set @automod-fc as your channel's moderator</CardTitle>
+          <CardTitle>Set @modbot as your channel's moderator</CardTitle>
           <CardDescription>
-            @automod-fc will auto invite people who meet your channel rules. You
-            can also remove the people @autojoin invited at any time.
+            @modbot will auto invite people who meet your channel rules. You
+            can also remove the people @modbot invited at any time.
           </CardDescription>
         </CardHeader>
         <form

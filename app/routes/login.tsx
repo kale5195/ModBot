@@ -56,7 +56,7 @@ export default function Login() {
       }}
     >
       <div className="max-w-xl flex flex-col justify-center items-center p-12 bg-white/10 rounded-md">
-        <h1 className="text-3xl logo text-white mb-2">automod</h1>
+        <h1 className="text-3xl logo text-white mb-2">ModBot</h1>
         <p className="text-lg text-center text-[#f9ffd9] max-w-sm tracking-tighter leading-1">
           25+ composable rules to automatically moderate channel content.
         </p>

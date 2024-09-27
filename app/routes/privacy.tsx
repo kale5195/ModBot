@@ -78,7 +78,7 @@ const PrivacyPolicy = () => {
         <h2 className="text-2xl font-semibold mb-3">Contact Us</h2>
         <p>
           If you have questions or concerns about our privacy practices, please contact us at
-          support@automod.sh.
+          admin@modbot.sh.
         </p>
       </section>
     </div>

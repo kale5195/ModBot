@@ -6,7 +6,7 @@ import { getSharedEnv, requireUser } from "~/lib/utils.server";
 import { getWarpcastChannel } from "~/lib/warpcast.server";
 import { Button } from "~/components/ui/button";
 import { db } from "~/lib/db.server";
-import { automodFid } from "./~.channels.$id";
+import { modbotFid } from "./~.channels.$id";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Check, CheckIcon, CopyIcon, Loader } from "lucide-react";
@@ -29,9 +29,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
     getWarpcastChannel({ channel: channelId }),
   ]);
 
-  const isAutomodSet = automodFid === wcChannel.moderatorFid;
+  const isModbotSet = modbotFid === wcChannel.moderatorFid;
 
-  if (isAutomodSet) {
+  if (isModbotSet) {
     await recoverQueue.add("recover", {
       channelId: channel.id,
       moderatedChannel: channel,
@@ -45,20 +45,20 @@ export async function loader({ request }: LoaderFunctionArgs) {
     user,
     channel,
     wcChannel,
-    isAutomodSet,
+    isModbotSet,
     env: getSharedEnv(),
   });
 }
 
 export default function Screen() {
-  const { channel, isAutomodSet, env } = useTypedLoaderData<typeof loader>();
-  const [fidSet, setFidSet] = useState<boolean>(isAutomodSet);
+  const { channel, isModbotSet, env } = useTypedLoaderData<typeof loader>();
+  const [fidSet, setFidSet] = useState<boolean>(isModbotSet);
 
   useEffect(() => {
     const interval = setInterval(() => {
       axios.get(`${env.hostUrl}/api/warpcast/channels/${channel.id}`).then((rsp) => {
         const updatedWcChannel = rsp.data.result.channel;
-        if (updatedWcChannel.moderatorFid === automodFid) {
+        if (updatedWcChannel.moderatorFid === modbotFid) {
           clearInterval(interval);
           setFidSet(true);
         }

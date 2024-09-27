@@ -8,7 +8,7 @@ export default function Screen() {
     <main className={cn("w-full max-w-4xl px-8 mx-auto min-h-screen flex flex-col pb-[200px] overflow-hidden")}>
       <nav className="w-full flex justify-between max-w-4xl mx-auto py-8">
         <Link to="/channels" className="no-underline">
-          <h1 className="logo text-3xl">automod</h1>
+          <h1 className="logo text-3xl">ModBot</h1>
         </Link>
         <div className="flex space-x-4">
           <Button asChild>

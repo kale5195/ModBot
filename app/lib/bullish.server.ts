@@ -8,7 +8,7 @@ import { neynar, pageChannelCasts } from "./neynar.server";
 import { ValidateCastArgsV2 } from "./types";
 import { toggleWebhook } from "~/routes/api.channels.$id.toggleEnable";
 import { getCast, getWarpcastChannel, publishCast } from "./warpcast.server";
-import { automodFid } from "~/routes/~.channels.$id";
+import { modbotFid } from "~/routes/~.channels.$id";
 import { syncSubscriptions } from "./subscription.server";
 import { sendNotification } from "./notifications.server";
 import axios from "axios";
@@ -208,7 +208,7 @@ export const webhookWorker = new Worker(
     }
 
     if (!skipSignerCheck) {
-      if (!signerAllocation && warpcastChannel.moderatorFid !== automodFid) {
+      if (!signerAllocation && warpcastChannel.moderatorFid !== modbotFid) {
         console.error(`Moderator fid for ${moderatedChannel.id} is not set to automod.`);
         // await toggleWebhook({ channelId: moderatedChannel.id, active: false });
         throw new UnrecoverableError(`Moderator fid for ${moderatedChannel.id} is not set to automod`);
@@ -224,9 +224,9 @@ export const webhookWorker = new Worker(
             `Signer allocation mismatch for ${moderatedChannel.id}, Expected: ${signerAllocation.signer.fid}, got: ${warpcastChannel.moderatorFid}. Exiting.`
           );
         }
-      } else if (warpcastChannel.moderatorFid !== automodFid) {
+      } else if (warpcastChannel.moderatorFid !== modbotFid) {
         console.error(
-          `Moderator fid for ${moderatedChannel.id} is not set to automod default fid (${automodFid}).`
+          `Moderator fid for ${moderatedChannel.id} is not set to modbot default fid (${modbotFid}).`
         );
       }
     }

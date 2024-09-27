@@ -255,7 +255,7 @@ export default function Screen() {
       {moderationLogs.length === 0 ? (
         <Alert className="mt-2">
           <div className="text-gray-700">
-            No moderation logs yet. Anytime automod executes an action a log will show here.
+            No moderation logs yet. Anytime ModBot executes an action a log will show here.
           </div>
         </Alert>
       ) : (

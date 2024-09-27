@@ -14,7 +14,7 @@ import { Link } from "@remix-run/react";
 export const meta: MetaFunction<typeof loader> = (data) => {
   return [
     {
-      title: `/${data.data.channel.id} channel Rules | automod`,
+      title: `/${data.data.channel.id} channel Rules | ModBot`,
     },
   ];
 };
@@ -58,7 +58,7 @@ export default function Channels() {
       </Link>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <img src={channel?.imageUrl || ""} className="w-10 h-10 rounded-full" />
+          <img src={`https://preview.recaster.org/api/avatar/channel/${channel.id}`} className="w-10 h-10 rounded-full" />
           <h1 style={{ fontFamily: "Kode Mono" }}>/{channel.id}</h1>
         </div>
       </div>

@@ -14,7 +14,7 @@ import { isRecoverActive, isSweepActive } from "./~.channels.$id.tools";
 import { recoverQueue, subscriptionQueue, sweepQueue } from "~/lib/bullish.server";
 import { Suspense } from "react";
 import axios from "axios";
-import { automodFid } from "./~.channels.$id";
+import { modbotFid } from "./~.channels.$id";
 import { Checkbox } from "~/components/ui/checkbox";
 import { refreshAccountStatus } from "~/lib/subscription.server";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
@@ -612,12 +612,12 @@ export async function getDau() {
   });
 
   const signerFids = await db.signer.findMany({});
-  const automodFids = [...signerFids.map((s) => +s.fid), automodFid];
+  const modbotFids = [...signerFids.map((s) => +s.fid), modbotFid];
   const active = [];
   const setupIncomplete = [];
 
   for (const channel of channels) {
-    if (automodFids.includes(channel.moderatorFid)) {
+    if (modbotFids.includes(channel.moderatorFid)) {
       active.push(channel);
     } else {
       if (moderatedChannels.find((mc) => mc.id.toLowerCase() === channel.id.toLowerCase())) {
