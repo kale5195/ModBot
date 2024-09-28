@@ -10,6 +10,7 @@ import { RuleDisplayForm } from "~/components/rule-display-form";
 import { RuleSet } from "~/lib/types";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "@remix-run/react";
+import { getChannelImageUrl } from "~/lib/utils";
 
 export const meta: MetaFunction<typeof loader> = (data) => {
   return [
@@ -58,7 +59,7 @@ export default function Channels() {
       </Link>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <img src={`https://preview.recaster.org/api/avatar/channel/${channel.id}`} className="w-10 h-10 rounded-full" />
+          <img src={getChannelImageUrl(channel.id)} className="w-10 h-10 rounded-full" />
           <h1 style={{ fontFamily: "Kode Mono" }}>/{channel.id}</h1>
         </div>
       </div>

@@ -18,7 +18,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "~/components/ui/dialog";
-import { cn, PlanType, userPlans } from "~/lib/utils";
+import { cn, getChannelImageUrl, PlanType, userPlans } from "~/lib/utils";
 import { refreshAccountStatus } from "~/lib/subscription.server";
 import { ModeratedChannel } from "@prisma/client";
 
@@ -230,12 +230,7 @@ export default function FrameConfig() {
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 w-full">
               {channels.map((channel) => (
-                <Link
-                  to={`/~/channels/${channel.id}`}
-                  className="no-underline"
-                  key={channel.id}
-                  prefetch="intent"
-                >
+                <Link to={`/~/channels/${channel.id}`} className="no-underline" key={channel.id} prefetch="intent">
                   <ChannelCard channel={channel} />
                 </Link>
               ))}
@@ -252,7 +247,7 @@ export function ChannelCard(props: { channel: Pick<ModeratedChannel, "id" | "ima
   return (
     <div className="flex gap-2 rounded-lg p-4 shadow border hover:border-orange-200 hover:shadow-orange-200 transition-all duration-300 items-center">
       <img
-        src={channel.imageUrl ?? undefined}
+        src={getChannelImageUrl(props.channel.id)}
         alt={channel.id}
         className="h-12 w-12 rounded-full block  shrink-0"
       />

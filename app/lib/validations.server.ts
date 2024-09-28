@@ -5,9 +5,9 @@ import * as Sentry from "@sentry/remix";
 import mimeType from "mime-types";
 import RE2 from "re2";
 import { z } from "zod";
-import { getWarpcastChannel, getWarpcastChannelOwner } from "./warpcast.server";
+import { getWarpcastChannel, getWarpcastChannelOwner, isFollowingChannel } from "./warpcast.server";
 import { ModeratedChannel } from "@prisma/client";
-import { neynar } from "./neynar.server";
+import { inviteToChannel, neynar } from "./neynar.server";
 import emojiRegex from "emoji-regex";
 import { clientsByChainId, hamChain } from "./viem.server";
 import { erc20Abi, erc721Abi, getAddress, getContract, parseUnits } from "viem";
@@ -203,8 +203,7 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
         required: true,
         friendlyName: "Fan Token",
         placeholder: "Enter a username...",
-        description:
-          "If you don't see the token you're looking for, it may not be available yet. Check airstack.xyz",
+        description: "If you don't see the token you're looking for, it may not be available yet. Check airstack.xyz",
       },
       minBalance: {
         type: "string",
@@ -337,6 +336,13 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
         friendlyName: "Contract Address",
         description: "",
       },
+      name: {
+        type: "string",
+        required: true,
+        friendlyName: "Membership Name",
+        placeholder: "e.g. Buoy Pro",
+        description: "The name of the membership for display in the UI.",
+      },
     },
   },
 
@@ -375,6 +381,13 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
         pattern: "0x[a-fA-F0-9]{40}",
         placeholder: "0xdead...",
         description: "",
+      },
+      name: {
+        type: "string",
+        required: true,
+        friendlyName: "Token Name",
+        placeholder: "e.g. $DEGEN",
+        description: "The name of the token for display in the UI.",
       },
       minBalance: {
         type: "string",
@@ -445,6 +458,13 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
         friendlyName: "Contract Address",
         description: "",
       },
+      name: {
+        type: "string",
+        required: true,
+        friendlyName: "Token Name",
+        placeholder: "e.g. Rocks NFT",
+        description: "The name of the NFT for display in the UI.",
+      },
       tokenId: {
         type: "string",
         required: false,
@@ -491,6 +511,13 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
         friendlyName: "Contract Address",
         description: "",
       },
+      name: {
+        type: "string",
+        required: true,
+        friendlyName: "Token Name",
+        placeholder: "e.g. BAYC NFT",
+        description: "The name of the NFT for display in the UI.",
+      },
       tokenId: {
         type: "string",
         required: false,
@@ -517,7 +544,6 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
     invertable: true,
     args: {},
   },
-
 
   userProfileContainsText: {
     author: "automod",
@@ -1039,7 +1065,7 @@ export const RuleSchema: z.ZodType<Rule> = BaseRuleSchema.extend({
     }
   )
   .transform(async (data) => {
-      return data;
+    return data;
   });
 
 export const ActionSchema = z.discriminatedUnion("type", [
@@ -1160,7 +1186,8 @@ export const actionFunctions: Record<ActionType, ActionFunction> = {
 
 export async function like(props: { user: User; channel: string }) {
   const { user, channel } = props;
-  console.log("invite", user, channel);
+  console.log("invite", user.username, channel);
+  await inviteToChannel({ channelId: channel, fid: user.fid });
   // const signerAlloc = await db.signerAllocation.findFirst({
   //   where: {
   //     channelId: props.channel,
@@ -1174,8 +1201,6 @@ export async function like(props: { user: User; channel: string }) {
   // console.log(`Liking with @${signerAlloc ? signerAlloc.signer.username : "automod"}, ${uuid}`);
   // await neynar.publishReactionToCast(uuid, "like", props.cast.hash);
 }
-
-
 
 type BotOrNotResponse = { fid: number; result: { bot?: boolean; status: "complete" | "analyzing" } };
 
@@ -1202,7 +1227,6 @@ export async function isHuman(args: CheckFunctionArgs) {
   };
 }
 
-
 export async function userFidInList(args: CheckFunctionArgs) {
   const { user, rule } = args;
   const { fids } = rule.args as { fids: Array<{ value: number; icon: string; label: string }> };
@@ -1211,9 +1235,7 @@ export async function userFidInList(args: CheckFunctionArgs) {
 
   return {
     result,
-    message: result
-      ? `@${user.username} is in the list`
-      : `@${user.username} is not in the list`,
+    message: result ? `@${user.username} is in the list` : `@${user.username} is not in the list`,
   };
 }
 
@@ -1265,7 +1287,6 @@ export async function subscribesOnParagraph(args: CheckFunctionArgs) {
       : `User is not subscribed to @${farcasterUser.label} on Paragraph`,
   };
 }
-
 
 export function userProfileContainsText(args: CheckFunctionArgs) {
   const { user, rule } = args;
@@ -1346,21 +1367,15 @@ export async function holdsFanToken(args: CheckFunctionArgs) {
 
   return {
     result: hasEnough,
-    message: hasEnough
-      ? `User holds @${label}'s Fan Token`
-      : `User does not hold enough of @${label}'s Fan Token`,
+    message: hasEnough ? `User holds @${label}'s Fan Token` : `User does not hold enough of @${label}'s Fan Token`,
   };
 }
 
 export async function userFollowsChannel(args: CheckFunctionArgs) {
   const { user, rule } = args;
   const { channelSlug } = rule.args;
-
-  const follows = await getSetCache({
-    key: `follows:${channelSlug}:${user.fid}`,
-    ttlSeconds: 60 * 5,
-    get: () => airstackUserFollowsChannel({ fid: user.fid, channelId: channelSlug }),
-  });
+  
+  const follows = await isFollowingChannel({ channel: channelSlug, fid: user.fid });
 
   return {
     result: follows,
@@ -1391,9 +1406,7 @@ export function userDisplayNameContainsText(args: CheckFunctionArgs) {
 
   return {
     result: containsText,
-    message: containsText
-      ? `Display name contains "${searchText}"`
-      : `Display name does not contain "${searchText}"`,
+    message: containsText ? `Display name contains "${searchText}"` : `Display name does not contain "${searchText}"`,
   };
 }
 
@@ -1546,7 +1559,7 @@ export function userHoldsPowerBadge(args: CheckFunctionArgs) {
 
 export async function holdsErc721(args: CheckFunctionArgs) {
   const { user, rule } = args;
-  const { chainId, contractAddress, tokenId } = rule.args;
+  const { chainId, contractAddress, tokenId, name } = rule.args;
   const client = clientsByChainId[chainId];
 
   if (!client) {
@@ -1589,14 +1602,14 @@ export async function holdsErc721(args: CheckFunctionArgs) {
   return {
     result: isOwner,
     message: isOwner
-      ? `User holds ERC-721 (${formatHash(contractAddress)})`
-      : `User does not hold ERC-721 (${formatHash(contractAddress)})`,
+      ? `User holds ERC-721 (${name || formatHash(contractAddress)})`
+      : `User does not hold ERC-721 (${name || formatHash(contractAddress)})`,
   };
 }
 
 export async function holdsActiveHypersub(args: CheckFunctionArgs) {
   const { user, rule } = args;
-  const { chainId, contractAddress } = rule.args;
+  const { chainId, contractAddress, name } = rule.args;
   const client = clientsByChainId[chainId];
 
   if (!client) {
@@ -1626,8 +1639,8 @@ export async function holdsActiveHypersub(args: CheckFunctionArgs) {
   return {
     result: isSubscribed,
     message: isSubscribed
-      ? `User holds an active hypersub (${formatHash(contractAddress)})`
-      : `User does not hold an active hypersub (${formatHash(contractAddress)})`,
+      ? `User holds an active hypersub (${name || formatHash(contractAddress)})`
+      : `User does not hold an active hypersub (${name || formatHash(contractAddress)})`,
   };
 }
 
@@ -1692,7 +1705,7 @@ export async function holdsActiveHypersub(args: CheckFunctionArgs) {
 
 export async function holdsErc1155(args: CheckFunctionArgs) {
   const { user, rule } = args;
-  const { chainId, contractAddress, tokenId } = rule.args;
+  const { chainId, contractAddress, tokenId, name } = rule.args;
   const client = clientsByChainId[chainId];
 
   if (!client) {
@@ -1716,8 +1729,8 @@ export async function holdsErc1155(args: CheckFunctionArgs) {
     return {
       result: isOwner,
       message: isOwner
-        ? `User holds ERC-1155 (${formatHash(contractAddress)})`
-        : `User does not hold ERC-1155 (${formatHash(contractAddress)})`,
+        ? `User holds ERC-1155 (${name || formatHash(contractAddress)})`
+        : `User does not hold ERC-1155 (${name || formatHash(contractAddress)})`,
     };
   } else {
     const contract = getContract({
@@ -1751,16 +1764,16 @@ export async function holdsErc1155(args: CheckFunctionArgs) {
 
 export async function holdsErc20(args: CheckFunctionArgs) {
   const { user, rule } = args;
-  const { chainId, contractAddress, minBalance } = rule.args;
+  const { chainId, contractAddress, minBalance, name } = rule.args;
   const client = clientsByChainId[chainId];
 
   if (!client) {
     throw new Error(`No client found for chainId: ${chainId}`);
   }
 
-  const cacheKey = `erc20-balance:${contractAddress}:${minBalance}:${
-    user.custody_address
-  }:${user.verifications.join(`,`)}`;
+  const cacheKey = `erc20-balance:${contractAddress}:${minBalance}:${user.custody_address}:${user.verifications.join(
+    `,`
+  )}`;
 
   const { result: hasEnough } = await getSetCache({
     key: cacheKey,
@@ -1777,8 +1790,8 @@ export async function holdsErc20(args: CheckFunctionArgs) {
   return {
     result: hasEnough,
     message: hasEnough
-      ? `User holds ERC-20 (${formatHash(contractAddress)})`
-      : `User does not hold enough ERC-20 (${formatHash(contractAddress)})`,
+      ? `User holds ERC-20 (${name || formatHash(contractAddress)})`
+      : `User does not hold enough ERC-20 (${name || formatHash(contractAddress)})`,
   };
 }
 
@@ -1800,9 +1813,7 @@ export async function verifyErc20Balance({
     client,
   });
 
-  const balances = (await Promise.all(
-    wallets.map((add) => contract.read.balanceOf([getAddress(add)]))
-  )) as bigint[];
+  const balances = (await Promise.all(wallets.map((add) => contract.read.balanceOf([getAddress(add)])))) as bigint[];
   const decimals = await contract.read.decimals();
   const minBalanceBigInt = parseUnits(minBalanceRequired ?? "0", decimals);
   const sum = balances.reduce((a, b) => a + b, BigInt(0));
@@ -1896,7 +1907,7 @@ export function getRuleDefinitions(fid: string, channelId?: string): Record<Rule
 }
 
 async function openRankChannel(props: CheckFunctionArgs) {
-  const { user:member, rule, channel } = props;
+  const { user: member, rule, channel } = props;
   const { minRank } = rule.args as { minRank: number };
 
   const user = await getSetCache({
@@ -1905,13 +1916,13 @@ async function openRankChannel(props: CheckFunctionArgs) {
     get: () =>
       axios
         .post<GlobalRankResponse>(
-          `https://graph.cast.k3l.io/priority/channels/rankings/${channel.id}/fids`,
-          [member.fid],
-          {
-            headers: {
-              "API-Key": process.env.OPENRANK_API_KEY,
-            },
-          }
+          `https://graph.cast.k3l.io/channels/rankings/${channel.id}/fids`,
+          [member.fid]
+          // {
+          //   headers: {
+          //     "API-Key": process.env.OPENRANK_API_KEY,
+          //   },
+          // }
         )
         .then((res) => res.data.result.find((u) => u.fid === member.fid)),
   });
@@ -1944,7 +1955,7 @@ type GlobalRankResponse = {
 };
 
 async function openRankGlobalEngagement(props: CheckFunctionArgs) {
-  const { user:member, rule } = props;
+  const { user: member, rule } = props;
   const { minRank } = rule.args as { minRank: number };
 
   const user = await getSetCache({
@@ -1954,7 +1965,7 @@ async function openRankGlobalEngagement(props: CheckFunctionArgs) {
       axios
         .post<GlobalRankResponse>(
           `https://graph.cast.k3l.io/scores/global/engagement/fids`,
-          [member.fid],
+          [member.fid]
           // {
           //   headers: {
           //     "API-Key": process.env.OPENRANK_API_KEY,

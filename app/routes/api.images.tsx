@@ -1,6 +1,7 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { CSSProperties } from "react";
 import satori from "satori";
+import { getChannelImageUrl } from "~/lib/utils";
 import { convertSvgToPngBase64, getSharedEnv } from "~/lib/utils.server";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -46,7 +47,7 @@ async function generateFrame(props: { message: string; channel: string }) {
     <div style={styles}>
       {Boolean(props.channel) && (
         <img
-          src={`https://preview.recaster.org/api/avatar/channel/${props.channel}`}
+          src={getChannelImageUrl(props.channel)}
           style={{
             height: 120,
             width: 120,

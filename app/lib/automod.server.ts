@@ -231,14 +231,14 @@ export async function validateCast({
     throw new Error("Moderated channel not found");
   }
 
-  moderatedChannel = await db.moderatedChannel.findFirstOrThrow({
-    where: {
-      id: moderatedChannel.id,
-    },
-    include: {
-      user: true,
-    },
-  });
+  // moderatedChannel = await db.moderatedChannel.findFirstOrThrow({
+  //   where: {
+  //     id: moderatedChannel.id,
+  //   },
+  //   include: {
+  //     user: true,
+  //   },
+  // });
 
 
   if (!user) {
@@ -269,13 +269,14 @@ export async function validateCast({
 
   if (!moderatedChannel.inclusionRuleSetParsed?.ruleParsed?.conditions?.length) {
     console.log(`[${moderatedChannel.id}] No rules for channel.`);
-    await logModerationAction(
+    const log = await logModerationAction(
       moderatedChannel.id,
       "hideQuietly",
       "No automated curation rules configured.",
       user,
       simulation
     );
+    logs.push(log);
     return logs;
   }
 

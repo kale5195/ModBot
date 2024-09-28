@@ -18,8 +18,7 @@ export async function registerWebhook({ rootParentUrl }: { rootParentUrl: string
       },
     }
   );
-  const existingWebhooks = webhook.data.webhook?.subscription?.filters?.["cast.created"]
-    ?.root_parent_urls as string[];
+  const existingWebhooks = webhook.data.webhook?.subscription?.filters?.["cast.created"]?.root_parent_urls as string[];
   if (!existingWebhooks || !existingWebhooks.length) {
     console.error(`No existing webhooks found for webhook ${process.env.NEYNAR_WEBHOOK_ID!}`);
     throw new Error("No existing webhooks found for webhook");
@@ -71,8 +70,7 @@ export async function unregisterWebhook({ rootParentUrl }: { rootParentUrl: stri
       },
     }
   );
-  const existingWebhooks = webhook.data.webhook?.subscription?.filters?.["cast.created"]
-    .root_parent_urls as string[];
+  const existingWebhooks = webhook.data.webhook?.subscription?.filters?.["cast.created"].root_parent_urls as string[];
   if (!existingWebhooks || !existingWebhooks.length) {
     console.error(`No existing webhooks found for webhook ${process.env.NEYNAR_WEBHOOK_ID!}`);
     throw new Error("No existing webhooks found for webhook");
@@ -108,6 +106,23 @@ export async function unregisterWebhook({ rootParentUrl }: { rootParentUrl: stri
   );
 }
 
+export async function inviteToChannel({ channelId, fid }: { channelId: string; fid: number }) {
+  const res = await axios.post(
+    `https://api.neynar.com/v2/farcaster/channel/member/invite`,
+    {
+      signer_uuid: process.env.NEYNAR_SIGNER_UUID!,
+      channel_id: channelId,
+      fid,
+      role: "member",
+    },
+    {
+      headers: {
+        api_key: process.env.NEYNAR_API_KEY!,
+      },
+    }
+  );
+  return res;
+}
 export async function* pageChannelCasts(props: { id: string }) {
   let cursor: string | null | undefined = undefined;
 

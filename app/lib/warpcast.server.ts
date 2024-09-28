@@ -47,6 +47,22 @@ export async function getWarpcastChannels() {
   });
 }
 
+export async function isChannelInvited(props: { channel: string, fid: number }) {
+  const { channel, fid } = props;
+  const rsp = await http.get<{ result: { invites: [] } }>(
+    `https://api.warpcast.com/fc/channel-invites?channelId=${channel}&fid=${fid}`
+  );
+  return rsp.data.result.invites.length > 0;
+}
+
+export async function isFollowingChannel(props: { channel: string; fid: number }) {
+  const { channel, fid } = props;
+  const rsp = await http.get<{ result: { following: boolean } }>(
+    `https://api.warpcast.com/v1/user-channel?fid=${fid}&channelId=${channel}`
+  );
+  return rsp.data.result.following;
+}
+
 export async function getOwnedChannels(props: { fid: number }) {
   const channels = await getWarpcastChannels();
   return channels.filter((c) => c.leadFid === props.fid);

@@ -150,6 +150,10 @@ export function grantRoleAction(role: {
 export const planTypes = ["basic", "prime", "ultra", "vip"] as const;
 export type PlanType = (typeof planTypes)[number];
 
+export function getChannelImageUrl(channelId: string) {
+  return `https://preview.recaster.org/api/avatar/channel/${channelId}`;
+}
+
 export function meetsMinimumPlan(args: { userPlan: PlanType; minimumPlan: PlanType }) {
   return userPlans[args.userPlan].level >= userPlans[args.minimumPlan].level;
 }
