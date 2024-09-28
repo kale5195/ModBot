@@ -5,7 +5,11 @@ import invariant from "tiny-invariant";
 import { validateCast } from "~/lib/automod.server";
 import { User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { isChannelInvited } from "~/lib/warpcast.server";
-import { generateFrame } from "./api.images";
+
+function getFrameImageUrl(props: { message: string; channel?: string }) {
+  const { message, channel } = props;
+  return `${getSharedEnv().hostUrl}/api/images?message=${message}&channel=${channel}`;
+}
 
 export async function action({ request, params }: ActionFunctionArgs) {
   invariant(params.channel, "channel id is required");
@@ -23,7 +27,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       return frameResponse({
         title: `/${channelId} not configured`,
         description: `/${channelId} is not configured to use ModBot`,
-        image: await generateFrame({
+        image: getFrameImageUrl({
           message: `/${channelId} is not configured to use ModBot`,
         }),
         buttons: [
@@ -46,7 +50,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       return frameResponse({
         title: `Join ${channelId}`,
         description: "Join the channel through ModBot.",
-        image: await generateFrame({
+        image: getFrameImageUrl({
           message: "You are already invited!",
           channel: channelId,
         }),
@@ -70,7 +74,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     return frameResponse({
       title: `Join ${channelId}`,
       description: "Join the channel through ModBot.",
-      image: await generateFrame({
+      image: getFrameImageUrl({
         message:
           action === "like" ? "Invite sent!" : log.reason.length < 50 ? log.reason : "You are not eligible to join",
         channel: channelId,
@@ -110,7 +114,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     return frameResponse({
       title: "Internal error",
       description: errorMessage,
-      image: await generateFrame({
+      image: getFrameImageUrl({
         message: errorMessage,
       }),
       buttons: [
@@ -135,7 +139,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     return frameResponse({
       title: `/${channelId} not configured`,
       description: `/${channelId} is not configured to use ModBot`,
-      image: await generateFrame({
+      image: getFrameImageUrl({
         message: `/${channelId} is not configured to use ModBot`,
       }),
       buttons: [
@@ -149,7 +153,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
   return frameResponse({
     title: `Welcome to ${channelId}`,
     description: "Join the channel through ModBot.",
-    image: await generateFrame({
+    image: getFrameImageUrl({
       message: `Welcome to /${channelId}`,
       channel: channelId,
     }),
