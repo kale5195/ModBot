@@ -33,95 +33,95 @@ export const propagationDelayWorker = new Worker(
   async () => {
     console.log("Checking propagation delay");
 
-    const uuid = process.env.AUTOMOD_FACTORY_UUID!;
-    const username = "automod-factory";
-    const delayThreshold = 15 * 60 * 1000;
+    // const uuid = process.env.AUTOMOD_FACTORY_UUID!;
+    // const username = "automod-factory";
+    // const delayThreshold = 15 * 60 * 1000;
 
-    const checks = await db.propagationDelayCheck.findMany({
-      where: {
-        arrivedAt: null,
-        createdAt: {
-          gte: new Date(Date.now() - 24 * 60 * 60 * 1_000),
-        },
-      },
-    });
+    // const checks = await db.propagationDelayCheck.findMany({
+    //   where: {
+    //     arrivedAt: null,
+    //     createdAt: {
+    //       gte: new Date(Date.now() - 24 * 60 * 60 * 1_000),
+    //     },
+    //   },
+    // });
 
-    if (!checks.length) {
-      const neynarToWarpcast = await neynar.publishCast(
-        uuid,
-        `neynar -> warpcast\n${new Date().toISOString()}`
-      );
-      const warpcastToNeynar = await publishCast({
-        text: `warpcast -> neynar\n${new Date().toISOString()}`,
-        token: process.env.AUTOMOD_FACTORY_WARPCAST_TOKEN!,
-      });
+    // if (!checks.length) {
+    //   const neynarToWarpcast = await neynar.publishCast(
+    //     uuid,
+    //     `neynar -> warpcast\n${new Date().toISOString()}`
+    //   );
+    //   const warpcastToNeynar = await publishCast({
+    //     text: `warpcast -> neynar\n${new Date().toISOString()}`,
+    //     token: process.env.AUTOMOD_FACTORY_WARPCAST_TOKEN!,
+    //   });
 
-      await db.propagationDelayCheck.create({
-        data: {
-          hash: neynarToWarpcast.hash,
-          arrivedAt: null,
-          src: "neynar",
-          dst: "warpcast",
-        },
-      });
+    //   await db.propagationDelayCheck.create({
+    //     data: {
+    //       hash: neynarToWarpcast.hash,
+    //       arrivedAt: null,
+    //       src: "neynar",
+    //       dst: "warpcast",
+    //     },
+    //   });
 
-      await db.propagationDelayCheck.create({
-        data: {
-          hash: warpcastToNeynar.result.cast.hash,
-          arrivedAt: null,
-          src: "warpcast",
-          dst: "neynar",
-        },
-      });
+    //   await db.propagationDelayCheck.create({
+    //     data: {
+    //       hash: warpcastToNeynar.result.cast.hash,
+    //       arrivedAt: null,
+    //       src: "warpcast",
+    //       dst: "neynar",
+    //     },
+    //   });
 
-      return;
-    }
+    //   return;
+    // }
 
-    for (const check of checks) {
-      const delay = new Date().getTime() - new Date(check.createdAt).getTime();
-      const delaySeconds = Math.floor(delay / 1_000);
+    // for (const check of checks) {
+    //   const delay = new Date().getTime() - new Date(check.createdAt).getTime();
+    //   const delaySeconds = Math.floor(delay / 1_000);
 
-      if (delay > delayThreshold) {
-        await axios.post("https://webhook-relay.fly.dev/automod", {
-          text: `Warning: Cast propagation delay from ${check.src} to ${
-            check.dst
-          } exceeded ${delaySeconds.toLocaleString()} seconds.\nhttps://explorer.neynar.com/${check.hash}`,
-        });
-      }
+    //   if (delay > delayThreshold) {
+    //     await axios.post("https://webhook-relay.fly.dev/automod", {
+    //       text: `Warning: Cast propagation delay from ${check.src} to ${
+    //         check.dst
+    //       } exceeded ${delaySeconds.toLocaleString()} seconds.\nhttps://explorer.neynar.com/${check.hash}`,
+    //     });
+    //   }
 
-      if (check.dst === "neynar") {
-        const rsp = await neynar.fetchBulkCasts([check.hash]);
-        if (rsp.result.casts.length !== 0) {
-          const cast = rsp.result.casts[0];
-          await db.propagationDelayCheck.update({
-            where: {
-              id: check.id,
-            },
-            data: {
-              arrivedAt: cast.timestamp,
-            },
-          });
-        }
-      } else if (check.dst === "warpcast") {
-        const cast = await getCast({ hash: check.hash, username });
-        if (cast) {
-          const delaySeconds = Math.floor(
-            (new Date(cast.timestamp).getTime() - check.createdAt.getTime()) / 1_000
-          );
-          console.log(
-            `[propagation-delay] ${check.hash} arrived after ${delaySeconds.toLocaleString()} seconds`
-          );
-          await db.propagationDelayCheck.update({
-            where: {
-              id: check.id,
-            },
-            data: {
-              arrivedAt: new Date(cast.timestamp),
-            },
-          });
-        }
-      }
-    }
+    //   if (check.dst === "neynar") {
+    //     const rsp = await neynar.fetchBulkCasts([check.hash]);
+    //     if (rsp.result.casts.length !== 0) {
+    //       const cast = rsp.result.casts[0];
+    //       await db.propagationDelayCheck.update({
+    //         where: {
+    //           id: check.id,
+    //         },
+    //         data: {
+    //           arrivedAt: cast.timestamp,
+    //         },
+    //       });
+    //     }
+    //   } else if (check.dst === "warpcast") {
+    //     const cast = await getCast({ hash: check.hash, username });
+    //     if (cast) {
+    //       const delaySeconds = Math.floor(
+    //         (new Date(cast.timestamp).getTime() - check.createdAt.getTime()) / 1_000
+    //       );
+    //       console.log(
+    //         `[propagation-delay] ${check.hash} arrived after ${delaySeconds.toLocaleString()} seconds`
+    //       );
+    //       await db.propagationDelayCheck.update({
+    //         where: {
+    //           id: check.id,
+    //         },
+    //         data: {
+    //           arrivedAt: new Date(cast.timestamp),
+    //         },
+    //       });
+    //     }
+    //   }
+    // }
   },
   {
     connection,
