@@ -22,7 +22,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   });
 }
 
-async function generateFrame(props: { message: string; channel: string }) {
+export async function generateFrame(props: { message: string; channel?: string }) {
   const response = await fetch(`${getSharedEnv().hostUrl}/fonts/kode-mono-bold.ttf`);
   const fontBuffer = await response.arrayBuffer();
   const styles: CSSProperties = {
@@ -45,7 +45,7 @@ async function generateFrame(props: { message: string; channel: string }) {
 
   const svg = await satori(
     <div style={styles}>
-      {Boolean(props.channel) && (
+      {props.channel && (
         <img
           src={getChannelImageUrl(props.channel)}
           style={{
