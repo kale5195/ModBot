@@ -7,7 +7,7 @@ import RE2 from "re2";
 import { z } from "zod";
 import { getWarpcastChannel, getWarpcastChannelOwner, isFollowingChannel } from "./warpcast.server";
 import { ModeratedChannel } from "@prisma/client";
-import { inviteToChannel, neynar } from "./neynar.server";
+import { checkSubscribesOnParagraph, inviteToChannel, neynar } from "./neynar.server";
 import emojiRegex from "emoji-regex";
 import { clientsByChainId, hamChain } from "./viem.server";
 import { erc20Abi, erc721Abi, getAddress, getContract, parseUnits } from "viem";
@@ -599,29 +599,29 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
     },
   },
 
-  userFollowsChannel: {
-    name: "userFollowsChannel",
-    author: "automod",
-    authorUrl: "https://automod.sh",
-    authorIcon: `${hostUrl}/icons/modbot.png`,
-    allowMultiple: true,
-    category: "all",
-    friendlyName: "Follows Channel",
-    checkType: "user",
-    hidden: false,
-    invertable: false,
-    description: "Check if the user follows a channel",
-    args: {
-      channelSlug: {
-        type: "string",
-        friendlyName: "Channel ID",
-        placeholder: "dont-do-this",
-        required: true,
-        pattern: "/^[a-zA-Z0-9-]+$/",
-        description: "The id of the channel to check",
-      },
-    },
-  },
+  // userFollowsChannel: {
+  //   name: "userFollowsChannel",
+  //   author: "automod",
+  //   authorUrl: "https://automod.sh",
+  //   authorIcon: `${hostUrl}/icons/modbot.png`,
+  //   allowMultiple: true,
+  //   category: "all",
+  //   friendlyName: "Follows Channel",
+  //   checkType: "user",
+  //   hidden: false,
+  //   invertable: false,
+  //   description: "Check if the user follows a channel",
+  //   args: {
+  //     channelSlug: {
+  //       type: "string",
+  //       friendlyName: "Channel ID",
+  //       placeholder: "dont-do-this",
+  //       required: true,
+  //       pattern: "/^[a-zA-Z0-9-]+$/",
+  //       description: "The id of the channel to check",
+  //     },
+  //   },
+  // },
 
   userFollowerCount: {
     name: "userFollowerCount",
@@ -911,7 +911,7 @@ export const ruleNames = [
   "holdsChannelFanToken",
   "userProfileContainsText",
   "userDisplayNameContainsText",
-  "userFollowsChannel",
+  // "userFollowsChannel",
   "userFollowerCount",
   "userDoesNotFollow",
   "userIsNotFollowedBy",
@@ -1002,22 +1002,22 @@ export const RuleSchema: z.ZodType<Rule> = BaseRuleSchema.extend({
       message: "Your channel doesn't have a Fan Token yet. Contact /airstack",
     }
   )
-  .refine(
-    async (data) => {
-      if (data.name === "userFollowsChannel") {
-        const channel = await getWarpcastChannel({ channel: data.args.channelSlug }).catch(() => null);
+  // .refine(
+  //   async (data) => {
+  //     if (data.name === "userFollowsChannel") {
+  //       const channel = await getWarpcastChannel({ channel: data.args.channelSlug }).catch(() => null);
 
-        if (!channel) {
-          return false;
-        }
-      }
+  //       if (!channel) {
+  //         return false;
+  //       }
+  //     }
 
-      return true;
-    },
-    {
-      message: `Couldn't find that channel. Sure you got it right?`,
-    }
-  )
+  //     return true;
+  //   },
+  //   {
+  //     message: `Couldn't find that channel. Sure you got it right?`,
+  //   }
+  // )
   .refine(
     async (data) => {
       if (data.name === "requiresErc721") {
@@ -1155,7 +1155,7 @@ export const ruleFunctions: Record<RuleName, CheckFunction> = {
   userDoesNotFollow: userFollows,
   userIsNotFollowedBy: userFollowedBy,
   userDisplayNameContainsText: userDisplayNameContainsText,
-  userFollowsChannel: userFollowsChannel,
+  // userFollowsChannel: userFollowsChannel,
   userFollowerCount: userFollowerCount,
   userDoesNotHoldPowerBadge: userHoldsPowerBadge,
   userFidInList: userFidInList,
@@ -1269,16 +1269,7 @@ export async function airstackSocialCapitalRank(args: CheckFunctionArgs) {
 export async function subscribesOnParagraph(args: CheckFunctionArgs) {
   const { user, rule } = args;
   const { farcasterUser } = rule.args as { farcasterUser: { value: number; label: string; icon: string } };
-
-  const isSubbed = await getSetCache({
-    key: `paragraph-subscribers:${farcasterUser.value}:${user.fid}`,
-    ttlSeconds: 60 * 5,
-    get: async () => {
-      const rsp = await neynar.fetchSubscribersForFid(farcasterUser.value, "paragraph");
-      const isSubbed = rsp.subscribers?.some((s) => s.user.fid === user.fid) || false;
-      return isSubbed;
-    },
-  });
+  const isSubbed = await checkSubscribesOnParagraph({ fid: user.fid, value: farcasterUser.value });
 
   return {
     result: isSubbed,
@@ -1317,16 +1308,11 @@ export async function holdsChannelFanToken(args: CheckFunctionArgs) {
 
   const cacheKey = `erc20-balance:${contractAddress}:${minBalance}:${authorAddresses.join(",")}`;
 
-  const { result: hasEnough } = await getSetCache({
-    key: cacheKey,
-    get: async () =>
-      verifyErc20Balance({
-        wallets: authorAddresses,
-        chainId: String(base.id),
-        contractAddress,
-        minBalanceRequired: minBalance,
-      }),
-    ttlSeconds: 60 * 60 * 2,
+  const { result: hasEnough } = await verifyErc20Balance({
+    wallets: authorAddresses,
+    chainId: String(base.id),
+    contractAddress,
+    minBalanceRequired: minBalance,
   });
 
   return {
@@ -1374,7 +1360,7 @@ export async function holdsFanToken(args: CheckFunctionArgs) {
 export async function userFollowsChannel(args: CheckFunctionArgs) {
   const { user, rule } = args;
   const { channelSlug } = rule.args;
-  
+
   const follows = await isFollowingChannel({ channel: channelSlug, fid: user.fid });
 
   return {
@@ -1449,22 +1435,14 @@ export async function userFollowedBy(args: CheckFunctionArgs) {
     };
   }
 
-  const followingStatus = await getSetCache({
-    key: `followedby:${users
-      .map((u) => u.value)
-      .sort()
-      .join(":")}:${user.fid}`,
-    ttlSeconds: 60,
-    get: () =>
-      neynar
-        .fetchBulkUsers(
-          users.map((u) => u.value),
-          {
-            viewerFid: user.fid,
-          }
-        )
-        .then((rsp) => rsp.users),
-  });
+  const followingStatus = await neynar
+    .fetchBulkUsers(
+      users.map((u) => u.value),
+      {
+        viewerFid: user.fid,
+      }
+    )
+    .then((rsp) => rsp.users);
 
   const isFollowing = followingStatus.find((f) => f.viewer_context?.followed_by);
 
@@ -1495,26 +1473,18 @@ export async function userFollows(args: CheckFunctionArgs) {
     };
   }
 
-  const followingStatus = await getSetCache({
-    key: `follows:${users
-      .map((u) => u.value)
-      .sort()
-      .join(":")}:${user.fid}`,
-    ttlSeconds: 60,
-    get: () =>
-      neynar
-        .fetchBulkUsers(
-          users.map((u) => u.value),
-          {
-            viewerFid: user.fid,
-          }
-        )
-        .catch((err) => {
-          console.error(err);
-          return Promise.reject(err);
-        })
-        .then((rsp) => rsp.users),
-  });
+  const followingStatus = await neynar
+    .fetchBulkUsers(
+      users.map((u) => u.value),
+      {
+        viewerFid: user.fid,
+      }
+    )
+    .catch((err) => {
+      console.error(err);
+      return Promise.reject(err);
+    })
+    .then((rsp) => rsp.users);
 
   const isFollowing = followingStatus.find((f) => f.viewer_context?.following);
   return {
@@ -1775,16 +1745,11 @@ export async function holdsErc20(args: CheckFunctionArgs) {
     `,`
   )}`;
 
-  const { result: hasEnough } = await getSetCache({
-    key: cacheKey,
-    get: async () =>
-      verifyErc20Balance({
-        wallets: [user.custody_address, ...user.verifications],
-        chainId,
-        contractAddress,
-        minBalanceRequired: minBalance,
-      }),
-    ttlSeconds: 60 * 60 * 2,
+  const { result: hasEnough } = await verifyErc20Balance({
+    wallets: [user.custody_address, ...user.verifications],
+    chainId,
+    contractAddress,
+    minBalanceRequired: minBalance,
   });
 
   return {

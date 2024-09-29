@@ -56,6 +56,7 @@ export default function Screen() {
 
   useEffect(() => {
     const interval = setInterval(() => {
+      // TODO check here
       axios.get(`${env.hostUrl}/api/warpcast/channels/${channel.id}`).then((rsp) => {
         const updatedWcChannel = rsp.data.result.channel;
         if (updatedWcChannel.moderatorFid === modbotFid) {
@@ -75,14 +76,14 @@ export default function Screen() {
       <Card>
         <CardHeader>
           <ChannelHeader channel={channel} />
-          <CardTitle>Set the moderator to automod</CardTitle>
+          <CardTitle>Add modbot as moderator</CardTitle>
         </CardHeader>
         <CardContent>
           {fidSet ? (
             <Alert>
               <CheckIcon className="w-4 h-4 inline mr-1" />
               <AlertTitle>Success!</AlertTitle>
-              <AlertDescription>Automod is now set as your channel's moderator.</AlertDescription>
+              <AlertDescription>Modbot is now set as your channel's moderator.</AlertDescription>
             </Alert>
           ) : (
             <div className="flex flex-col gap-4">
@@ -93,12 +94,12 @@ export default function Screen() {
                     {copied ? (
                       <>
                         <Check className="w-3 h-3 inline mr-1" />
-                        automod
+                        modbot
                       </>
                     ) : (
                       <>
                         <CopyIcon className="w-3 h-3 inline mr-1" />
-                        automod
+                        modbot
                       </>
                     )}
                   </Button>{" "}
@@ -114,7 +115,7 @@ export default function Screen() {
                   >
                     /{channel.id}
                   </a>{" "}
-                  and set the moderator to automod.
+                  and set the moderator to modbot.
                 </li>
                 <li>Come back here.</li>
               </ol>

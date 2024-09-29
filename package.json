@@ -11,7 +11,7 @@
     "bullboard": "tsx bullboard/index.ts",
     "test": "exit 0",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
-    "start": "remix-serve ./build/index.js",
+    "start": "PORT=3009 remix-serve ./build/index.js",
     "typecheck": "tsc"
   },
   "dependencies": {
@@ -102,7 +102,6 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@flydotio/dockerfile": "^0.5.0",
     "@remix-run/dev": "^2.5.0",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",

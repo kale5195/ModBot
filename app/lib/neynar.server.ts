@@ -106,6 +106,11 @@ export async function unregisterWebhook({ rootParentUrl }: { rootParentUrl: stri
   );
 }
 
+export async function checkSubscribesOnParagraph({ fid, value }: { fid: number; value: number }) {
+  const rsp = await neynar.fetchSubscribersForFid(value, "paragraph");
+  return rsp.subscribers?.some((s) => s.user.fid === fid) || false;
+}
+
 export async function inviteToChannel({ channelId, fid }: { channelId: string; fid: number }) {
   const res = await axios.post(
     `https://api.neynar.com/v2/farcaster/channel/member/invite`,

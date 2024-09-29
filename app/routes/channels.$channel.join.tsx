@@ -4,11 +4,11 @@ import { frameResponse, getSharedEnv, parseMessage } from "~/lib/utils.server";
 import invariant from "tiny-invariant";
 import { validateCast } from "~/lib/automod.server";
 import { User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
-import { isChannelInvited } from "~/lib/warpcast.server";
+import { isChannelInvited, isFollowingChannel } from "~/lib/warpcast.server";
 
 function getFrameImageUrl(props: { message: string; channel?: string }) {
   const { message, channel } = props;
-  return `${getSharedEnv().hostUrl}/api/images?message=${message}&channel=${channel}`;
+  return `${getSharedEnv().hostUrl}/api/images?message=${message}${channel ? `&channel=${channel}` : ""}`;
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -41,9 +41,32 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const data = await request.json();
     const message = await parseMessage(data);
     const user = message.action.interactor as User;
+    // TODO may need async check, queue
     // rate limit
-    // check if invited
     // check if a member
+    // check if followed
+    const isFollowed = await isFollowingChannel({ channel: channelId, fid: user.fid });
+    if (!isFollowed) {
+      return frameResponse({
+        title: `Join ${channelId}`,
+        description: "Join the channel through ModBot.",
+        image: getFrameImageUrl({
+          message: `Please follow /${channelId} first`,
+          channel: channelId,
+        }),
+        buttons: [
+          {
+            text: "Follow Channel",
+            link: `https://warpcast.com/~/channel/${channelId}`,
+          },
+          {
+            text: "Try again",
+          },
+        ],
+      });
+    }
+
+    // check if invited
     const isInvited = await isChannelInvited({ channel: channelId, fid: user.fid });
 
     if (isInvited) {
