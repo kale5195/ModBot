@@ -1,14 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { detect } from "tinyld";
 import * as Sentry from "@sentry/remix";
-import mimeType from "mime-types";
-import RE2 from "re2";
 import { z } from "zod";
-import { getWarpcastChannel, getWarpcastChannelOwner, isFollowingChannel } from "./warpcast.server";
+import { getWarpcastChannelOwner, isFollowingChannel } from "./warpcast.server";
 import { ModeratedChannel } from "@prisma/client";
 import { checkSubscribesOnParagraph, inviteToChannel, neynar } from "./neynar.server";
-import emojiRegex from "emoji-regex";
 import { clientsByChainId, hamChain } from "./viem.server";
 import { erc20Abi, erc721Abi, getAddress, getContract, parseUnits } from "viem";
 import {
@@ -19,9 +15,7 @@ import {
   validateErc20,
   validateErc721,
 } from "./utils.server";
-import { WebhookCast } from "./types";
 import { erc1155Abi, hypersubAbi721 } from "./abis";
-import { languages } from "./languages";
 import { chainIdToChainName, nftsByWallets } from "./simplehash.server";
 import { db } from "./db.server";
 import { Cast, CastId, User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
@@ -31,7 +25,6 @@ import {
   getVestingContractsForAddresses,
   searchChannelFanToken,
   farRank,
-  userFollowsChannel as airstackUserFollowsChannel,
 } from "./airstack.server";
 import { hideQuietly, mute, addToBypass, downvote, cooldown, grantRole, ban, unlike } from "./automod.server";
 import { PlanType } from "~/lib/utils";

@@ -63,6 +63,14 @@ export async function isFollowingChannel(props: { channel: string; fid: number }
   return rsp.data.result.following;
 }
 
+export async function isChannelMember(props: { channel: string; fid: number }) {
+  const { channel, fid } = props;
+  const rsp = await http.get<{ result: { members: Array<{ fid: number }> } }>(
+    `https://api.warpcast.com/fc/channel-members?fid=${fid}&channelId=${channel}`
+  );
+  return rsp.data.result.members.length > 0;
+}
+
 export async function getOwnedChannels(props: { fid: number }) {
   const channels = await getWarpcastChannels();
   return channels.filter((c) => c.leadFid === props.fid);
