@@ -21,11 +21,7 @@ import { db } from "./db.server";
 import { Cast, CastId, User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import axios, { AxiosError } from "axios";
 import { base, polygon } from "viem/chains";
-import {
-  getVestingContractsForAddresses,
-  searchChannelFanToken,
-  farRank,
-} from "./airstack.server";
+import { getVestingContractsForAddresses, searchChannelFanToken, farRank } from "./airstack.server";
 import { hideQuietly, mute, addToBypass, downvote, cooldown, grantRole, ban, unlike } from "./automod.server";
 import { PlanType } from "~/lib/utils";
 
@@ -1236,11 +1232,7 @@ export async function airstackSocialCapitalRank(args: CheckFunctionArgs) {
   const { user, rule } = args;
   const { minRank } = rule.args as { minRank: number };
 
-  const rank = await getSetCache({
-    key: `airstack-social-capital-rank:${user.fid}`,
-    ttlSeconds: 60 * 60 * 24,
-    get: () => farRank({ fid: user.fid }).then((res) => (res === null ? Infinity : res)),
-  });
+  const rank = await farRank({ fid: user.fid }).then((res) => (res === null ? Infinity : res));
 
   if (rank === Infinity) {
     console.error(`User's FarRank is not available: ${user.fid}`);
@@ -1587,12 +1579,7 @@ export async function holdsActiveHypersub(args: CheckFunctionArgs) {
   });
 
   for (const address of [user.custody_address, ...user.verifications]) {
-    const balance = await getSetCache({
-      key: `hypersub:${contractAddress}:${address}`,
-      get: () => contract.read.balanceOf([getAddress(address)]),
-      ttlSeconds: 60 * 60 * 2,
-    });
-
+    const balance = await contract.read.balanceOf([getAddress(address)]);
     if (balance > 0) {
       isSubscribed = true;
       break;

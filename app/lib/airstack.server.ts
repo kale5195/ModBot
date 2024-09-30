@@ -291,13 +291,6 @@ export async function migrateModerationConfig(props: { userId: string; config: C
       }
 
       case "FOLLOWS_CHANNEL": {
-        inclusionConditions.push({
-          name: "userFollowsChannel",
-          type: "CONDITION",
-          args: {
-            channelSlug: config.channelId,
-          },
-        });
         break;
       }
 

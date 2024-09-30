@@ -149,7 +149,7 @@ export default function Home() {
                 Put your channel on autopilot.
               </h1>
               <p className="text-white/80 text-md sm:text-xl mt-2 max-w-2xl mx-auto">
-                Choose from 25+ composable rules to automatically curate great people in your channel.
+                Choose from 25+ composable rules to automatically invite great people to your channel.
               </p>
             </div>
 
@@ -212,7 +212,7 @@ export default function Home() {
           </section>
         </div>
 
-        <div className="p-7 sm:px-12">
+        {/* <div className="p-7 sm:px-12">
           <video
             autoPlay
             loop
@@ -221,7 +221,7 @@ export default function Home() {
             className="w-full max-w-3xl mx-auto h-full object-cover border-slate-700/80 border-[10px] rounded-[20px] shadow-lg"
             src="/videos/automod-demo-complete.mp4"
           />
-        </div>
+        </div> */}
 
         {/* features */}
         <div className="p-7 pt-8 pb-24 sm:px-12">
@@ -297,6 +297,9 @@ export default function Home() {
               </Link>
               <Link to="/tos" className="text-white/40 no-underline">
                 Terms
+              </Link>
+              <Link to="https://github.com/kale5195/automod" className="text-white/40 no-underline">
+                Github
               </Link>
             </p>
             <p style={{ fontFamily: "Kode Mono" }} className="text-white/20">
