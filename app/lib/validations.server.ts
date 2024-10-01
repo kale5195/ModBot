@@ -21,7 +21,12 @@ import { db } from "./db.server";
 import { Cast, CastId, User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import axios, { AxiosError } from "axios";
 import { base, polygon } from "viem/chains";
-import { getVestingContractsForAddresses, searchChannelFanToken, farRank } from "./airstack.server";
+import {
+  getVestingContractsForAddresses,
+  searchChannelFanToken,
+  farRank,
+  holdingFanTokenBalance,
+} from "./airstack.server";
 import { hideQuietly, mute, addToBypass, downvote, cooldown, grantRole, ban, unlike } from "./automod.server";
 import { PlanType } from "~/lib/utils";
 
@@ -973,6 +978,7 @@ export const RuleSchema: z.ZodType<Rule> = BaseRuleSchema.extend({
         args: {
           ...data.args,
           contractAddress: contractAddress?.id,
+          symbol: contractAddress?.symbol,
         },
       };
     }
@@ -1279,26 +1285,9 @@ export function userProfileContainsText(args: CheckFunctionArgs) {
 
 export async function holdsChannelFanToken(args: CheckFunctionArgs) {
   const { user, rule, channel } = args;
-  const { contractAddress, minBalance } = rule.args;
-
-  const authorAddresses = [user.custody_address, ...user.verifications];
-
-  const vestingContracts = await getSetCache({
-    key: `vesting-contract-address:${user.fid}`,
-    get: async () => getVestingContractsForAddresses({ addresses: authorAddresses }),
-    ttlSeconds: 60 * 60,
-  });
-
-  authorAddresses.push(...vestingContracts.tokenLockWallets.map((w) => w.id));
-
-  const cacheKey = `erc20-balance:${contractAddress}:${minBalance}:${authorAddresses.join(",")}`;
-
-  const { result: hasEnough } = await verifyErc20Balance({
-    wallets: authorAddresses,
-    chainId: String(base.id),
-    contractAddress,
-    minBalanceRequired: minBalance,
-  });
+  const { contractAddress, minBalance, symbol } = rule.args;
+  const balance = await holdingFanTokenBalance({ fid: user.fid, symbol });
+  const hasEnough = balance >= minBalance;
 
   return {
     result: hasEnough,
@@ -1310,32 +1299,11 @@ export async function holdsFanToken(args: CheckFunctionArgs) {
   const { user, rule } = args;
   const {
     minBalance,
-    fanToken: { value: contractAddress, label },
+    fanToken: { value: contractAddress, label, symbol },
   } = rule.args;
 
-  const authorAddresses = [user.custody_address, ...user.verifications];
-
-  const vestingContracts = await getSetCache({
-    key: `vesting-contract-address:${user.fid}`,
-    get: async () => getVestingContractsForAddresses({ addresses: authorAddresses }),
-    ttlSeconds: 60 * 60,
-  });
-
-  authorAddresses.push(...vestingContracts.tokenLockWallets.map((w) => w.id));
-
-  const cacheKey = `erc20-balance:${contractAddress}:${minBalance}:${authorAddresses.join(",")}`;
-  const { result: hasEnough } = await getSetCache({
-    key: cacheKey,
-    get: async () =>
-      verifyErc20Balance({
-        wallets: authorAddresses,
-        chainId: String(base.id),
-        contractAddress,
-        minBalanceRequired: minBalance,
-      }),
-    ttlSeconds: 60 * 60 * 2,
-  });
-
+  const balance = await holdingFanTokenBalance({ fid: user.fid, symbol });
+  const hasEnough = balance >= minBalance;
   return {
     result: hasEnough,
     message: hasEnough ? `User holds @${label}'s Fan Token` : `User does not hold enough of @${label}'s Fan Token`,

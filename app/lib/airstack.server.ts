@@ -93,6 +93,30 @@ export async function userFollowsChannel(props: { fid: number; channelId: string
   return !!data.FarcasterChannelParticipants?.FarcasterChannelParticipant;
 }
 
+export async function holdingFanTokenBalance({ fid, symbol }: { fid: number; symbol: string }) {
+  const query = gql`
+    query GetPortfolioInfo {
+      MoxieUserPortfolios(
+        input: { filter: { walletAddress: {}, fanTokenSymbol: { _eq: "${symbol}" }, fid: { _eq: "${fid}" } } }
+      ) {
+        MoxieUserPortfolio {
+          totalUnlockedAmount
+          totalLockedAmount
+        }
+      }
+    }
+  `;
+
+  const { data } = await fetchQuery(query);
+  if (!data?.MoxieUserPortfolios?.MoxieUserPortfolio) {
+    return 0;
+  }
+  const unlocked = Number(data.MoxieUserPortfolios.MoxieUserPortfolio[0].totalUnlockedAmount);
+  const locked = Number(data.MoxieUserPortfolios.MoxieUserPortfolio[0].totalLockedAmount);
+  const total = (unlocked + locked) / Math.pow(10, 18);
+  return total;
+}
+
 export async function farRank(props: { fid: number }) {
   const query = gql`
     query MyQuery {

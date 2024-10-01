@@ -22,6 +22,7 @@ export function MoxieMemberPicker(props: { name: string; isMulti: boolean; requi
             const options = res.data.subjectTokens.map((token) => ({
               value: token.id,
               label: token.name,
+              symbol: token.symbol,
               icon: token.pfpUrl || "/icons/moxie.png",
             }));
             callback(options);
