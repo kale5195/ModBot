@@ -108,22 +108,22 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function Home() {
   const { user, env, error, activeChannels } = useTypedLoaderData<typeof loader>();
-  const coin = useRef<HTMLAudioElement>();
+  // const coin = useRef<HTMLAudioElement>();
 
-  useEffect(() => {
-    if (!coin.current) {
-      coin.current = new Audio("/1up.wav");
-    }
-    const audio = coin.current;
-    audio.preload = "auto";
-    audio.load();
-  }, []);
+  // useEffect(() => {
+  //   if (!coin.current) {
+  //     coin.current = new Audio("/1up.wav");
+  //   }
+  //   const audio = coin.current;
+  //   audio.preload = "auto";
+  //   audio.load();
+  // }, []);
 
-  const playSound = () => {
-    // Clone the audio node and play it
-    const audioClone = coin.current?.cloneNode() as HTMLAudioElement;
-    audioClone.play().catch((error) => console.error("Error playing the sound:", error));
-  };
+  // const playSound = () => {
+  //   // Clone the audio node and play it
+  //   const audioClone = coin.current?.cloneNode() as HTMLAudioElement;
+  //   audioClone.play().catch((error) => console.error("Error playing the sound:", error));
+  // };
 
   return (
     <main
@@ -149,7 +149,7 @@ export default function Home() {
                 Put your channel on autopilot.
               </h1>
               <p className="text-white/80 text-md sm:text-xl mt-2 max-w-2xl mx-auto">
-                Choose from 25+ composable rules to automatically invite great people to your channel.
+                Choose from 20+ composable rules to automatically invite great people to your channel.
               </p>
             </div>
 
@@ -235,18 +235,18 @@ export default function Home() {
               <FeatureCard
                 Icon={Bot}
                 title="Fully customizable moderation rules"
-                description="25+ composable rules to automatically filter out and promote meaningful content in your channel."
+                description="20+ composable rules to automatically filter out and promote meaningful content in your channel."
               />
-              <FeatureCard
+              {/* <FeatureCard
                 Icon={Users}
                 title="Team based moderation"
                 description="Distribute work between teammates and community members with Moderation Roles."
-              />
-              <FeatureCard
+              /> */}
+              {/* <FeatureCard
                 Icon={MagicWandIcon}
                 title="Moderate directly in Warpcast"
                 description="Use cast actions to ban, hide, curate, or whitelist any account, directly in Warpcast."
-              />
+              /> */}
               <FeatureCard
                 Icon={Plug}
                 title="Farcaster native integrations"
@@ -269,9 +269,9 @@ export default function Home() {
               />
             </div>
           </div>
-          <div className="pt-16">
+          {/* <div className="pt-16">
             <LoginButton user={user} error={error} env={env} />
-          </div>
+          </div> */}
         </div>
 
         {/* <div className="py-7 max-w-5xl mx-auto">
@@ -287,7 +287,7 @@ export default function Home() {
               "radial-gradient( circle farthest-corner at 10% 20%,  rgba(10,3,32,0.87) 20.8%, rgba(10,10,35,0.84) 74.4% )",
           }}
         >
-          <div className="max-w-5xl mx-auto flex justify-between">
+          <div className="max-w-5xl mx-auto flex justify-between flex-col gap-4 sm:flex-row">
             <p className="flex items-center gap-4">
               {/* <Link to="/disclosure" className="text-white/40 no-underline">
                 Disclosure
