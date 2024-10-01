@@ -77,13 +77,7 @@ export async function requireUser({ request }: { request: Request }) {
   return refreshedUser;
 }
 
-export async function requireSuperAdmin({
-  request,
-  failureRedirect,
-}: {
-  request: Request;
-  failureRedirect?: string;
-}) {
+export async function requireSuperAdmin({ request, failureRedirect }: { request: Request; failureRedirect?: string }) {
   const user = await authenticator.isAuthenticated(request, {
     failureRedirect: failureRedirect || `/`,
   });
@@ -99,10 +93,7 @@ export async function requireValidSignature(props: {
   sharedSecret: string;
   incomingSignature: string;
 }) {
-  const computedSignature = crypto
-    .createHmac("sha512", props.sharedSecret)
-    .update(props.payload)
-    .digest("hex");
+  const computedSignature = crypto.createHmac("sha512", props.sharedSecret).update(props.payload).digest("hex");
 
   const isValid = computedSignature === props.incomingSignature;
 
@@ -272,9 +263,10 @@ export async function parseMessageWithAirstack(payload: any) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: process.env.AIRSTACK_API_KEY!, 
+      Authorization: process.env.AIRSTACK_API_KEY!,
     },
-    body: JSON.stringify({ query: `query MyQuery(
+    body: JSON.stringify({
+      query: `query MyQuery(
   $messageBytes: String!
 ) {
   FarcasterValidateFrameMessage(
@@ -287,9 +279,11 @@ export async function parseMessageWithAirstack(payload: any) {
       }
     }
   }
-}`, variables: { messageBytes: payload.trustedData.messageBytes } }),
+}`,
+      variables: { messageBytes: payload.trustedData.messageBytes },
+    }),
   });
-  const jsonRes = await res.json() as {
+  const jsonRes = (await res.json()) as {
     data: {
       FarcasterValidateFrameMessage: {
         isValid: boolean;
@@ -409,11 +403,7 @@ export async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function validateErc1155(props: {
-  chainId?: string;
-  contractAddress?: string;
-  tokenId?: string;
-}) {
+export async function validateErc1155(props: { chainId?: string; contractAddress?: string; tokenId?: string }) {
   if (!props.chainId || !props.contractAddress) {
     return false;
   }
@@ -435,9 +425,7 @@ export async function validateErc1155(props: {
     client,
   });
 
-  const supportsInterface = await contract.read
-    .supportsInterface(["0xd9b67a26" as `0x${string}`])
-    .catch(() => false);
+  const supportsInterface = await contract.read.supportsInterface(["0xd9b67a26" as `0x${string}`]).catch(() => false);
 
   return supportsInterface;
 }
@@ -469,20 +457,12 @@ export async function validateErc721(props: { chainId?: string; contractAddress?
     client,
   });
 
-  const supportsInterface = await contract.read
-    .supportsInterface(["0x80ac58cd" as `0x${string}`])
-    .catch(() => false);
+  const supportsInterface = await contract.read.supportsInterface(["0x80ac58cd" as `0x${string}`]).catch(() => false);
 
   return supportsInterface;
 }
 
-export async function validateErc20({
-  chainId,
-  contractAddress,
-}: {
-  chainId?: string;
-  contractAddress?: string;
-}) {
+export async function validateErc20({ chainId, contractAddress }: { chainId?: string; contractAddress?: string }) {
   if (!chainId || !contractAddress) {
     return false;
   }
@@ -524,11 +504,7 @@ export function isWarpcastCastUrl(value: string): boolean {
   return value.match(/https:\/\/warpcast.com\/[a-zA-Z0-9]+\/0x[a-fA-F0-9]{8}/) !== null;
 }
 
-export async function getSetCache<T>(props: {
-  key: string;
-  ttlSeconds?: number;
-  get: () => Promise<T>;
-}): Promise<T> {
+export async function getSetCache<T>(props: { key: string; ttlSeconds?: number; get: () => Promise<T> }): Promise<T> {
   const { key, ttlSeconds, get: get } = props;
   const cachedValue = await cache.get<T>(key);
 

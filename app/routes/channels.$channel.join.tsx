@@ -4,7 +4,7 @@ import { frameResponse, getSharedEnv, parseMessage } from "~/lib/utils.server";
 import invariant from "tiny-invariant";
 import { validateCast } from "~/lib/automod.server";
 import { User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
-import { isChannelInvited, isChannelMember, isFollowingChannel } from "~/lib/warpcast.server";
+import { isBannedByChannel, isChannelInvited, isChannelMember, isFollowingChannel } from "~/lib/warpcast.server";
 
 function getFrameImageUrl(props: { message: string; channel?: string }) {
   const { message, channel } = props;
@@ -15,6 +15,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
   invariant(params.channel, "channel id is required");
   const channelId = params.channel;
   try {
+    const data = await request.json();
+    // TODO may need async check, queue
+    // TODO rate limit
     const channel = await db.moderatedChannel.findFirst({
       where: {
         id: channelId,
@@ -38,11 +41,26 @@ export async function action({ request, params }: ActionFunctionArgs) {
         ],
       });
     }
-    const data = await request.json();
     const message = await parseMessage(data);
     const user = message.action.interactor as User;
-    // TODO may need async check, queue
-    // rate limit
+    // TODO check if banned by channel
+    const isBanned = await isBannedByChannel({ channel: channelId, fid: user.fid });
+    if (isBanned) {
+      return frameResponse({
+        title: `Join ${channelId}`,
+        description: `You are banned from /${channelId}`,
+        image: getFrameImageUrl({
+          message: `You are banned from /${channelId}`,
+          channel: channelId,
+        }),
+        buttons: [
+          {
+            text: "Go to channel",
+            link: `https://warpcast.com/~/channel/${channelId}`,
+          },
+        ],
+      });
+    }
     // check if a member
     const isMember = await isChannelMember({ channel: channelId, fid: user.fid });
     if (isMember) {
@@ -61,9 +79,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
         ],
       });
     }
-    // check if followed
-    const isFollowed = await isFollowingChannel({ channel: channelId, fid: user.fid });
-    if (!isFollowed) {
+    // check if following
+    const isFollowing = await isFollowingChannel({ channel: channelId, fid: user.fid });
+    if (!isFollowing) {
       return frameResponse({
         title: `Join ${channelId}`,
         description: "Join the channel through ModBot.",
@@ -133,8 +151,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
                 text: "Try again",
               },
               {
-                text: "Check rules",
-                link: `${getSharedEnv().hostUrl}/channels/${channelId}`,
+                text: "Check Reasons",
+                link: `${getSharedEnv().hostUrl}/channels/${channelId}?fid=${user.fid}`,
               },
             ],
     });

@@ -70,6 +70,13 @@ export async function isChannelMember(props: { channel: string; fid: number }) {
   );
   return rsp.data.result.members.length > 0;
 }
+export async function isBannedByChannel(props: { channel: string; fid: number }) {
+  const { channel, fid } = props;
+  const rsp = await http.get<{ result: { bannedUsers: Array<{ fid: number }> } }>(
+    `https://api.warpcast.com/fc/channel-banned-users?fid=${fid}&channelId=${channel}`
+  );
+  return rsp.data.result.bannedUsers.length > 0;
+}
 
 export async function getOwnedChannels(props: { fid: number }) {
   const channels = await getWarpcastChannels();
