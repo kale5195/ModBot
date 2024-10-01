@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { db } from "~/lib/db.server";
-import { frameResponse, getSharedEnv, parseMessage } from "~/lib/utils.server";
+import { frameResponse, getSetCache, getSharedEnv, parseMessage } from "~/lib/utils.server";
 import invariant from "tiny-invariant";
 import { validateCast } from "~/lib/automod.server";
 import { User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
@@ -11,13 +11,27 @@ function getFrameImageUrl(props: { message: string; channel?: string }) {
   return `${getSharedEnv().hostUrl}/api/images?message=${message}${channel ? `&channel=${channel}` : ""}`;
 }
 
+async function rateLimit(key: string): Promise<boolean> {
+  const cacheKey = `ratelimit:${key}`;
+  const now = Date.now();
+  const ttlSeconds = 30;
+  return getSetCache({
+    key: cacheKey,
+    ttlSeconds,
+    get: async () => now,
+  }).then((lastActionTime) => {
+    const diff = now - lastActionTime;
+    // console.log("diff", diff);
+    return diff <= ttlSeconds * 1000 && diff > 0;
+  });
+}
+
 export async function action({ request, params }: ActionFunctionArgs) {
   invariant(params.channel, "channel id is required");
   const channelId = params.channel;
   try {
     const data = await request.json();
     // TODO may need async check, queue
-    // TODO rate limit
     const channel = await db.moderatedChannel.findFirst({
       where: {
         id: channelId,
@@ -43,42 +57,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }
     const message = await parseMessage(data);
     const user = message.action.interactor as User;
-    // TODO check if banned by channel
-    const isBanned = await isBannedByChannel({ channel: channelId, fid: user.fid });
-    if (isBanned) {
-      return frameResponse({
-        title: `Join ${channelId}`,
-        description: `You are banned from /${channelId}`,
-        image: getFrameImageUrl({
-          message: `You are banned from /${channelId}`,
-          channel: channelId,
-        }),
-        buttons: [
-          {
-            text: "Go to channel",
-            link: `https://warpcast.com/~/channel/${channelId}`,
-          },
-        ],
-      });
-    }
-    // check if a member
-    const isMember = await isChannelMember({ channel: channelId, fid: user.fid });
-    if (isMember) {
-      return frameResponse({
-        title: `Join ${channelId}`,
-        description: `You are already a member of /${channelId}`,
-        image: getFrameImageUrl({
-          message: `You are already a member of /${channelId}`,
-          channel: channelId,
-        }),
-        buttons: [
-          {
-            text: "Go to channel",
-            link: `https://warpcast.com/~/channel/${channelId}`,
-          },
-        ],
-      });
-    }
     // check if following
     const isFollowing = await isFollowingChannel({ channel: channelId, fid: user.fid });
     if (!isFollowing) {
@@ -101,6 +79,25 @@ export async function action({ request, params }: ActionFunctionArgs) {
       });
     }
 
+    // check if a member
+    const isMember = await isChannelMember({ channel: channelId, fid: user.fid });
+    if (isMember) {
+      return frameResponse({
+        title: `Join ${channelId}`,
+        description: `You are already a member of /${channelId}`,
+        image: getFrameImageUrl({
+          message: `You are already a member of /${channelId}`,
+          channel: channelId,
+        }),
+        buttons: [
+          {
+            text: "Go to channel",
+            link: `https://warpcast.com/~/channel/${channelId}`,
+          },
+        ],
+      });
+    }
+
     // check if invited
     const isInvited = await isChannelInvited({ channel: channelId, fid: user.fid });
 
@@ -116,6 +113,41 @@ export async function action({ request, params }: ActionFunctionArgs) {
           {
             text: "Accept Invite",
             link: `https://warpcast.com/~/notifications`,
+          },
+        ],
+      });
+    }
+    // rate limit
+    const isRateLimited = await rateLimit(`join:${channelId}:${user.fid}`);
+    if (isRateLimited) {
+      return frameResponse({
+        title: `Join ${channelId}`,
+        description: "Too fast, try again later",
+        image: getFrameImageUrl({
+          message: "Too fast, try again later",
+          channel: channelId,
+        }),
+        buttons: [
+          {
+            text: "Try again",
+          },
+        ],
+      });
+    }
+    // check if banned by channel
+    const isBanned = await isBannedByChannel({ channel: channelId, fid: user.fid });
+    if (isBanned) {
+      return frameResponse({
+        title: `Join ${channelId}`,
+        description: `You are banned from /${channelId}`,
+        image: getFrameImageUrl({
+          message: `You are banned from /${channelId}`,
+          channel: channelId,
+        }),
+        buttons: [
+          {
+            text: "Go to channel",
+            link: `https://warpcast.com/~/channel/${channelId}`,
           },
         ],
       });
