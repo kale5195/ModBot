@@ -6,15 +6,7 @@ import { typedjson, useTypedLoaderData } from "remix-typedjson";
 import { Button, ButtonProps } from "~/components/ui/button";
 import { db } from "~/lib/db.server";
 import { requireUser, successResponse } from "~/lib/utils.server";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { ArrowUpRight, RefreshCwIcon, RocketIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -26,12 +18,16 @@ import { userPlans, PlanType, PlanDef } from "~/lib/utils";
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireUser({ request });
   const [usages, channels] = await Promise.all([
-    db.usage.findMany({
+    db.moderationLog.groupBy({
+      by: ["channelId"],
       where: {
-        userId: user.id,
+        channel: {
+          userId: user.id,
+        },
+        action: "like",
       },
-      orderBy: {
-        monthYear: "desc",
+      _count: {
+        affectedUserFid: true,
       },
     }),
     db.moderatedChannel.findMany({
@@ -69,11 +65,7 @@ export default function Screen() {
   const { user, usages, plans, channels } = useTypedLoaderData<typeof loader>();
 
   const plan = plans[user.plan as PlanType];
-  const currentMonthPretty = new Date().toLocaleString("default", { month: "long" });
-  const currentMonthYear = new Date().toISOString().substring(0, 7);
-  const currentMonthUsage = usages.filter((usage) => usage.monthYear.includes(currentMonthYear));
-  const currentMonthTotal = currentMonthUsage.reduce((acc, usage) => acc + usage.castsProcessed, 0);
-
+  const total = usages.reduce((acc, usage) => acc + usage._count.affectedUserFid, 0);
   return (
     <div>
       <section className="flex flex-col sm:flex-row gap-4">
@@ -99,12 +91,10 @@ export default function Screen() {
                     <TableCell>{plan.displayName}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>Casts Processed</TableCell>
+                    <TableCell>Members Invited</TableCell>
                     <TableCell>
-                      {abbreviateNumber(currentMonthTotal, 0)} /{" "}
-                      {plan.maxCasts === Infinity
-                        ? Infinity.toLocaleString()
-                        : abbreviateNumber(plan.maxCasts, 0)}
+                      {abbreviateNumber(total, 0)} /{" "}
+                      {plan.maxCasts === Infinity ? Infinity.toLocaleString() : abbreviateNumber(plan.maxCasts, 0)}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -138,36 +128,36 @@ export default function Screen() {
             </CardContent>
           </Card>
 
-          <UpgradePlanButton currentPlan={plan} plans={plans} />
+          {/* <UpgradePlanButton currentPlan={plan} plans={plans} /> */}
         </div>
 
         <Card className="flex-auto">
           <CardHeader>
-            <CardTitle>{currentMonthPretty} Usage</CardTitle>
-            <CardDescription>Casts processed by automod.</CardDescription>
+            <CardTitle>Usage</CardTitle>
+            <CardDescription>Members invited by ModBot.</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Channel</TableHead>
-                  <TableHead>Casts</TableHead>
+                  <TableHead>Members</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {currentMonthUsage.map((usage) => (
+                {usages.map((usage) => (
                   <TableRow key={usage.channelId}>
                     <TableCell className="font-medium" style={{ fontFamily: "Kode Mono" }}>
                       /{usage.channelId}
                     </TableCell>
-                    <TableCell>{usage.castsProcessed.toLocaleString()}</TableCell>
+                    <TableCell>{usage._count.affectedUserFid.toLocaleString()}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
               <TableFooter>
                 <TableRow>
                   <TableCell className="font-medium">Total</TableCell>
-                  <TableCell>{currentMonthTotal.toLocaleString()}</TableCell>
+                  <TableCell>{total.toLocaleString()}</TableCell>
                 </TableRow>
               </TableFooter>
             </Table>

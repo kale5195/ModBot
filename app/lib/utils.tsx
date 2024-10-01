@@ -127,12 +127,7 @@ export function actionToInstallLink(action: CastAction) {
   return wcUrl.toString();
 }
 
-export function grantRoleAction(role: {
-  id: string;
-  name: string;
-  channelId: string;
-  hostUrl: string;
-}): CastAction {
+export function grantRoleAction(role: { id: string; name: string; channelId: string; hostUrl: string }): CastAction {
   return {
     action: {
       type: "post",
@@ -166,23 +161,23 @@ export const userPlans = {
     price: "free",
     link: "",
     maxChannels: 3,
-    maxCasts: 3_000,
+    maxCasts: 25_000,
   },
   prime: {
     id: "prime",
     level: 1,
     displayName: "Prime",
     price: "$14.99/mo",
-    link: "https://hypersub.withfabric.xyz/s/automod/2",
+    link: "https://warpcast.com/haole",
     maxChannels: 6,
-    maxCasts: 25_000,
+    maxCasts: 50_000,
   },
   ultra: {
     id: "ultra",
     level: 2,
     displayName: "Ultra",
     price: "$39.99/mo",
-    link: "https://hypersub.withfabric.xyz/s/automod",
+    link: "https://warpcast.com/haole",
     maxChannels: Infinity,
     maxCasts: 250_000,
   },

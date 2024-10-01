@@ -21,17 +21,10 @@ import {
 import { Form, NavLink } from "@remix-run/react";
 import { actionDefinitions, like } from "~/lib/validations.server";
 import { Alert } from "~/components/ui/alert";
-import {
-  ArrowUpRight,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  MoreVerticalIcon,
-  SlidersHorizontalIcon,
-} from "lucide-react";
+import { ArrowUpRight, ChevronLeftIcon, ChevronRightIcon, MoreVerticalIcon, SlidersHorizontalIcon } from "lucide-react";
 import { z } from "zod";
 import { useLocalStorage } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
-import { getModerationStats30Days } from "~/lib/stats.server";
 import { unlike } from "~/lib/automod.server";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -63,15 +56,12 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     }),
   ]);
 
-  const stats = getModerationStats30Days({ channelId: channel.id });
-
   return typeddefer({
     user,
     channel,
     moderationLogs,
     actionDefinitions: actionDefinitions,
     env: getSharedEnv(),
-    stats,
 
     page,
     pageSize,
@@ -263,10 +253,7 @@ export default function Screen() {
           <div className="divide-y">
             {moderationLogs.map((log) => (
               <div key={log.id} className="flex flex-col md:flex-row gap-2 py-2">
-                <p
-                  className="text-xs w-[150px] text-gray-400 shrink-0 sm:shrink-1"
-                  title={log.createdAt.toISOString()}
-                >
+                <p className="text-xs w-[150px] text-gray-400 shrink-0 sm:shrink-1" title={log.createdAt.toISOString()}>
                   {log.createdAt.toLocaleString()}
                 </p>
                 <div className="flex gap-2 w-full items-start">
@@ -277,20 +264,13 @@ export default function Screen() {
                     rel="noreferrer"
                   >
                     <Avatar className="block w-11 h-11">
-                      <AvatarImage
-                        src={log.affectedUserAvatarUrl ?? undefined}
-                        alt={"@" + log.affectedUsername}
-                      />
+                      <AvatarImage src={log.affectedUserAvatarUrl ?? undefined} alt={"@" + log.affectedUsername} />
                       <AvatarFallback>{log.affectedUsername.slice(0, 2).toLocaleUpperCase()}</AvatarFallback>
                     </Avatar>
                   </a>
                   <div className="flex flex-col w-full">
                     <p className="font-semibold">
-                      <a
-                        href={`https://warpcast.com/${log.affectedUsername}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
+                      <a href={`https://warpcast.com/${log.affectedUsername}`} target="_blank" rel="noreferrer">
                         @{log.affectedUsername}
                       </a>
                     </p>
@@ -307,10 +287,7 @@ export default function Screen() {
                       <p>
                         <a
                           className="text-[8px] no-underline hover:underline uppercase tracking-wide"
-                          href={`https://warpcast.com/${log.affectedUsername}/${log.castHash.substring(
-                            0,
-                            10
-                          )}`}
+                          href={`https://warpcast.com/${log.affectedUsername}/${log.castHash.substring(0, 10)}`}
                           target="_blank"
                           rel="noreferrer"
                         >
@@ -361,11 +338,7 @@ export default function Screen() {
                           <Form method="post">
                             <input type="hidden" name="logId" value={log.id} />
                             <DropdownMenuItem>
-                              <button
-                                name="intent"
-                                value="unban"
-                                className="w-full h-full cursor-default text-left"
-                              >
+                              <button name="intent" value="unban" className="w-full h-full cursor-default text-left">
                                 Unban
                               </button>
                             </DropdownMenuItem>
@@ -375,11 +348,7 @@ export default function Screen() {
                           <Form method="post">
                             <input type="hidden" name="logId" value={log.id} />
                             <DropdownMenuItem>
-                              <button
-                                name="intent"
-                                value="like"
-                                className="w-full h-full cursor-default text-left"
-                              >
+                              <button name="intent" value="like" className="w-full h-full cursor-default text-left">
                                 Approve
                               </button>
                             </DropdownMenuItem>
@@ -393,20 +362,12 @@ export default function Screen() {
             ))}
           </div>
           <div className="mt-12 flex justify-between">
-            <Button
-              variant={"outline"}
-              size={"sm"}
-              className="no-underline"
-              disabled={prevPage === 0}
-              asChild
-            >
+            <Button variant={"outline"} size={"sm"} className="no-underline" disabled={prevPage === 0} asChild>
               <NavLink
                 preventScrollReset
                 to={`?page=${prevPage}&pageSize=${pageSize}`}
                 prefetch="intent"
-                className={`text-gray-500 ${
-                  prevPage === 0 ? "cursor-not-allowed pointer-events-none opacity-50" : ""
-                }`}
+                className={`text-gray-500 ${prevPage === 0 ? "cursor-not-allowed pointer-events-none opacity-50" : ""}`}
                 onClick={(e) => {
                   if (prevPage !== 0) {
                     document.getElementById("log-top")?.scrollIntoView({ behavior: "smooth" });
@@ -419,13 +380,7 @@ export default function Screen() {
                 Previous
               </NavLink>
             </Button>
-            <Button
-              variant={"outline"}
-              size={"sm"}
-              className="no-underline"
-              disabled={nextPage === null}
-              asChild
-            >
+            <Button variant={"outline"} size={"sm"} className="no-underline" disabled={nextPage === null} asChild>
               <NavLink
                 preventScrollReset
                 to={`?page=${nextPage}&pageSize=${pageSize}`}
@@ -474,10 +429,7 @@ const defaultPageSize = 50;
 function getPageInfo({ request }: { request: Request }) {
   const url = new URL(request.url);
   const page = Math.max(parseInt(url.searchParams.get("page") || "1"), 1);
-  const pageSize = Math.max(
-    Math.min(parseInt(url.searchParams.get("pageSize") || `${defaultPageSize}`), 100),
-    0
-  );
+  const pageSize = Math.max(Math.min(parseInt(url.searchParams.get("pageSize") || `${defaultPageSize}`), 100), 0);
   const skip = (page - 1) * pageSize;
 
   return {

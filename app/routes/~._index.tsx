@@ -190,34 +190,34 @@ export default function FrameConfig() {
                             <Link
                               target="_blank"
                               className="no-underline"
-                              to="https://hypersub.withfabric.xyz/s/automod/2"
+                              to="https://warpcast.com/haole"
                               rel="noreferrer"
                             >
-                              Prime (5 channels, 25k casts, and more)
+                              Prime (5 channels, 25k members, and more)
                             </Link>
                           </Button>
                           <Button asChild>
                             <Link
                               target="_blank"
                               className="no-underline"
-                              to="https://hypersub.withfabric.xyz/s/automod"
+                              to="https://warpcast.com/haole"
                               rel="noreferrer"
                             >
-                              Ultra (Unlimited Channels, 250k casts, and more)
+                              Ultra (Unlimited Channels, 250k members, and more)
                             </Link>
                           </Button>
                         </div>
                       ) : (
                         <p>
-                          Reach out to <a href="https://warpcast.com/jtgi">@jtgi</a> to upgrade
+                          Reach out to <a href="https://warpcast.com/haole">@haole</a> to upgrade
                         </p>
                       )}
                     </DialogHeader>
-                    <DialogFooter>
+                    {/* <DialogFooter>
                       <div className="flex justify-center text-sm border-t gap-2 items-center w-full pt-4">
                         <p>Already upgraded?</p> <RefreshAccountButton />
                       </div>
-                    </DialogFooter>
+                    </DialogFooter> */}
                   </DialogContent>
                 </Dialog>
               ) : (
