@@ -14,7 +14,7 @@ export type WarpcastChannel = {
   imageUrl: string;
   leadFid: number;
   hostFids: number[];
-  moderatorFid: number;
+  moderatorFids: number[];
   createdAt: number;
   followerCount: number;
 };

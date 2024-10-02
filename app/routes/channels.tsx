@@ -12,7 +12,7 @@ export default function Screen() {
         </Link>
         <div className="flex space-x-4">
           <Button asChild>
-            <Link className="no-underline" to={id ? `/~/channels/${id}` : "/~"}>
+            <Link className="no-underline" to="/~">
               Dashboard
             </Link>
           </Button>

@@ -29,7 +29,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     getWarpcastChannel({ channel: channelId }),
   ]);
 
-  const isModbotSet = modbotFid === wcChannel.moderatorFid;
+  const isModbotSet = wcChannel.moderatorFids.includes(modbotFid);
 
   if (isModbotSet) {
     await recoverQueue.add("recover", {
@@ -59,7 +59,7 @@ export default function Screen() {
       // TODO check here
       axios.get(`${env.hostUrl}/api/warpcast/channels/${channel.id}`).then((rsp) => {
         const updatedWcChannel = rsp.data.result.channel;
-        if (updatedWcChannel.moderatorFid === modbotFid) {
+        if (updatedWcChannel.moderatorFids.includes(modbotFid)) {
           clearInterval(interval);
           setFidSet(true);
         }
@@ -90,7 +90,7 @@ export default function Screen() {
               <ol className=" list-decimal list-inside space-y-2 my-4">
                 <li>
                   Copy the{" "}
-                  <Button size={"xs"} variant={"outline"} onClick={() => copy("automod")}>
+                  <Button size={"xs"} variant={"outline"} onClick={() => copy("modbot")}>
                     {copied ? (
                       <>
                         <Check className="w-3 h-3 inline mr-1" />

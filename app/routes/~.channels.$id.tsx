@@ -65,9 +65,9 @@ export default function ChannelRoot() {
   const enableFetcher = useFetcher();
   const [isNotConfigured, setIsNotConfigured] = useState<boolean>(false);
 
-  // useEffect(() => {
-  //   setIsNotConfigured(!signerFid || warpcastChannel.moderatorFid !== +signerFid);
-  // }, []);
+  useEffect(() => {
+    setIsNotConfigured(!signerFid || !warpcastChannel.moderatorFids.includes(+signerFid));
+  }, []);
 
   return (
     <div>
@@ -140,7 +140,7 @@ export default function ChannelRoot() {
       <Dialog open={isNotConfigured} onOpenChange={(open) => setIsNotConfigured(open)}>
         <DialogContent onOpenAutoFocus={(evt) => evt.preventDefault()}>
           <DialogHeader>
-            <DialogTitle>Automod isn't set as Moderator</DialogTitle>
+            <DialogTitle>ModBot isn't set as Moderator</DialogTitle>
             <DialogDescription asChild>
               <div className="flex flex-col gap-4">
                 <div>
