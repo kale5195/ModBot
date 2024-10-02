@@ -341,7 +341,7 @@ export function LoginButton(props: { user: User | null; error: string | null; en
   const navigate = useNavigate();
 
   const farcasterConfig = {
-    rpcUrl: `https://mainnet.optimism.io`,
+    rpcUrl: `https://optimism-mainnet.infura.io/v3/${env.infuraProjectId}`,
     domain: new URL(env.hostUrl).host.split(":")[0],
     siweUri: `${env.hostUrl}/login`,
   };

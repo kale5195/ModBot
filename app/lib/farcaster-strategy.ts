@@ -25,7 +25,9 @@ export class FarcasterStrategy extends Strategy<User, FarcasterUser & { request:
     const env = getSharedEnv();
 
     const appClient = createAppClient({
-      ethereum: viemConnector(),
+      ethereum: viemConnector({
+        rpcUrl: `https://optimism-mainnet.infura.io/v3/${env.infuraProjectId}`,
+      }),
     });
 
     const verifyResponse = await appClient.verifySignInMessage({
