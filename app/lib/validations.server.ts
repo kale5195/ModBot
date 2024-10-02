@@ -2000,7 +2000,7 @@ async function hasIcebreakerCredential({ user: member, rule }: CheckFunctionArgs
     };
   }
 
-  const userHasCredential = hasCredential(credential, user.credentials, exact);
+  const userHasCredential = hasCredential(credential, user.credentials, exactMatch);
 
   return {
     result: userHasCredential,
