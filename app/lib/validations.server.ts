@@ -29,6 +29,7 @@ import {
 } from "./airstack.server";
 import { hideQuietly, mute, addToBypass, downvote, cooldown, grantRole, ban, unlike } from "./automod.server";
 import { PlanType } from "~/lib/utils";
+import { getIcebreakerbyFid, hasCredential } from "./icebreaker.server";
 
 export type RuleDefinition = {
   name: RuleName;
@@ -741,6 +742,74 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
       },
     },
   },
+
+  hasIcebreakerCredential: {
+    name: "hasIcebreakerCredential",
+    allowMultiple: true,
+    author: "Icebreaker",
+    authorUrl: "https://icebreaker.xyz",
+    authorIcon: `${hostUrl}/icons/icebreaker.png`,
+    category: "all",
+    friendlyName: "Icebreaker Credential",
+    checkType: "user",
+    description: "Check if the user has a specific Icebreaker credential",
+    hidden: false,
+    invertable: true,
+    args: {
+      credential: {
+        type: "string",
+        friendlyName: "Credential",
+        description: "The name of the credential",
+        placeholder: "Enter a credential...",
+        required: true,
+      },
+    },
+  },
+
+  hasIcebreakerHuman: {
+    name: "hasIcebreakerHuman",
+    allowMultiple: false,
+    author: "Icebreaker",
+    authorUrl: "https://icebreaker.xyz",
+    authorIcon: `${hostUrl}/icons/icebreaker.png`,
+    category: "all",
+    friendlyName: "Icebreaker Human",
+    checkType: "user",
+    description: "Check if the user has the Icebreaker Human credential",
+    hidden: false,
+    invertable: true,
+    args: {},
+  },
+
+  hasIcebreakerQBuilder: {
+    name: "hasIcebreakerQBuilder",
+    allowMultiple: false,
+    author: "Icebreaker",
+    authorUrl: "https://icebreaker.xyz",
+    authorIcon: `${hostUrl}/icons/icebreaker.png`,
+    category: "all",
+    friendlyName: "Icebreaker QBuilder",
+    checkType: "user",
+    description: "Check if the user has the Icebreaker QBuilder credential",
+    hidden: false,
+    invertable: true,
+    args: {},
+  },
+
+  hasIcebreakerVerified: {
+    name: "hasIcebreakerVerified",
+    allowMultiple: false,
+    author: "Icebreaker",
+    authorUrl: "https://icebreaker.xyz",
+    authorIcon: `${hostUrl}/icons/icebreaker.png`,
+    category: "all",
+    friendlyName: "Icebreaker Verified",
+    checkType: "user",
+    description: "Check if the user has the Icebreaker Verified credential",
+    hidden: false,
+    invertable: true,
+    args: {},
+  },
 } as const;
 
 export type ActionDefinition = {
@@ -916,6 +985,10 @@ export const ruleNames = [
   "requiresErc1155",
   "requiresErc721",
   "requiresErc20",
+  "hasIcebreakerHuman",
+  "hasIcebreakerQBuilder",
+  "hasIcebreakerVerified",
+  "hasIcebreakerCredential",
 ] as const;
 
 export const actionTypes = [
@@ -1159,6 +1232,10 @@ export const ruleFunctions: Record<RuleName, CheckFunction> = {
   requiresErc721: holdsErc721,
   requiresErc20: holdsErc20,
   requiresErc1155: holdsErc1155,
+  hasIcebreakerHuman: hasIcebreakerHuman,
+  hasIcebreakerQBuilder: hasIcebreakerQBuilder,
+  hasIcebreakerVerified: hasIcebreakerVerified,
+  hasIcebreakerCredential: hasIcebreakerCredential,
   // webhook: webhook,
 };
 
@@ -1901,5 +1978,113 @@ async function openRankGlobalEngagement(props: CheckFunctionArgs) {
       user.rank <= minRank
         ? `@${member.username} is ranked #${user.rank}`
         : `@${member.username} is not a top ${minRank} account. Their current rank is #${user.rank}.`,
+  };
+}
+
+async function hasIcebreakerCredential({ user: member, rule }: CheckFunctionArgs) {
+  const { credential } = rule.args as { credential: string };
+
+  const user = await getSetCache({
+    key: `icebreaker:user-fid:${member.fid}`,
+    ttlSeconds: 60 * 60 * 6,
+    get: () => getIcebreakerbyFid(member.fid),
+  });
+
+  if (!user) {
+    return {
+      result: false,
+      message: `@${member.username} not found in Icebreaker`,
+    };
+  }
+
+  const userHasCredential = hasCredential(credential, user.credentials);
+
+  return {
+    result: userHasCredential,
+    message:
+      userHasCredential
+        ? `@${member.username} has the ${credential} credential`
+        : `@${member.username} does not have the ${credential} credential`,
+  };
+}
+
+async function hasIcebreakerHuman({ user: member }: CheckFunctionArgs) {
+  const credential = "Human";
+
+  const user = await getSetCache({
+    key: `icebreaker:user-fid:${member.fid}`,
+    ttlSeconds: 60 * 60 * 6,
+    get: () => getIcebreakerbyFid(member.fid),
+  });
+
+  if (!user) {
+    return {
+      result: false,
+      message: `@${member.username} not found in Icebreaker`,
+    };
+  }
+
+  const userHasCredential = hasCredential(credential, user.credentials, true);
+
+  return {
+    result: userHasCredential,
+    message:
+      userHasCredential
+        ? `@${member.username} has the ${credential} credential`
+        : `@${member.username} does not have the ${credential} credential`,
+  };
+}
+
+async function hasIcebreakerVerified({ user: member }: CheckFunctionArgs) {
+  const credential = "Verified:";
+
+  const user = await getSetCache({
+    key: `icebreaker:user-fid:${member.fid}`,
+    ttlSeconds: 60 * 60 * 6,
+    get: () => getIcebreakerbyFid(member.fid),
+  });
+
+  if (!user) {
+    return {
+      result: false,
+      message: `@${member.username} not found in Icebreaker`,
+    };
+  }
+
+  const userHasCredential = hasCredential(credential, user.credentials, true);
+
+  return {
+    result: userHasCredential,
+    message:
+      userHasCredential
+        ? `@${member.username} has the ${credential} credential`
+        : `@${member.username} does not have the ${credential} credential`,
+  };
+}
+
+async function hasIcebreakerQBuilder({ user: member }: CheckFunctionArgs) {
+  const credential = "qBuilder";
+
+  const user = await getSetCache({
+    key: `icebreaker:user-fid:${member.fid}`,
+    ttlSeconds: 60 * 60 * 6,
+    get: () => getIcebreakerbyFid(member.fid),
+  });
+
+  if (!user) {
+    return {
+      result: false,
+      message: `@${member.username} not found in Icebreaker`,
+    };
+  }
+
+  const userHasCredential = hasCredential(credential, user.credentials, true);
+
+  return {
+    result: userHasCredential,
+    message:
+      userHasCredential
+        ? `@${member.username} has the ${credential} credential`
+        : `@${member.username} does not have the ${credential} credential`,
   };
 }
