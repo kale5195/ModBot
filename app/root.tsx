@@ -22,7 +22,6 @@ import { Alert } from "./components/ui/alert";
 import { Button } from "./components/ui/button";
 import { getSharedEnv } from "./lib/utils.server";
 import { authenticator } from "./lib/auth.server";
-import { usePosthog } from "./lib/posthog";
 import { typedjson, useTypedLoaderData } from "remix-typedjson";
 
 export const links: LinksFunction = () => [
@@ -89,7 +88,6 @@ export const meta: MetaFunction = () => {
 function App() {
   const { env, user } = useTypedLoaderData<typeof loader>();
 
-  usePosthog({ user, enabled: env.nodeEnv === "production" });
 
   return (
     <html lang="en">

@@ -34,6 +34,7 @@ export class FarcasterStrategy extends Strategy<User, FarcasterUser & { request:
       domain: new URL(env.hostUrl).host.split(":")[0],
       nonce: credentials.nonce,
     });
+    console.log("verifyResponse", JSON.stringify(verifyResponse, null, 2));
     const { success, fid, error } = verifyResponse;
 
     if (!success) {
