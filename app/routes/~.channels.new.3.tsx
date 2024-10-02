@@ -170,7 +170,7 @@ export async function action({ request }: ActionFunctionArgs) {
   //     rootParentUrl: wcChannel.url,
   //   }),
   // ]);
-
+  return redirect(`/~/channels/${moderatedChannel.id}`);
   return redirect(`/~/channels/new/4?channelId=${moderatedChannel.id}`);
 }
 
@@ -206,15 +206,14 @@ export default function Screen() {
           <ChannelHeader channel={channel} />
           <CardTitle>Set @modbot as your channel's moderator</CardTitle>
           <CardDescription>
-            @modbot will auto invite people who meet your channel rules. You
-            can also remove the people @modbot invited at any time.
+            @modbot will auto invite people who meet your channel rules. You can also remove the people @modbot invited
+            at any time.
+            <div className="mt-1 text-red-500">
+              You can do this step at October 4th, 2024,, otherwise it will break your existing channnel feeds.
+            </div>
           </CardDescription>
         </CardHeader>
-        <form
-          method="post"
-          className="space-y-8"
-          onSubmit={methods.handleSubmit(onSubmit)}
-        >
+        <form method="post" className="space-y-8" onSubmit={methods.handleSubmit(onSubmit)}>
           <CardFooter>
             <Button type="submit" className="w-full sm:w-[150px]">
               Next
@@ -234,16 +233,9 @@ export function ChannelHeader(props: { channel: { imageUrl: string | null; id: s
   }
 
   return (
-    <div
-      className="flex gap-2 items-center mb-4 text-sm text-muted-foreground"
-      style={{ fontFamily: "Kode Mono" }}
-    >
-      <img
-        src={channel.imageUrl}
-        alt=""
-        className="h-5 w-5 rounded-full drop-shadow-sm border-2 border-white"
-      />
-      /{channel.id}
+    <div className="flex gap-2 items-center mb-4 text-sm text-muted-foreground" style={{ fontFamily: "Kode Mono" }}>
+      <img src={channel.imageUrl} alt="" className="h-5 w-5 rounded-full drop-shadow-sm border-2 border-white" />/
+      {channel.id}
     </div>
   );
 }

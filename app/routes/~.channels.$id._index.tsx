@@ -12,11 +12,14 @@ import {
 import { Await } from "@remix-run/react";
 import { actionDefinitions } from "~/lib/validations.server";
 import { Suspense } from "react";
-import { Card, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { ModerationStats30Days, getModerationStats30Days } from "~/lib/stats.server";
 import { Badge } from "~/components/ui/badge";
+import { CopyIcon, Check } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import { useClipboard } from "~/lib/utils";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   invariant(params.id, "id is required");
@@ -44,9 +47,30 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 export default function Screen() {
   const { channel, moderationStats } = useTypedLoaderData<typeof loader>();
-
+  const { copy, copied } = useClipboard();
   return (
     <div>
+      <div>
+        <p className="font-medium">Invite Channel Members</p>
+        <p className="text-sm text-gray-500">Add this frame URL to your channel settings.</p>
+        <p className="mt-1 text-sm text-gray-500">
+          Use this link only after you set <span className="font-medium text-primary">@modbot</span> as channel
+          moderator.
+        </p>
+        <Card className="mt-2 ">
+          <CardContent className="flex items-center gap-x-4 py-4">
+            <p className="text-lg text-primary font-medium">https://modbot.sh/channels/{channel.id}/join</p>
+            <Button
+              size={"xs"}
+              variant={"outline"}
+              onClick={() => copy(`https://modbot.sh/channels/${channel.id}/join`)}
+            >
+              {copied ? <Check className="w-3 h-3 inline mr-1" /> : <CopyIcon className="w-3 h-3 inline mr-1" />}
+            </Button>{" "}
+          </CardContent>
+        </Card>
+      </div>
+
       {moderationStats !== null && (
         <div className="mt-6">
           <div>

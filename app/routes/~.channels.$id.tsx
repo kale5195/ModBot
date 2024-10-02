@@ -65,16 +65,13 @@ export default function ChannelRoot() {
   const enableFetcher = useFetcher();
   const [isNotConfigured, setIsNotConfigured] = useState<boolean>(false);
 
-  useEffect(() => {
-    setIsNotConfigured(!signerFid || !warpcastChannel.moderatorFids.includes(+signerFid));
-  }, []);
+  // useEffect(() => {
+  //   setIsNotConfigured(!signerFid || !warpcastChannel.moderatorFids.includes(+signerFid));
+  // }, []);
 
   return (
     <div>
-      <Link
-        className="text-[9px] tracking-wider text-gray-500 no-underline items-center flex gap-1 mb-1"
-        to={"/~"}
-      >
+      <Link className="text-[9px] tracking-wider text-gray-500 no-underline items-center flex gap-1 mb-1" to={"/~"}>
         <ArrowLeft className="inline w-3 h-3" />
         <p>BACK</p>
       </Link>
@@ -113,7 +110,7 @@ export default function ChannelRoot() {
               [
                 { to: `/~/channels/${channel.id}`, title: "Overview", end: true },
                 { to: `/~/channels/${channel.id}/edit`, title: "Rules" },
-             
+
                 // {
                 //   to: `/~/channels/${channel.id}/roles`,
                 //   title: "Roles",
@@ -153,6 +150,9 @@ export default function ChannelRoot() {
                     @{signerUsername}
                   </a>{" "}
                   as the moderator.
+                </div>
+                <div className="text-red-500">
+                  You can do this step at October 4th, 2024, otherwise it will break your existing channnel feeds.
                 </div>
                 <Button asChild>
                   <a
