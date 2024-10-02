@@ -763,6 +763,13 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
         placeholder: "Enter a credential...",
         required: true,
       },
+      exactMatch: {
+        type: "boolean",
+        defaultValue: false,
+        friendlyName: "Exact credential match",
+        description: "Exactly matches the full name of the credential",
+        required: false,
+      },
     },
   },
 
@@ -1982,13 +1989,9 @@ async function openRankGlobalEngagement(props: CheckFunctionArgs) {
 }
 
 async function hasIcebreakerCredential({ user: member, rule }: CheckFunctionArgs) {
-  const { credential } = rule.args as { credential: string };
+  const { credential, exactMatch } = rule.args as { credential: string; exactMatch: boolean };
 
-  const user = await getSetCache({
-    key: `icebreaker:user-fid:${member.fid}`,
-    ttlSeconds: 60 * 60 * 6,
-    get: () => getIcebreakerbyFid(member.fid),
-  });
+  const user = await getIcebreakerbyFid(member.fid);
 
   if (!user) {
     return {
@@ -1997,25 +2000,20 @@ async function hasIcebreakerCredential({ user: member, rule }: CheckFunctionArgs
     };
   }
 
-  const userHasCredential = hasCredential(credential, user.credentials);
+  const userHasCredential = hasCredential(credential, user.credentials, exact);
 
   return {
     result: userHasCredential,
-    message:
-      userHasCredential
-        ? `@${member.username} has the ${credential} credential`
-        : `@${member.username} does not have the ${credential} credential`,
+    message: userHasCredential
+      ? `@${member.username} has the ${credential} credential`
+      : `@${member.username} does not have the ${credential} credential`,
   };
 }
 
 async function hasIcebreakerHuman({ user: member }: CheckFunctionArgs) {
   const credential = "Human";
 
-  const user = await getSetCache({
-    key: `icebreaker:user-fid:${member.fid}`,
-    ttlSeconds: 60 * 60 * 6,
-    get: () => getIcebreakerbyFid(member.fid),
-  });
+  const user = await getIcebreakerbyFid(member.fid);
 
   if (!user) {
     return {
@@ -2028,21 +2026,16 @@ async function hasIcebreakerHuman({ user: member }: CheckFunctionArgs) {
 
   return {
     result: userHasCredential,
-    message:
-      userHasCredential
-        ? `@${member.username} has the ${credential} credential`
-        : `@${member.username} does not have the ${credential} credential`,
+    message: userHasCredential
+      ? `@${member.username} has the ${credential} credential`
+      : `@${member.username} does not have the ${credential} credential`,
   };
 }
 
 async function hasIcebreakerVerified({ user: member }: CheckFunctionArgs) {
   const credential = "Verified:";
 
-  const user = await getSetCache({
-    key: `icebreaker:user-fid:${member.fid}`,
-    ttlSeconds: 60 * 60 * 6,
-    get: () => getIcebreakerbyFid(member.fid),
-  });
+  const user = await getIcebreakerbyFid(member.fid);
 
   if (!user) {
     return {
@@ -2055,21 +2048,16 @@ async function hasIcebreakerVerified({ user: member }: CheckFunctionArgs) {
 
   return {
     result: userHasCredential,
-    message:
-      userHasCredential
-        ? `@${member.username} has the ${credential} credential`
-        : `@${member.username} does not have the ${credential} credential`,
+    message: userHasCredential
+      ? `@${member.username} has the ${credential} credential`
+      : `@${member.username} does not have the ${credential} credential`,
   };
 }
 
 async function hasIcebreakerQBuilder({ user: member }: CheckFunctionArgs) {
   const credential = "qBuilder";
 
-  const user = await getSetCache({
-    key: `icebreaker:user-fid:${member.fid}`,
-    ttlSeconds: 60 * 60 * 6,
-    get: () => getIcebreakerbyFid(member.fid),
-  });
+  const user = await getIcebreakerbyFid(member.fid);
 
   if (!user) {
     return {
@@ -2082,9 +2070,8 @@ async function hasIcebreakerQBuilder({ user: member }: CheckFunctionArgs) {
 
   return {
     result: userHasCredential,
-    message:
-      userHasCredential
-        ? `@${member.username} has the ${credential} credential`
-        : `@${member.username} does not have the ${credential} credential`,
+    message: userHasCredential
+      ? `@${member.username} has the ${credential} credential`
+      : `@${member.username} does not have the ${credential} credential`,
   };
 }
