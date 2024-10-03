@@ -148,7 +148,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const logs = await validateCast({
       user,
       moderatedChannel,
-      simulation: false,
+      simulation: true,
     });
     // console.log("logs", logs);
     return typedjson({
