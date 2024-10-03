@@ -29,8 +29,8 @@ import { MagicWandIcon } from "@radix-ui/react-icons";
 
 export const meta: MetaFunction<typeof loader> = (data) => {
   return [
-    { title: "ModBot - Farcaster Channel Moderation helper" },
-    { property: "og:title", content: "ModBot - Farcaster Channel Moderation helper" },
+    { title: "ModBot - Farcaster Channel Moderation Helper" },
+    { property: "og:title", content: "ModBot - Farcaster Channel Moderation Helper" },
     {
       name: "description",
       content: "Automate channel moderation with customizable rules and team-based moderation.",
@@ -40,7 +40,7 @@ export const meta: MetaFunction<typeof loader> = (data) => {
       content: "Automate channel moderation with customizable rules and team-based moderation.",
     },
     { name: "twitter:card", content: "summary" },
-    { name: "twitter:title", content: "ModBot - Farcaster Channel Moderation helper" },
+    { name: "twitter:title", content: "ModBot - Farcaster Channel Moderation Helper" },
     {
       name: "twitter:description",
       content: "Automate channel moderation with customizable rules and team-based moderation.",

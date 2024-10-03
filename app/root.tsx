@@ -72,10 +72,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "ModBot | channel moderation on autopilot" },
+    { title: "ModBot | Farcaster Channel Moderation Helper" },
     {
       property: "og:title",
-      content: "ModBot | channel moderation on autopilot",
+      content: "ModBot | Farcaster Channel Moderation Helper",
     },
     {
       name: "description",

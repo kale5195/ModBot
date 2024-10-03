@@ -181,7 +181,7 @@ function RuleSetEditor(props: {
                 <CardHeader>
                   <div className="flex justify-between items-start gap-2">
                     <div className="flex gap-3 items-start">
-                      {props.ruleDefinitions[ruleName].author !== "automod" &&
+                      {props.ruleDefinitions[ruleName].author !== "modbot" &&
                         props.ruleDefinitions[ruleName].authorIcon && (
                           <Avatar className="w-[33px] h-[33px] ring-white ring-4 shadow-xl shrink-0 mt-1">
                             <AvatarImage src={props.ruleDefinitions[ruleName].authorIcon} />

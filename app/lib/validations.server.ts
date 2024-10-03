@@ -77,8 +77,8 @@ const hostUrl = ""; //getSharedEnv().hostUrl;
 
 export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
   and: {
-    author: "automod",
-    authorUrl: "https://automod.sh",
+    author: "modbot",
+    authorUrl: "https://modbot.sh",
     authorIcon: `${hostUrl}/icons/modbot.png`,
     allowMultiple: true,
     name: "and",
@@ -92,8 +92,8 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
   },
 
   or: {
-    author: "automod",
-    authorUrl: "https://automod.sh",
+    author: "modbot",
+    authorUrl: "https://modbot.sh",
     authorIcon: `${hostUrl}/icons/modbot.png`,
     allowMultiple: true,
     name: "or",
@@ -108,8 +108,8 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
 
   alwaysInclude: {
     name: "alwaysInclude",
-    author: "automod",
-    authorUrl: "https://automod.sh",
+    author: "modbot",
+    authorUrl: "https://modbot.sh",
     authorIcon: `${hostUrl}/icons/modbot.png`,
     allowMultiple: true,
     category: "inclusion",
@@ -251,8 +251,8 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
   },
   userDoesNotFollow: {
     name: "userDoesNotFollow",
-    author: "automod",
-    authorUrl: "https://automod.sh",
+    author: "modbot",
+    authorUrl: "https://modbot.sh",
     authorIcon: `${hostUrl}/icons/modbot.png`,
     allowMultiple: true,
     category: "all",
@@ -275,8 +275,8 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
 
   userIsNotFollowedBy: {
     name: "userIsNotFollowedBy",
-    author: "automod",
-    authorUrl: "https://automod.sh",
+    author: "modbot",
+    authorUrl: "https://modbot.sh",
     authorIcon: `${hostUrl}/icons/modbot.png`,
     allowMultiple: true,
     category: "all",
@@ -343,8 +343,8 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
 
   requiresErc20: {
     name: "requiresErc20",
-    author: "automod",
-    authorUrl: "https://automod.sh",
+    author: "modbot",
+    authorUrl: "https://modbot.sh",
     authorIcon: `${hostUrl}/icons/modbot.png`,
     allowMultiple: true,
     category: "all",
@@ -420,8 +420,8 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
 
   requiresErc1155: {
     name: "requiresErc1155",
-    author: "automod",
-    authorUrl: "https://automod.sh",
+    author: "modbot",
+    authorUrl: "https://modbot.sh",
     authorIcon: `${hostUrl}/icons/modbot.png`,
     allowMultiple: true,
     category: "all",
@@ -473,8 +473,8 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
 
   requiresErc721: {
     name: "requiresErc721",
-    author: "automod",
-    authorUrl: "https://automod.sh",
+    author: "modbot",
+    authorUrl: "https://modbot.sh",
     authorIcon: `${hostUrl}/icons/modbot.png`,
     allowMultiple: true,
     category: "all",
@@ -526,9 +526,9 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
 
   userDoesNotHoldPowerBadge: {
     name: "userDoesNotHoldPowerBadge",
-    author: "automod",
-    authorUrl: "https://automod.sh",
-    authorIcon: `${hostUrl}/icons/modbot.png`,
+    author: "neynar",
+    authorUrl: "https://neynar.com/",
+    authorIcon: `${hostUrl}/icons/neynar.png`,
     allowMultiple: false,
     category: "all",
     friendlyName: "Power Badge",
@@ -541,8 +541,8 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
   },
 
   userProfileContainsText: {
-    author: "automod",
-    authorUrl: "https://automod.sh",
+    author: "modbot",
+    authorUrl: "https://modbot.sh",
     authorIcon: `${hostUrl}/icons/modbot.png`,
     name: "userProfileContainsText",
     allowMultiple: true,
@@ -568,8 +568,8 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
   },
   userDisplayNameContainsText: {
     name: "userDisplayNameContainsText",
-    author: "automod",
-    authorUrl: "https://automod.sh",
+    author: "modbot",
+    authorUrl: "https://modbot.sh",
     authorIcon: `${hostUrl}/icons/modbot.png`,
     allowMultiple: true,
     category: "all",
@@ -620,8 +620,8 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
 
   userFollowerCount: {
     name: "userFollowerCount",
-    author: "automod",
-    authorUrl: "https://automod.sh",
+    author: "modbot",
+    authorUrl: "https://modbot.sh",
     authorIcon: `${hostUrl}/icons/modbot.png`,
     allowMultiple: false,
     category: "all",
@@ -696,8 +696,8 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
   userFidInList: {
     name: "userFidInList",
     allowMultiple: false,
-    author: "automod",
-    authorUrl: "https://automod.sh",
+    author: "modbot",
+    authorUrl: "https://modbot.sh",
     authorIcon: `${hostUrl}/icons/modbot.png`,
     category: "all",
     friendlyName: "User in List",
@@ -719,8 +719,8 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
   userFidInRange: {
     name: "userFidInRange",
     allowMultiple: false,
-    author: "automod",
-    authorUrl: "https://automod.sh",
+    author: "modbot",
+    authorUrl: "https://modbot.sh",
     authorIcon: `${hostUrl}/icons/modbot.png`,
     category: "all",
     friendlyName: "User FID",
