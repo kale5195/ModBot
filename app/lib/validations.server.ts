@@ -862,10 +862,10 @@ export const actionDefinitions = {
     args: {},
   },
   hideQuietly: {
-    friendlyName: "Rejected",
+    friendlyName: "Declined",
     hidden: false,
     castScope: "all",
-    description: "Reject the user from the channel",
+    description: "Not inviting the user to the channel",
     args: {},
   },
   addToBypass: {
@@ -898,7 +898,7 @@ export const actionDefinitions = {
     args: {},
   },
   like: {
-    friendlyName: "Approved",
+    friendlyName: "Invited",
     hidden: true,
     castScope: "root",
     description: "Invite the user to the channel.",

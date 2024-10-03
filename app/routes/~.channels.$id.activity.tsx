@@ -252,7 +252,10 @@ export default function Screen() {
         <>
           <div className="divide-y">
             {moderationLogs.map((log) => (
-              <div key={log.id} className="flex flex-col md:flex-row gap-2 py-2">
+              <div
+                key={log.id}
+                className={`flex flex-col md:flex-row gap-2 p-2 ${log.action === "like" ? "bg-green-50" : "bg-red-50"}`}
+              >
                 <p className="text-xs w-[150px] text-gray-400 shrink-0 sm:shrink-1" title={log.createdAt.toISOString()}>
                   {log.createdAt.toLocaleString()}
                 </p>
@@ -298,7 +301,7 @@ export default function Screen() {
                     )}
                   </div>
 
-                  {["cooldown", "mute", "hideQuietly", "warnAndHide", "like"].includes(log.action) && (
+                  {/* {["cooldown", "mute", "hideQuietly", "warnAndHide", "like"].includes(log.action) && (
                     <DropdownMenu>
                       <DropdownMenuTrigger>
                         <MoreVerticalIcon className="w-5 h-5" />
@@ -349,14 +352,14 @@ export default function Screen() {
                             <input type="hidden" name="logId" value={log.id} />
                             <DropdownMenuItem>
                               <button name="intent" value="like" className="w-full h-full cursor-default text-left">
-                                Approve
+                                Invite
                               </button>
                             </DropdownMenuItem>
                           </Form>
                         )}
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  )}
+                  )} */}
                 </div>
               </div>
             ))}
