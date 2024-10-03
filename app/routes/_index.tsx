@@ -250,7 +250,7 @@ export default function Home() {
               <FeatureCard
                 Icon={Plug}
                 title="Farcaster native integrations"
-                description="Support for Hypersub, Paragraph, OpenRank, Warpcast and more."
+                description="Support for Hypersub, Paragraph, OpenRank, Icebreaker, Warpcast and more."
               />
               <FeatureCard
                 Icon={HeartHandshake}

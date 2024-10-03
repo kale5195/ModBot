@@ -58,8 +58,8 @@ export default function Screen() {
           moderator.
         </p>
         <Card className="mt-2 ">
-          <CardContent className="flex items-center gap-x-4 py-4">
-            <p className="text-lg text-primary font-medium">https://modbot.sh/channels/{channel.id}/join</p>
+          <CardContent className="flex items-center flex-wrap gap-x-4 py-4">
+            <p className="text-sm md:text-lg text-primary font-medium">https://modbot.sh/channels/{channel.id}/join</p>
             <Button
               size={"xs"}
               variant={"outline"}
