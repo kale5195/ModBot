@@ -132,7 +132,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
       return successResponse({
         request,
-        message: `Refreshed. Plan is ${plan.plan}, expiring ${plan.expiresAt?.toISOString()}`,
+        message: `Refreshed. Plan is ${plan.plan}}`,
       });
     } else {
       await subscriptionQueue.add(

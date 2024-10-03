@@ -18,7 +18,7 @@ export async function syncSubscriptions() {
   for (const user of activeUsers) {
     const plan = await refreshAccountStatus({ fid: user.id });
     console.log(
-      `[subsync] ${user.name} plan: ${plan.plan}, expiry: ${plan.expiresAt?.toISOString() || Infinity.toString()}`
+      `[subsync] ${user.name} plan: ${plan.plan}`
     );
   }
 }
