@@ -172,7 +172,7 @@ export default function Home() {
                   @jtgi
                 </a>{" "}
               </p>
-              <div className="flex -space-x-1">
+              {/* <div className="flex -space-x-1">
                 {activeChannels
                   .filter((c) => !!c.imageUrl)
                   .map((channel, index) => {
@@ -204,7 +204,7 @@ export default function Home() {
                       </Popover>
                     );
                   })}
-              </div>
+              </div> */}
             </section>
           </section>
         </div>
