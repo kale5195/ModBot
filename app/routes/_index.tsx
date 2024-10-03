@@ -49,7 +49,6 @@ export const meta: MetaFunction<typeof loader> = (data) => {
     { name: "twitter:image", content: `${data.data.env.hostUrl}/logo.png` },
     { property: "og:url", content: data.data.env.hostUrl },
     { property: "og:type", content: "website" },
-    { name: "fc:frame", content: "vNext" },
   ];
 };
 
