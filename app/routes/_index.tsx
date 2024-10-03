@@ -180,11 +180,9 @@ export default function Home() {
                       <Popover key={channel.id}>
                         <PopoverTrigger
                           className="hover:-translate-y-1 transition-all duration-400 z-auto"
-                          onMouseEnter={playSound}
                           style={{
                             zIndex: index,
                           }}
-                          onClick={playSound}
                         >
                           <img
                             key={channel.id}
