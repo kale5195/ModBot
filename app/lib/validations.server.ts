@@ -2044,7 +2044,7 @@ async function hasIcebreakerVerified({ user: member }: CheckFunctionArgs) {
     };
   }
 
-  const userHasCredential = hasCredential(credential, user.credentials, true);
+  const userHasCredential = hasCredential(credential, user.credentials);
 
   return {
     result: userHasCredential,

@@ -1,5 +1,4 @@
 import { http } from "./http.server";
-import { getSetCache } from "./utils.server";
 
 export type IcebreakerChannel = {
   type: string;
@@ -47,7 +46,7 @@ export type IcebreakerProfile = {
   workExperience?: IcebreakerWorkExperience[];
 };
 
-const API_URL = 'https://app.icebreaker.xyz/api/v1';
+const API_URL = "https://app.icebreaker.xyz/api/v1";
 
 async function request<T>(path: string, options?: RequestInit) {
   try {
@@ -74,16 +73,10 @@ export async function getIcebreakerbyFid(fid?: number) {
   return response?.profiles[0];
 }
 
-export function hasCredential(
-  credentialName?: string,
-  credentials?: IcebreakerCredential[],
-  exact = false,
-) {
+export function hasCredential(credentialName?: string, credentials?: IcebreakerCredential[], exact = false) {
   if (!credentials || !credentialName) {
     return false;
   }
 
-  return credentials.some(({ name }) =>
-    exact ? name === credentialName : name.startsWith(credentialName),
-  );
+  return credentials.some(({ name }) => (exact ? name === credentialName : name.startsWith(credentialName)));
 }
