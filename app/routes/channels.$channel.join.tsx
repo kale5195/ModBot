@@ -26,6 +26,13 @@ async function rateLimit(key: string): Promise<boolean> {
   });
 }
 
+function getDeclinedReasons(reason: string) {
+  if (reason.includes("Need manual approval by channel moderators")) {
+    return "Need manual approval by channel moderators";
+  }
+  return reason.length < 50 ? reason : "You are not eligible to join";
+}
+
 export async function action({ request, params }: ActionFunctionArgs) {
   invariant(params.channel, "channel id is required");
   const channelId = params.channel;
@@ -165,8 +172,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       title: `Join ${channelId}`,
       description: "Join the channel through ModBot.",
       image: getFrameImageUrl({
-        message:
-          action === "like" ? "Invite sent!" : log.reason.length < 50 ? log.reason : "You are not eligible to join",
+        message: action === "like" ? "Invite sent!" : getDeclinedReasons(log.reason),
         channel: channelId,
       }),
       postUrl: `${getSharedEnv().hostUrl}/channels/${channelId}/join`,

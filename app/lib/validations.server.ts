@@ -120,7 +120,20 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
     invertable: false,
     args: {},
   },
-
+  manuallyApprove: {
+    name: "manuallyApprove",
+    author: "modbot",
+    authorUrl: "https://modbot.sh",
+    authorIcon: `${hostUrl}/icons/modbot.png`,
+    allowMultiple: false,
+    category: "inclusion",
+    friendlyName: " Manually Approve",
+    checkType: "cast",
+    description: "Manually approve member requests in activity tabs",
+    hidden: false,
+    invertable: false,
+    args: {},
+  },
   // webhook: {
   //   name: "webhook",
   //   author: "automod",
@@ -403,7 +416,7 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
     allowMultiple: false,
     hidden: false,
     category: "all",
-    friendlyName: " FarRank by Airstack",
+    friendlyName: "FarRank by Airstack",
     checkType: "user",
     description: "Check if a user's Airstack FarRank is high enough.",
     invertable: false,
@@ -973,6 +986,7 @@ export const ruleNames = [
   "or",
   "isHuman",
   "alwaysInclude",
+  "manuallyApprove",
   "airstackSocialCapitalRank",
   "openRankGlobalEngagement",
   "openRankChannel",
@@ -1219,6 +1233,7 @@ export const ruleFunctions: Record<RuleName, CheckFunction> = {
   and: () => ({ result: true, message: "And rule always passes" }),
   or: () => ({ result: true, message: "Or rule always passes" }),
   alwaysInclude: () => ({ result: true, message: "Everything included by default" }),
+  manuallyApprove: manuallyApprove,
   airstackSocialCapitalRank: airstackSocialCapitalRank,
   subscribesOnParagraph: subscribesOnParagraph,
   isHuman: isHuman,
@@ -2073,5 +2088,20 @@ async function hasIcebreakerQBuilder({ user: member }: CheckFunctionArgs) {
     message: userHasCredential
       ? `@${member.username} has the ${credential} credential`
       : `@${member.username} does not have the ${credential} credential`,
+  };
+}
+
+async function manuallyApprove(args: CheckFunctionArgs) {
+  // remove existing moderation logs
+  const { channel, user } = args;
+  await db.moderationLog.deleteMany({
+    where: {
+      channelId: channel.id,
+      affectedUserFid: user.fid.toString(),
+    },
+  });
+  return {
+    result: false,
+    message: "Need manual approval by channel moderators",
   };
 }

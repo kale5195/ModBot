@@ -148,7 +148,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const logs = await validateCast({
       user,
       moderatedChannel,
-      simulation: true,
+      simulation: false,
     });
     // console.log("logs", logs);
     return typedjson({
@@ -236,9 +236,7 @@ export default function Screen() {
       <div className="space-y-3">
         <div>
           <p className="font-medium">Simulate Rules</p>
-          <p className="text-sm text-gray-500">
-            Enter a fid to simulate your moderation rules against.
-          </p>
+          <p className="text-sm text-gray-500">Enter a fid to simulate your moderation rules against.</p>
         </div>
       </div>
       <SimulateCast actionDefs={actionDefinitions} />
@@ -349,9 +347,7 @@ export type SweepArgs = {
   onProcessed?: () => void;
 };
 
-export async function sweep(args: SweepArgs) {
-  
-}
+export async function sweep(args: SweepArgs) {}
 
 /**
  * Recover is similar to sweep but it only processes
@@ -382,9 +378,7 @@ export async function recover(
       });
 
       alreadyProcessedHashes = new Set(
-        alreadyProcessed
-          .filter((log): log is { castHash: string } => !!log.castHash)
-          .map((log) => log.castHash)
+        alreadyProcessed.filter((log): log is { castHash: string } => !!log.castHash).map((log) => log.castHash)
       );
     } else {
       alreadyProcessedHashes = new Set();
@@ -466,11 +460,9 @@ export async function simulate(args: SimulateArgs) {
   //     );
   //     break;
   //   }
-
   //   castsChecked += page.casts.length;
   //   for (const cast of page.casts) {
   //     console.log(`${args.channelId} sweep: processing cast ${cast.hash}...`);
-
   //     const [existing, proposed] = await Promise.all([
   //       args.moderatedChannel
   //         ? validateCast({
@@ -487,18 +479,15 @@ export async function simulate(args: SimulateArgs) {
   //         simulation: true,
   //       }),
   //     ]);
-
   //     aggregatedResults.push({
   //       hash: cast.hash,
   //       existing,
   //       proposed,
   //     });
   //     await args.onProgress?.(castsChecked);
-
   //     await sleep(500);
   //   }
   // }
-
   // return aggregatedResults;
 }
 

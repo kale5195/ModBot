@@ -26,6 +26,7 @@ import { z } from "zod";
 import { useLocalStorage } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { unlike } from "~/lib/automod.server";
+import { inviteToChannel } from "~/lib/neynar.server";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   invariant(params.id, "id is required");
@@ -111,79 +112,30 @@ export async function action({ request, params }: ActionFunctionArgs) {
     );
   }
 
-  if (result.data.intent === "end-cooldown") {
-    const updated = await db.cooldown.update({
-      where: {
-        affectedUserId_channelId: {
-          affectedUserId: log.affectedUserFid,
-          channelId: moderatedChannel.id,
-        },
-      },
-      data: {
-        active: false,
-      },
-    });
-
-    if (updated) {
-      await db.moderationLog.create({
-        data: {
-          action: "cooldownEnded",
-          affectedUserFid: log.affectedUserFid,
-          affectedUsername: log.affectedUsername,
-          affectedUserAvatarUrl: log.affectedUserAvatarUrl,
-          castHash: log.castHash,
-          castText: log.castText,
-          actor: user.id,
-          channelId: moderatedChannel.id,
-          reason: `Cooldown ended by @${user.name}`,
-        },
-      });
-    }
-  } else if (result.data.intent === "unban") {
-    const updated = await db.cooldown.update({
-      where: {
-        affectedUserId_channelId: {
-          affectedUserId: log.affectedUserFid,
-          channelId: moderatedChannel.id,
-        },
-      },
-      data: {
-        active: false,
-      },
-    });
-
-    if (updated) {
-      await db.moderationLog.create({
-        data: {
-          action: "unmuted",
-          affectedUserFid: log.affectedUserFid,
-          affectedUsername: log.affectedUsername,
-          affectedUserAvatarUrl: log.affectedUserAvatarUrl,
-          castHash: log.castHash,
-          castText: log.castText,
-          actor: user.id,
-          channelId: moderatedChannel.id,
-          reason: `Unmuted by @${user.name}`,
-        },
-      });
-    }
-  } else if (result.data.intent === "like") {
+  if (result.data.intent === "like") {
     // invariant(log.castHash, "castHash is required");
     console.log("approve", log.affectedUsername);
+    try {
+      await inviteToChannel({ channelId: moderatedChannel.id, fid: Number(log.affectedUserFid) });
+    } catch (e) {
+      return typedjson(
+        {
+          message: "Failed to invite user",
+        },
+        { status: 404 }
+      );
+    }
     // await like({ cast: { hash: log.castHash } as any, channel: moderatedChannel.id });
-    // await db.moderationLog.create({
-    //   data: {
-    //     action: "like",
-    //     affectedUserFid: log.affectedUserFid,
-    //     affectedUsername: log.affectedUsername,
-    //     affectedUserAvatarUrl: log.affectedUserAvatarUrl,
-    //     castHash: log.castHash,
-    //     castText: log.castText,
-    //     actor: user.id,
-    //     channelId: moderatedChannel.id,
-    //     reason: `Applied manually by @${user.name}`,
-    //   },
-    // });
+    await db.moderationLog.update({
+      where: {
+        id: log.id,
+      },
+      data: {
+        action: "like",
+        actor: user.id,
+        reason: `Applied manually by @${user.name}`,
+      },
+    });
   } else if (result.data.intent === "hideQuietly") {
     // invariant(log.castHash, "castHash is required");
     console.log("remove", log.affectedUsername);
@@ -300,28 +252,20 @@ export default function Screen() {
                       </p>
                     )}
                   </div>
-
-                  {/* {["cooldown", "mute", "hideQuietly", "warnAndHide", "like"].includes(log.action) && (
+                  {log.action === "hideQuietly" && (
+                    <Form method="post">
+                      <input type="hidden" name="logId" value={log.id} />
+                      <Button name="intent" value="like" variant={"outline"} className="w-full h-full text-left">
+                        Invite
+                      </Button>
+                    </Form>
+                  )}
+                  {/* {["hideQuietly"].includes(log.action) && (
                     <DropdownMenu>
                       <DropdownMenuTrigger>
                         <MoreVerticalIcon className="w-5 h-5" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        {log.action === "hideQuietly" && log.reason.includes("in cooldown until") && (
-                          <Form method="post">
-                            <input type="hidden" name="logId" value={log.id} />
-                            <DropdownMenuItem>
-                              <button
-                                name="intent"
-                                value="end-cooldown"
-                                className="w-full h-full cursor-default text-left"
-                              >
-                                End Cooldown
-                              </button>
-                            </DropdownMenuItem>
-                          </Form>
-                        )}
-
                         {log.action === "like" && (
                           <Form method="post">
                             <input type="hidden" name="logId" value={log.id} />
@@ -336,18 +280,7 @@ export default function Screen() {
                             </DropdownMenuItem>
                           </Form>
                         )}
-
-                        {log.action === "ban" && (
-                          <Form method="post">
-                            <input type="hidden" name="logId" value={log.id} />
-                            <DropdownMenuItem>
-                              <button name="intent" value="unban" className="w-full h-full cursor-default text-left">
-                                Unban
-                              </button>
-                            </DropdownMenuItem>
-                          </Form>
-                        )}
-                        {(log.action === "hideQuietly" || log.action === "warnAndHide") && (
+                        {log.action === "hideQuietly" && (
                           <Form method="post">
                             <input type="hidden" name="logId" value={log.id} />
                             <DropdownMenuItem>
