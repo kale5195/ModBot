@@ -93,39 +93,40 @@ export async function verifyFarcasterUser(args: FarcasterUser & { request: Reque
   });
 
   if (!user) {
-    const order = await db.order.findFirst({
-      where: {
-        fid: args.fid,
-      },
-    });
+    // const order = await db.order.findFirst({
+    //   where: {
+    //     fid: args.fid,
+    //   },
+    // });
 
-    let subscription: Awaited<ReturnType<typeof getSubscriptionPlan>> | undefined;
-    if (!order) {
-      subscription = await getSubscriptionPlan({ fid: args.fid });
+    // let subscription: Awaited<ReturnType<typeof getSubscriptionPlan>> | undefined;
+    // if (!order) {
+    //   subscription = await getSubscriptionPlan({ fid: args.fid });
 
-      if (subscription.tokenId) {
-        const existingUser = await db.user.findFirst({
-          where: {
-            planTokenId: subscription.tokenId,
-            plan: subscription.plan,
-          },
-        });
+    //   if (subscription.tokenId) {
+    //     const existingUser = await db.user.findFirst({
+    //       where: {
+    //         planTokenId: subscription.tokenId,
+    //         plan: subscription.plan,
+    //       },
+    //     });
 
-        if (existingUser) {
-          Sentry.captureMessage(
-            `Token ${subscription.tokenId} for ${subscription.plan} already in use by ${existingUser.name}.`
-          );
-          throw new Error(`Token already in use. Contact support.`);
-        }
-      }
-    }
+    //     if (existingUser) {
+    //       Sentry.captureMessage(
+    //         `Token ${subscription.tokenId} for ${subscription.plan} already in use by ${existingUser.name}.`
+    //       );
+    //       throw new Error(`Token already in use. Contact support.`);
+    //     }
+    //   }
+    // }
+
 
     return await db.user.create({
       data: {
         id: args.fid,
-        plan: subscription?.plan || "basic",
-        planExpiry: subscription?.expiresAt,
-        planTokenId: subscription?.tokenId,
+        plan: "basic",
+        planExpiry: null,
+        planTokenId: null,
         name: args.username || args.fid,
         avatarUrl: args.pfpUrl,
         inviteCodeId: args.inviteCodeId,

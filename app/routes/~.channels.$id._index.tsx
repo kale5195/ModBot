@@ -54,7 +54,7 @@ export default function Screen() {
         <p className="font-medium">Invite Channel Members</p>
         <p className="text-sm text-gray-500">Add this frame URL to your channel settings.</p>
         <p className="mt-1 text-sm text-gray-500">
-          Use this link only after you set <span className="font-medium text-primary">@modbot</span> as channel
+          Share this link only after you set <span className="font-medium text-primary">@modbot</span> as channel
           moderator.
         </p>
         <Card className="mt-2 ">

@@ -18,9 +18,7 @@ export async function syncSubscriptions() {
   for (const user of activeUsers) {
     const plan = await refreshAccountStatus({ fid: user.id });
     console.log(
-      `[subsync] ${user.name} plan: ${plan.plan}, expiry: ${
-        plan.expiresAt?.toISOString() || Infinity.toString()
-      }`
+      `[subsync] ${user.name} plan: ${plan.plan}, expiry: ${plan.expiresAt?.toISOString() || Infinity.toString()}`
     );
   }
 }
@@ -53,9 +51,7 @@ export async function getSubscriptionPlan(args: { fid: string; walletAddress?: s
   }
 
   const user = rsp.users[0];
-  const addresses = [args.walletAddress, ...user.verified_addresses.eth_addresses].filter(
-    Boolean
-  ) as string[];
+  const addresses = [args.walletAddress, ...user.verified_addresses.eth_addresses].filter(Boolean) as string[];
   for (const address of addresses) {
     const [primeSecondsRemaining, v2SecondsRemaining] = await Promise.all([
       primeContract.read.balanceOf([getAddress(address)]),
@@ -90,43 +86,48 @@ export async function getSubscriptionPlan(args: { fid: string; walletAddress?: s
 }
 
 export async function refreshAccountStatus(args: { fid: string }) {
-  const user = await db.user.findFirst({
-    where: {
-      id: args.fid,
-    },
-  });
+  return {
+    plan: "basic",
+    expiresAt: null,
+    tokenId: null,
+  };
+  // const user = await db.user.findFirst({
+  //   where: {
+  //     id: args.fid,
+  //   },
+  // });
 
-  if (!user) {
-    return {
-      plan: "basic",
-      expiresAt: null,
-      tokenId: null,
-    };
-  }
+  // if (!user) {
+  //   return {
+  //     plan: "basic",
+  //     expiresAt: null,
+  //     tokenId: null,
+  //   };
+  // }
 
-  if (user.plan === "vip") {
-    return {
-      plan: "vip",
-      tokenId: null,
-      expiresAt: null,
-    };
-  }
+  // if (user.plan === "vip") {
+  //   return {
+  //     plan: "vip",
+  //     tokenId: null,
+  //     expiresAt: null,
+  //   };
+  // }
 
-  const plan = await getSubscriptionPlan({
-    fid: args.fid,
-    walletAddress: user.planWalletAddress ?? undefined,
-  });
+  // const plan = await getSubscriptionPlan({
+  //   fid: args.fid,
+  //   walletAddress: user.planWalletAddress ?? undefined,
+  // });
 
-  await db.user.update({
-    where: {
-      id: args.fid,
-    },
-    data: {
-      plan: plan.plan,
-      planExpiry: plan.expiresAt,
-      planTokenId: plan.tokenId,
-    },
-  });
+  // await db.user.update({
+  //   where: {
+  //     id: args.fid,
+  //   },
+  //   data: {
+  //     plan: plan.plan,
+  //     planExpiry: plan.expiresAt,
+  //     planTokenId: plan.tokenId,
+  //   },
+  // });
 
-  return plan;
+  // return plan;
 }

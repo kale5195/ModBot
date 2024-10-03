@@ -19,7 +19,6 @@ const connection = new IORedis(process.env.REDIS_URL || "redis://localhost:6379"
   maxRetriesPerRequest: null,
 });
 
-
 export const subscriptionQueue = new Queue("subscriptionQueue", {
   connection,
 });
@@ -133,7 +132,7 @@ export const subscriptionWorker = new Worker(
   "subscriptionQueue",
   async () => {
     console.log("Checking subscription status for all active users");
-    await syncSubscriptions();
+    // await syncSubscriptions();
   },
   {
     connection,
@@ -154,19 +153,12 @@ export const webhookQueue = new Queue("webhookQueue", {
   connection,
 });
 
-export const webhookWorker = new Worker(
-  "webhookQueue",
-  async (job: Job<ValidateCastArgsV2>) => {
-
-
-  },
-  {
-    connection,
-    lockDuration: 30_000,
-    concurrency: 25,
-    autorun: !!process.env.ENABLE_QUEUES,
-  }
-);
+export const webhookWorker = new Worker("webhookQueue", async (job: Job<ValidateCastArgsV2>) => {}, {
+  connection,
+  lockDuration: 30_000,
+  concurrency: 25,
+  autorun: !!process.env.ENABLE_QUEUES,
+});
 
 webhookWorker.on("error", (err: Error) => {
   Sentry.captureException(err);
@@ -183,7 +175,7 @@ export const castQueue = new Queue("castQueue", {
 export const castWorker = new Worker(
   "castQueue",
   async (job: Job<ValidateCastArgs>) => {
-    await validateCast(job.data);
+    // await validateCast(job.data);
   },
   {
     connection,
@@ -221,7 +213,6 @@ castWorker.on("completed", async (job) => {
   // if (process.env.NODE_ENV === "development") {
   //   console.log(`${job.data.moderatedChannel.id}: cast ${job.data.cast.hash} completed`);
   // }
-
   // await db.castLog.upsert({
   //   where: {
   //     hash: job.data.cast.hash,
@@ -240,10 +231,8 @@ castWorker.on("completed", async (job) => {
 
 castWorker.on("failed", async (job, err: any) => {
   // const message = err?.response?.data || err?.message || "unknown error";
-
   // if (job) {
   //   console.error(`[${job.data.moderatedChannel?.id}]: cast ${job.data.cast?.hash} failed`, message);
-
   //   await db.castLog.upsert({
   //     where: {
   //       hash: job.data.cast.hash,
@@ -275,19 +264,19 @@ export const recoverQueue = new Queue("recoverQueue", {
 export const recoverWorker = new Worker(
   "recoverQueue",
   async (job: Job<SweepArgs>) => {
-    try {
-      await recover({
-        channelId: job.data.channelId,
-        limit: job.data.limit,
-        untilTimeUtc: job.data.untilTimeUtc,
-        untilCastHash: job.data.untilCastHash,
-        moderatedChannel: job.data.moderatedChannel,
-        skipSignerCheck: job.data.skipSignerCheck,
-      });
-    } catch (e) {
-      Sentry.captureException(e);
-      throw e;
-    }
+    // try {
+    //   await recover({
+    //     channelId: job.data.channelId,
+    //     limit: job.data.limit,
+    //     untilTimeUtc: job.data.untilTimeUtc,
+    //     untilCastHash: job.data.untilCastHash,
+    //     moderatedChannel: job.data.moderatedChannel,
+    //     skipSignerCheck: job.data.skipSignerCheck,
+    //   });
+    // } catch (e) {
+    //   Sentry.captureException(e);
+    //   throw e;
+    // }
   },
   {
     connection,
@@ -304,18 +293,18 @@ export const sweepQueue = new Queue("sweepQueue", {
 export const sweepWorker = new Worker(
   "sweepQueue",
   async (job: Job<SweepArgs>) => {
-    try {
-      await sweep({
-        channelId: job.data.channelId,
-        limit: job.data.limit,
-        untilTimeUtc: job.data.untilTimeUtc,
-        untilCastHash: job.data.untilCastHash,
-        moderatedChannel: job.data.moderatedChannel,
-      });
-    } catch (e) {
-      Sentry.captureException(e);
-      throw e;
-    }
+    // try {
+    //   await sweep({
+    //     channelId: job.data.channelId,
+    //     limit: job.data.limit,
+    //     untilTimeUtc: job.data.untilTimeUtc,
+    //     untilCastHash: job.data.untilCastHash,
+    //     moderatedChannel: job.data.moderatedChannel,
+    //   });
+    // } catch (e) {
+    //   Sentry.captureException(e);
+    //   throw e;
+    // }
   },
   {
     connection,
@@ -346,23 +335,23 @@ export const simulationQueue = new Queue("simulationQueue", {
 export const simulationWorker = new Worker(
   "simulationQueue",
   async (job: Job<SimulateArgs>) => {
-    let result;
-    try {
-      result = await simulate({
-        channelId: job.data.channelId,
-        limit: job.data.limit,
-        moderatedChannel: job.data.moderatedChannel,
-        proposedModeratedChannel: job.data.proposedModeratedChannel,
-        onProgress: async (castsProcessed: number) => {
-          await job.updateProgress(castsProcessed);
-        },
-      });
-    } catch (e) {
-      Sentry.captureException(e);
-      throw e;
-    }
+    // let result;
+    // try {
+    //   result = await simulate({
+    //     channelId: job.data.channelId,
+    //     limit: job.data.limit,
+    //     moderatedChannel: job.data.moderatedChannel,
+    //     proposedModeratedChannel: job.data.proposedModeratedChannel,
+    //     onProgress: async (castsProcessed: number) => {
+    //       await job.updateProgress(castsProcessed);
+    //     },
+    //   });
+    // } catch (e) {
+    //   Sentry.captureException(e);
+    //   throw e;
+    // }
 
-    return result;
+    // return result;
   },
   {
     connection,
@@ -393,60 +382,60 @@ export const syncQueue = new Queue("syncQueue", {
 export const syncWorker = new Worker(
   "syncQueue",
   async (job: Job<{ channelId: string; rootCastsToProcess: number }>) => {
-    const moderatedChannel = await db.moderatedChannel.findFirst({
-      where: {
-        id: job.data.channelId,
-        active: true,
-      },
-    });
+    // const moderatedChannel = await db.moderatedChannel.findFirst({
+    //   where: {
+    //     id: job.data.channelId,
+    //     active: true,
+    //   },
+    // });
 
-    if (!moderatedChannel) {
-      console.error(`[${job.data.channelId}] sync: moderated channel not found`);
-      return;
-    }
+    // if (!moderatedChannel) {
+    //   console.error(`[${job.data.channelId}] sync: moderated channel not found`);
+    //   return;
+    // }
 
-    let rootCastsChecked = 0;
-    for await (const page of pageChannelCasts({ id: job.data.channelId })) {
-      if (process.env.NODE_ENV === "development") {
-        console.log(`[${job.data.channelId}] sync: page length ${page.casts.length}`);
-      }
-      const castHashes = page.casts.map((cast) => cast.hash);
-      const alreadyProcessed = await db.castLog.findMany({
-        where: {
-          hash: {
-            in: castHashes,
-          },
-        },
-      });
+    // let rootCastsChecked = 0;
+    // for await (const page of pageChannelCasts({ id: job.data.channelId })) {
+    //   if (process.env.NODE_ENV === "development") {
+    //     console.log(`[${job.data.channelId}] sync: page length ${page.casts.length}`);
+    //   }
+    //   const castHashes = page.casts.map((cast) => cast.hash);
+    //   const alreadyProcessed = await db.castLog.findMany({
+    //     where: {
+    //       hash: {
+    //         in: castHashes,
+    //       },
+    //     },
+    //   });
 
-      for (const rootCast of page.casts) {
-        if (process.env.NODE_ENV === "development") {
-          console.log(`[${job.data.channelId}] sync: processing cast ${rootCast.hash}`);
-        }
+    //   for (const rootCast of page.casts) {
+    //     if (process.env.NODE_ENV === "development") {
+    //       console.log(`[${job.data.channelId}] sync: processing cast ${rootCast.hash}`);
+    //     }
 
-        if (rootCastsChecked >= job.data.rootCastsToProcess) {
-          return;
-        }
+    //     if (rootCastsChecked >= job.data.rootCastsToProcess) {
+    //       return;
+    //     }
 
-        if (alreadyProcessed.some((log) => log.hash === rootCast.hash)) {
-          if (process.env.NODE_ENV === "development") {
-            console.log(`[${job.data.channelId}] sync: cast ${rootCast.hash} already processed`);
-          }
-          continue;
-        }
+    //     if (alreadyProcessed.some((log) => log.hash === rootCast.hash)) {
+    //       if (process.env.NODE_ENV === "development") {
+    //         console.log(`[${job.data.channelId}] sync: cast ${rootCast.hash} already processed`);
+    //       }
+    //       continue;
+    //     }
 
-        castQueue.add(
-          "processCast",
-          {
-            moderatedChannel,
-            cast: rootCast,
-          },
-          defaultProcessCastJobArgs(rootCast.hash)
-        );
+    //     castQueue.add(
+    //       "processCast",
+    //       {
+    //         moderatedChannel,
+    //         cast: rootCast,
+    //       },
+    //       defaultProcessCastJobArgs(rootCast.hash)
+    //     );
 
-        rootCastsChecked++;
-      }
-    }
+    //     rootCastsChecked++;
+    //   }
+    // }
   },
   { connection, autorun: !!process.env.ENABLE_QUEUES }
 );
@@ -483,4 +472,3 @@ function init() {
   }
 }
 
-init();
