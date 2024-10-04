@@ -206,6 +206,14 @@ export default function Home() {
                   })}
               </div> */}
             </section>
+
+            <section className="flex flex-col items-center mt-4">
+              <Link to="/channels">
+                <p className="mb-2 text-[#f9ffd9]/80 text-sm">
+                  check all <FarcasterIcon className="-mt-[2px] inline w-3 h-3 text-white/80" /> channels using modbot
+                </p>
+              </Link>
+            </section>
           </section>
         </div>
 

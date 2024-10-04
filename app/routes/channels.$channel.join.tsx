@@ -226,27 +226,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 export async function loader({ params }: LoaderFunctionArgs) {
   invariant(params.channel, "channel id is required");
   const channelId = params.channel;
-  const channel = await db.moderatedChannel.findFirst({
-    where: {
-      id: channelId,
-    },
-  });
-
-  if (!channel) {
-    return frameResponse({
-      title: `/${channelId} not configured`,
-      description: `/${channelId} is not configured to use ModBot`,
-      image: getFrameImageUrl({
-        message: `/${channelId} is not configured to use ModBot`,
-      }),
-      buttons: [
-        {
-          text: "Go to ModBot",
-          link: `${getSharedEnv().hostUrl}`,
-        },
-      ],
-    });
-  }
   return frameResponse({
     title: `Welcome to ${channelId}`,
     description: "Join the channel through ModBot.",

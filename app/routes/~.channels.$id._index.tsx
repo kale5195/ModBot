@@ -51,24 +51,38 @@ export default function Screen() {
   return (
     <div>
       <div>
-        <p className="font-medium">Invite Channel Members</p>
+        <p className="font-medium">Invite Channel Members with Frames</p>
         <p className="text-sm text-gray-500">Add this frame URL to your channel settings.</p>
         <p className="mt-1 text-sm text-gray-500">
           Share this link only after you set <span className="font-medium text-primary">@modbot</span> as channel
           moderator.
         </p>
-        <Card className="mt-2 ">
-          <CardContent className="flex items-center flex-wrap gap-x-4 py-4">
-            <p className="text-sm md:text-lg text-primary font-medium">https://modbot.sh/channels/{channel.id}/join</p>
+        <div className="mt-2 rounded-lg border bg-card text-card-foreground shadow p-4 ">
+          <p className="text-base text-primary font-medium">https://modbot.sh/channels/{channel.id}/join</p>
+          <div className="flex flex-row gap-x-4 mt-4 items-center">
             <Button
-              size={"xs"}
-              variant={"outline"}
+              variant={"secondary"}
               onClick={() => copy(`https://modbot.sh/channels/${channel.id}/join`)}
+              className="min-w-[80px]"
             >
-              {copied ? <Check className="w-3 h-3 inline mr-1" /> : <CopyIcon className="w-3 h-3 inline mr-1" />}
-            </Button>{" "}
-          </CardContent>
-        </Card>
+              {copied ? "Copied" : "Copy"}
+            </Button>
+            <Button
+              variant={"secondary"}
+              onClick={() =>
+                window.open(
+                  `https://warpcast.com/~/developers/frames?url=${encodeURIComponent(
+                    `https://modbot.sh/channels/${channel.id}/join`
+                  )}`,
+                  "_blank"
+                )
+              }
+              className="min-w-[80px]"
+            >
+              Preview
+            </Button>
+          </div>
+        </div>
       </div>
 
       {moderationStats !== null && (
