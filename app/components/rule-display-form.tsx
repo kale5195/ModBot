@@ -4,17 +4,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/no-unescaped-entities */
 
-import {
-  Action,
-  ActionType,
-  Rule,
-  RuleDefinition,
-  RuleName,
-  SelectOption,
-  actionDefinitions,
-  ruleDefinitions,
-} from "~/lib/validations.server";
-
+import { Action, ruleDefinitions } from "~/lib/validations.server";
+import { Rule, RuleDefinition, RuleName, SelectOption } from "~/rules/rules.type";
 import { Input } from "~/components/ui/input";
 import { FieldLabel, SliderField } from "~/components/ui/fields";
 import { Checkbox } from "~/components/ui/checkbox";

@@ -1,7 +1,8 @@
 import { Cast as NeynarCast } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { Prisma } from "@prisma/client";
 
-import { Action, ActionType, Rule, SelectOption } from "./validations.server";
+import { Action, ActionType } from "./validations.server";
+import { Rule, SelectOption } from "~/rules/rules.type";
 
 const FullModeratedChannel = Prisma.validator<Prisma.ModeratedChannelDefaultArgs>()({
   include: {

@@ -3,26 +3,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/no-unescaped-entities */
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
-import {
-  Action,
-  ActionType,
-  Rule,
-  RuleDefinition,
-  RuleName,
-  SelectOption,
-  actionDefinitions,
-  ruleDefinitions,
-} from "~/lib/validations.server";
-
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "~/components/ui/table";
+import { Action, ActionType, actionDefinitions, ruleDefinitions } from "~/lib/validations.server";
+import { Rule, RuleDefinition, RuleName, SelectOption } from "~/rules/rules.type";
 import { loader as jobStatusLoader } from "~/routes/api.channels.$id.simulations.$jobId";
 import { Input } from "~/components/ui/input";
 import { FieldLabel, SliderField } from "~/components/ui/fields";
@@ -391,28 +374,27 @@ function SimulateButton(props: { channelId: string; actionDefs: typeof actionDef
                   <p>{submitJobFetcher.data.message}</p>
                 </Alert>
               )}
-              {!isError(submitJobFetcher.data) &&
-                (submitJobFetcher.data || submitJobFetcher.state !== "idle") && (
-                  <div>
-                    {isFinished(jobStatusFetcher.data) && result && (
-                      <SimulationResultDisplay simulation={result} actionDefinitions={props.actionDefs} />
-                    )}
+              {!isError(submitJobFetcher.data) && (submitJobFetcher.data || submitJobFetcher.state !== "idle") && (
+                <div>
+                  {isFinished(jobStatusFetcher.data) && result && (
+                    <SimulationResultDisplay simulation={result} actionDefinitions={props.actionDefs} />
+                  )}
 
-                    {isFailure(jobStatusFetcher.data) && (
-                      <div className="flex flex-col items-center gap-4 p-8 border rounded-lg">
-                        <ServerCrash className="w-12 h-12" />
-                        <p className="text-center text-sm">Something went wrong. Sorry.</p>
-                      </div>
-                    )}
+                  {isFailure(jobStatusFetcher.data) && (
+                    <div className="flex flex-col items-center gap-4 p-8 border rounded-lg">
+                      <ServerCrash className="w-12 h-12" />
+                      <p className="text-center text-sm">Something went wrong. Sorry.</p>
+                    </div>
+                  )}
 
-                    {simulating && (
-                      <div className="flex flex-col items-center gap-4 p-8 border rounded-lg">
-                        <Bot className="w-12 h-12 animate-bounce" />
-                        <p className="text-center text-sm">Hang tight, this takes about 15 seconds...</p>
-                      </div>
-                    )}
-                  </div>
-                )}
+                  {simulating && (
+                    <div className="flex flex-col items-center gap-4 p-8 border rounded-lg">
+                      <Bot className="w-12 h-12 animate-bounce" />
+                      <p className="text-center text-sm">Hang tight, this takes about 15 seconds...</p>
+                    </div>
+                  )}
+                </div>
+              )}
               {isFinished(jobStatusFetcher.data) && (
                 <>
                   <div className="py-2">
@@ -437,13 +419,7 @@ function SimulateButton(props: { channelId: string; actionDefs: typeof actionDef
               )}
             </DialogContent>
           </Dialog>
-          <Button
-            size={"lg"}
-            className="w-full"
-            type="button"
-            variant="secondary"
-            onClick={() => setIsOpen(true)}
-          >
+          <Button size={"lg"} className="w-full" type="button" variant="secondary" onClick={() => setIsOpen(true)}>
             Simulate
           </Button>
         </>
@@ -452,10 +428,7 @@ function SimulateButton(props: { channelId: string; actionDefs: typeof actionDef
   );
 }
 
-function SimulationResultDisplay(props: {
-  simulation: SimulationResult;
-  actionDefinitions: typeof actionDefinitions;
-}) {
+function SimulationResultDisplay(props: { simulation: SimulationResult; actionDefinitions: typeof actionDefinitions }) {
   const actionCounts: Record<string, { proposed: number; existing: number }> = {};
 
   let proposedCastsActedOn = 0;
@@ -722,9 +695,7 @@ function RuleSetEditor(props: {
                           <p className="text-sm font-semibold">{ruleDef.friendlyName}</p>
                           <p className="text-sm text-gray-500">{ruleDef.description}</p>
                           <div className="flex gap-1 items-center mt-4">
-                            {ruleDef.authorIcon && (
-                              <img src={ruleDef.authorIcon} className="w-4 h-4 rounded-full" />
-                            )}
+                            {ruleDef.authorIcon && <img src={ruleDef.authorIcon} className="w-4 h-4 rounded-full" />}
                             {ruleDef.author && <p className="text-xs text-gray-500">{ruleDef.author}</p>}
                           </div>
                         </div>
@@ -755,9 +726,7 @@ function RuleSetEditor(props: {
                           </div>
                           {ruleDef.author !== "modbot" && (
                             <div className="flex gap-1 items-center mt-4">
-                              {ruleDef.authorIcon && (
-                                <img src={ruleDef.authorIcon} className="w-4 h-4 rounded-full" />
-                              )}
+                              {ruleDef.authorIcon && <img src={ruleDef.authorIcon} className="w-4 h-4 rounded-full" />}
                               {ruleDef.author && <p className="text-xs text-gray-500">{ruleDef.author}</p>}
                             </div>
                           )}
@@ -808,11 +777,7 @@ function RuleArgs(props: {
       return (
         <ClientOnly key={argName}>
           {() => (
-            <FieldLabel
-              label={argDef.friendlyName}
-              description={argDef.description}
-              className="flex-col items-start"
-            >
+            <FieldLabel label={argDef.friendlyName} description={argDef.description} className="flex-col items-start">
               <MoxieMemberPicker
                 name={`${props.name}.${props.ruleIndex}.args.${argName}`}
                 isMulti={false}
@@ -828,11 +793,7 @@ function RuleArgs(props: {
       return (
         <ClientOnly key={argName}>
           {() => (
-            <FieldLabel
-              label={argDef.friendlyName}
-              description={argDef.description}
-              className="flex-col items-start"
-            >
+            <FieldLabel label={argDef.friendlyName} description={argDef.description} className="flex-col items-start">
               <UserPicker
                 name={`${props.name}.${props.ruleIndex}.args.${argName}`}
                 isMulti={false}

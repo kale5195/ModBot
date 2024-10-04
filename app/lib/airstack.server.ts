@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { gql, GraphQLClient } from "graphql-request";
 import { neynar, registerWebhook } from "./neynar.server";
-import { Rule } from "./validations.server";
 import { getWarpcastChannel, getWarpcastChannelOwner } from "./warpcast.server";
 import { ModeratedChannel } from "@prisma/client";
 import invariant from "tiny-invariant";
@@ -10,6 +9,7 @@ import { permissionDefs } from "./permissions.server";
 
 import { fetchQuery, init } from "@airstack/node";
 import { recoverQueue } from "./bullish.server";
+import { Rule } from "~/rules/rules.type";
 
 init(process.env.AIRSTACK_API_KEY!);
 

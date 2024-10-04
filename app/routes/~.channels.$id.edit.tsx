@@ -10,13 +10,8 @@ import {
   requireUser,
   requireUserCanModerateChannel,
 } from "~/lib/utils.server";
-import {
-  ModeratedChannelSchema,
-  Rule,
-  actionDefinitions,
-  getRuleDefinitions,
-  ruleNames,
-} from "~/lib/validations.server";
+import { ModeratedChannelSchema, actionDefinitions, getRuleDefinitions } from "~/lib/validations.server";
+import { Rule, ruleNames } from "~/rules/rules.type";
 import { commitSession, getSession } from "~/lib/auth.server";
 import { db } from "~/lib/db.server";
 import invariant from "tiny-invariant";

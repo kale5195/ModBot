@@ -1,6 +1,4 @@
-import { ModeratedChannel, Prisma } from "@prisma/client";
 import { db } from "~/lib/db.server";
-import { Action, Rule } from "~/lib/validations.server";
 
 async function seed() {
   const haole = await db.user.upsert({
@@ -12,7 +10,7 @@ async function seed() {
       name: "haole",
       role: "superadmin",
       plan: "prime",
-      avatarUrl: "https://i.imgur.com/hekRUeM.png"
+      avatarUrl: "https://i.imgur.com/hekRUeM.png",
     },
     update: {
       id: "3346",

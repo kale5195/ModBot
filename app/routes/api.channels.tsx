@@ -1,6 +1,7 @@
 import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { db } from "~/lib/db.server";
-import { Rule, ruleDefinitions } from "~/lib/validations.server";
+import { ruleDefinitions } from "~/lib/validations.server";
+import { Rule } from "~/rules/rules.type";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const channel = await db.moderatedChannel.findMany({});

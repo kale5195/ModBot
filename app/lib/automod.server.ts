@@ -5,8 +5,8 @@ import { v4 as uuid } from "uuid";
 import { db } from "~/lib/db.server";
 import { neynar } from "~/lib/neynar.server";
 import { getModerators } from "~/lib/utils.server";
-
-import { Action, Rule, actionFunctions, isCohost, ruleFunctions } from "~/lib/validations.server";
+import { Rule } from "~/rules/rules.type";
+import { Action, actionFunctions, isCohost, ruleFunctions } from "~/lib/validations.server";
 import { FullModeratedChannel, WebhookCast } from "~/lib/types";
 import { getWarpcastChannelOwner } from "~/lib/warpcast.server";
 import { PlanType, userPlans } from "~/lib/utils";
@@ -14,7 +14,6 @@ import { PlanType, userPlans } from "~/lib/utils";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export async function cooldown({ channel, user, action }: { channel: string; user: User; action: Action }) {
   // const { duration } = (action as any).args;
-
   // return db.cooldown.upsert({
   //   where: {
   //     affectedUserId_channelId: {
@@ -81,19 +80,15 @@ export async function addToBypass({ channel, user }: { channel: string; user: Us
   //     id: channel,
   //   },
   // });
-
   // const existing = moderatedChannel.excludeUsernamesParsed || [];
-
   // if (existing.some((u) => u.value === cast.author.fid)) {
   //   return;
   // }
-
   // existing.push({
   //   value: cast.author.fid,
   //   label: cast.author.username,
   //   icon: cast.author.pfp_url,
   // });
-
   // return db.moderatedChannel.update({
   //   where: {
   //     id: channel,
@@ -108,14 +103,12 @@ export async function downvote({ channel, user, action }: { channel: string; use
   // if (action.type !== "downvote") {
   //   return;
   // }
-
   // const { voterFid, voterAvatarUrl, voterUsername } = action.args;
   // await db.moderatedChannel.findFirstOrThrow({
   //   where: {
   //     id: channel,
   //   },
   // });
-
   // await db.downvote.upsert({
   //   where: {
   //     fid_castHash: {
@@ -145,9 +138,7 @@ export async function grantRole({ channel, user, action }: { channel: string; us
   //     id: roleId,
   //   },
   // });
-
   // const user = await neynar.lookupUserByUsername(cast.author.username);
-
   // return db.delegate.upsert({
   //   where: {
   //     fid_roleId_channelId: {
@@ -176,13 +167,10 @@ export async function unlike(props: { user: User; channel: string }) {
   //     signer: true,
   //   },
   // });
-
   // const uuid = signerAlloc?.signer.signerUuid || process.env.NEYNAR_SIGNER_UUID!;
-
   // console.log(
   //   `Unliking with @${signerAlloc ? signerAlloc.signer.username : "automod"}, cast: ${props.cast.hash}`
   // );
-
   // await neynar.deleteReactionFromCast(uuid, "like", props.cast.hash);
 }
 
@@ -240,7 +228,6 @@ export async function validateCast({
   //   },
   // });
 
-
   if (!user) {
     Sentry.captureMessage(`User not found`);
   }
@@ -250,16 +237,12 @@ export async function validateCast({
   const isOwner = channelOwner === user.fid;
 
   if (isExcluded || isOwner) {
-    const message = isOwner
-      ? `@${user.username} is the channel owner`
-      : `@${user.username} is in the bypass list.`;
+    const message = isOwner ? `@${user.username} is the channel owner` : `@${user.username} is in the bypass list.`;
 
     console.log(message);
 
     const [, log] = await Promise.all([
-      simulation
-        ? Promise.resolve()
-        : Promise.resolve(), // invite to channel
+      simulation ? Promise.resolve() : Promise.resolve(), // invite to channel
       logModerationAction(moderatedChannel.id, "like", message, user, simulation),
     ]);
 
@@ -403,13 +386,7 @@ export async function validateCast({
       });
     }
     logs.push(
-      await logModerationAction(
-        moderatedChannel.id,
-        "hideQuietly",
-        inclusionCheck.explanation,
-        user,
-        simulation
-      )
+      await logModerationAction(moderatedChannel.id, "hideQuietly", inclusionCheck.explanation, user, simulation)
     );
   }
 
@@ -437,8 +414,8 @@ export async function logModerationAction(
         affectedUsername: user.username || String(user.fid) || "unknown",
         affectedUserAvatarUrl: user.pfp_url,
         affectedUserFid: String(user.fid),
-        castText: '',
-        castHash: '',
+        castText: "",
+        castHash: "",
         rule: rule ? JSON.stringify(rule) : "{}",
       },
     });
@@ -452,8 +429,8 @@ export async function logModerationAction(
       affectedUsername: user.username || String(user.fid) || "unknown",
       affectedUserAvatarUrl: user.pfp_url || null,
       affectedUserFid: String(user.fid),
-      castHash: '',
-      castText: '',
+      castHash: "",
+      castText: "",
       createdAt: new Date(),
       updatedAt: new Date(),
       rule: rule ? JSON.stringify(rule) : "{}",
