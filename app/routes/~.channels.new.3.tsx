@@ -13,7 +13,7 @@ import { z } from "zod";
 import { db } from "~/lib/db.server";
 import { permissionDefs } from "~/lib/permissions.server";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "~/components/ui/card";
-import { registerWebhook } from "~/lib/neynar.server";
+import { followChannel, registerWebhook } from "~/lib/neynar.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireUser({ request });
@@ -147,6 +147,12 @@ export async function action({ request }: ActionFunctionArgs) {
       ...ruleSets,
     },
   });
+  // follow the channel
+  try {
+    await followChannel({ channelId: moderatedChannel.id });
+  } catch (e) {
+    console.log("Failed to follow channel", e);
+  }
 
   // await Promise.all([
   //   db.role.create({
@@ -205,7 +211,7 @@ export default function Screen() {
         <CardHeader>
           <ChannelHeader channel={channel} />
           <CardTitle>
-            Invite {" "}
+            Invite{" "}
             <a href={`https://warpcast.com/modbot`} target="_blank" className="underline-offset-2" rel="noreferrer">
               @modbot
             </a>{" "}

@@ -128,6 +128,21 @@ export async function inviteToChannel({ channelId, fid }: { channelId: string; f
   );
   return res;
 }
+export async function followChannel({ channelId }: { channelId: string }) {
+  const res = await axios.post(
+    `https://api.neynar.com/v2/farcaster/channel/follow`,
+    {
+      signer_uuid: process.env.NEYNAR_SIGNER_UUID!,
+      channel_id: channelId,
+    },
+    {
+      headers: {
+        api_key: process.env.NEYNAR_API_KEY!,
+      },
+    }
+  );
+  return res;
+}
 export async function* pageChannelCasts(props: { id: string }) {
   let cursor: string | null | undefined = undefined;
 
