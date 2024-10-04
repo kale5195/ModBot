@@ -9,7 +9,7 @@ async function holdsChannelFanToken(args: CheckFunctionArgs) {
 
   return {
     result: hasEnough,
-    message: hasEnough ? `Holds /${channel.id} Fan Token` : `Does not hold enough /${channel.id} Fan Token`,
+    message: hasEnough ? `Holds /${channel.id} Fan Token` : `Does not hold enough /${channel.id} Channel Fan Token`,
   };
 }
 

@@ -178,6 +178,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const log = logs[0];
     // console.log("log", log);
     const action = log.action;
+    const needChannelFanToken = log.reason.includes("Channel Fan Token");
     return frameResponse({
       title: `Join ${channelId}`,
       description: "Join the channel through ModBot.",
@@ -199,6 +200,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
               {
                 text: "Try again",
               },
+              ...(needChannelFanToken
+                ? [
+                    {
+                      text: "Buy Fan Token",
+                      target: `https://moxie-frames.airstack.xyz/stim/frame?f=3&r=19&t=cid_${channelId}`,
+                    },
+                  ]
+                : []),
               {
                 text: "Check Reasons",
                 link: `${getSharedEnv().hostUrl}/channels/${channelId}?fid=${user.fid}`,
