@@ -65,9 +65,9 @@ export default function ChannelRoot() {
   const enableFetcher = useFetcher();
   const [isNotConfigured, setIsNotConfigured] = useState<boolean>(false);
 
-  useEffect(() => {
-    setIsNotConfigured(!signerFid || !warpcastChannel.moderatorFids.includes(+signerFid));
-  }, []);
+  // useEffect(() => {
+  //   setIsNotConfigured(!signerFid || !warpcastChannel.moderatorFids.includes(+signerFid));
+  // }, []);
 
   return (
     <div>
