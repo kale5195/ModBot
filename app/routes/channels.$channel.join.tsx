@@ -217,8 +217,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
         };
       };
     };
-    const errorMessage =
-      error.response?.data?.message?.[0]?.message || "Internal error, ask channel owner set @modbot as moderator";
+    console.log("error", JSON.stringify(error, null, 2));
+    const errorMessage = error.response?.data?.message?.[0]?.message || "Internal error, try again later";
     return frameResponse({
       title: "Internal error",
       description: errorMessage,
