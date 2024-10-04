@@ -65,9 +65,9 @@ export default function ChannelRoot() {
   const enableFetcher = useFetcher();
   const [isNotConfigured, setIsNotConfigured] = useState<boolean>(false);
 
-  // useEffect(() => {
-  //   setIsNotConfigured(!signerFid || !warpcastChannel.moderatorFids.includes(+signerFid));
-  // }, []);
+  useEffect(() => {
+    setIsNotConfigured(!signerFid || !warpcastChannel.moderatorFids.includes(+signerFid));
+  }, []);
 
   return (
     <div>
@@ -150,9 +150,6 @@ export default function ChannelRoot() {
                     @{signerUsername}
                   </a>{" "}
                   as the moderator.
-                </div>
-                <div className="text-red-500">
-                  You can do this step at October 4th, 2024, otherwise it will break your existing channnel feeds.
                 </div>
                 <Button asChild>
                   <a

@@ -171,7 +171,7 @@ export async function action({ request }: ActionFunctionArgs) {
   //   }),
   // ]);
   return redirect(`/~/channels/${moderatedChannel.id}`);
-  return redirect(`/~/channels/new/4?channelId=${moderatedChannel.id}`);
+  //return redirect(`/~/channels/new/4?channelId=${moderatedChannel.id}`);
 }
 
 export default function Screen() {
@@ -204,18 +204,32 @@ export default function Screen() {
       <Card>
         <CardHeader>
           <ChannelHeader channel={channel} />
-          <CardTitle>Set @modbot as your channel's moderator</CardTitle>
+          <CardTitle>
+            Set{" "}
+            <a href={`https://warpcast.com/modbot`} target="_blank" className="underline-offset-2" rel="noreferrer">
+              @modbot
+            </a>{" "}
+            as your channel's moderator
+          </CardTitle>
           <CardDescription>
             @modbot will auto invite people who meet your channel rules. You can also remove the people @modbot invited
             at any time.
-            <div className="mt-1 text-red-500">
-              You can do this step at October 4th, 2024,, otherwise it will break your existing channnel feeds.
-            </div>
           </CardDescription>
         </CardHeader>
         <form method="post" className="space-y-8" onSubmit={methods.handleSubmit(onSubmit)}>
-          <CardFooter>
-            <Button type="submit" className="w-full sm:w-[150px]">
+          <CardFooter className="flex gap-x-4">
+            <a
+              className="no-underline"
+              href={`https://warpcast.com/~/channel/${channel.id}/settings/moderation`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 w-full sm:w-[150px] bg-black/80 text-primary-foreground shadow hover:bg-black/90 h-9 px-4 py-2">
+                Go to Settings
+              </div>
+            </a>
+
+            <Button type="submit" variant="secondary" className="w-full sm:w-[150px]">
               Next
             </Button>
           </CardFooter>
