@@ -246,11 +246,7 @@ export function ChannelCard(props: { channel: Pick<ModeratedChannel, "id" | "ima
   const { channel } = props;
   return (
     <div className="flex gap-2 rounded-lg p-4 shadow border hover:border-orange-200 hover:shadow-orange-200 transition-all duration-300 items-center">
-      <img
-        src={getChannelImageUrl(props.channel.id)}
-        alt={channel.id}
-        className="h-12 w-12 rounded-full block  shrink-0"
-      />
+      <img src={props.channel.imageUrl || ""} alt={channel.id} className="h-12 w-12 rounded-full block  shrink-0" />
       <div className="w-full overflow-hidden">
         <h3
           title={channel.id}
