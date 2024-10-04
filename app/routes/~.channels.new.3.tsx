@@ -205,7 +205,7 @@ export default function Screen() {
         <CardHeader>
           <ChannelHeader channel={channel} />
           <CardTitle>
-            Set{" "}
+            Invite {" "}
             <a href={`https://warpcast.com/modbot`} target="_blank" className="underline-offset-2" rel="noreferrer">
               @modbot
             </a>{" "}
@@ -220,7 +220,7 @@ export default function Screen() {
           <CardFooter className="flex gap-x-4">
             <a
               className="no-underline"
-              href={`https://warpcast.com/~/channel/${channel.id}/settings/moderation`}
+              href={`https://warpcast.com/~/channel/${channel.id}/settings/invite`}
               target="_blank"
               rel="noreferrer"
             >

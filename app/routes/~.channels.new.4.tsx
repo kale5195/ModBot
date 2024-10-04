@@ -109,7 +109,7 @@ export default function Screen() {
                   Open{" "}
                   <a
                     className="no-underline"
-                    href={`https://warpcast.com/~/channel/${channel.id}/settings/moderation`}
+                    href={`https://warpcast.com/~/channel/${channel.id}/settings/invite`}
                     target="_blank"
                     rel="noreferrer"
                   >
