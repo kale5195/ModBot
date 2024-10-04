@@ -6,9 +6,11 @@ import { validateCast } from "~/lib/automod.server";
 import { User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { isBannedByChannel, isChannelInvited, isChannelMember, isFollowingChannel } from "~/lib/warpcast.server";
 
-function getFrameImageUrl(props: { message: string; channel?: string }) {
-  const { message, channel } = props;
-  return `${getSharedEnv().hostUrl}/api/images?message=${message}${channel ? `&channel=${channel}` : ""}`;
+function getFrameImageUrl(props: { message: string; channel?: string; color?: string | null }) {
+  const { message, channel, color } = props;
+  return `${getSharedEnv().hostUrl}/api/images?message=${message}${channel ? `&channel=${channel}` : ""}${
+    color ? `&c=${color}` : ""
+  }`;
 }
 
 async function rateLimit(key: string): Promise<boolean> {
@@ -36,6 +38,8 @@ function getDeclinedReasons(reason: string) {
 export async function action({ request, params }: ActionFunctionArgs) {
   invariant(params.channel, "channel id is required");
   const channelId = params.channel;
+  const url = new URL(request.url);
+  const color = url.searchParams.get("c");
   try {
     const data = await request.json();
     // TODO may need async check, queue
@@ -53,6 +57,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         description: `/${channelId} is not configured to use ModBot`,
         image: getFrameImageUrl({
           message: `/${channelId} is not configured to use ModBot`,
+          color,
         }),
         buttons: [
           {
@@ -73,6 +78,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         image: getFrameImageUrl({
           message: `Please follow /${channelId} first`,
           channel: channelId,
+          color,
         }),
         buttons: [
           {
@@ -95,6 +101,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         image: getFrameImageUrl({
           message: `You are already a member of /${channelId}`,
           channel: channelId,
+          color,
         }),
         buttons: [
           {
@@ -115,6 +122,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         image: getFrameImageUrl({
           message: "You are already invited!",
           channel: channelId,
+          color,
         }),
         buttons: [
           {
@@ -133,6 +141,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         image: getFrameImageUrl({
           message: "Too fast, try again later",
           channel: channelId,
+          color,
         }),
         buttons: [
           {
@@ -150,6 +159,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         image: getFrameImageUrl({
           message: `You are banned from /${channelId}`,
           channel: channelId,
+          color,
         }),
         buttons: [
           {
@@ -174,6 +184,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       image: getFrameImageUrl({
         message: action === "like" ? "Invite sent!" : getDeclinedReasons(log.reason),
         channel: channelId,
+        color,
       }),
       postUrl: `${getSharedEnv().hostUrl}/channels/${channelId}/join`,
       buttons:
@@ -213,6 +224,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       description: errorMessage,
       image: getFrameImageUrl({
         message: errorMessage,
+        color,
       }),
       buttons: [
         {
@@ -223,17 +235,20 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 }
 
-export async function loader({ params }: LoaderFunctionArgs) {
+export async function loader({ params, request }: LoaderFunctionArgs) {
   invariant(params.channel, "channel id is required");
   const channelId = params.channel;
+  const url = new URL(request.url);
+  const color = url.searchParams.get("c") || "ea580c";
   return frameResponse({
     title: `Welcome to ${channelId}`,
     description: "Join the channel through ModBot.",
     image: getFrameImageUrl({
       message: `Welcome to /${channelId}`,
       channel: channelId,
+      color,
     }),
-    postUrl: `${getSharedEnv().hostUrl}/channels/${channelId}/join`,
+    postUrl: `${getSharedEnv().hostUrl}/channels/${channelId}/join?c=${color}`,
     buttons: [
       {
         text: `Join Now`,

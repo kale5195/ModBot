@@ -11,7 +11,7 @@ import {
 } from "~/lib/utils.server";
 import { Await } from "@remix-run/react";
 import { actionDefinitions } from "~/lib/validations.server";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
@@ -20,6 +20,7 @@ import { Badge } from "~/components/ui/badge";
 import { CopyIcon, Check } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { useClipboard } from "~/lib/utils";
+import ColorPicker from "~/components/color-picker";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   invariant(params.id, "id is required");
@@ -48,6 +49,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 export default function Screen() {
   const { channel, moderationStats } = useTypedLoaderData<typeof loader>();
   const { copy, copied } = useClipboard();
+  const [color, setColor] = useState<string | null>(null);
+  function getFrameUrl() {
+    return `https://modbot.sh/channels/${channel.id}/join${color ? `?c=${color}` : ""}`;
+  }
   return (
     <div>
       <div>
@@ -58,22 +63,18 @@ export default function Screen() {
           moderator.
         </p>
         <div className="mt-2 rounded-lg border bg-card text-card-foreground shadow p-4 ">
-          <p className="text-base text-primary font-medium">https://modbot.sh/channels/{channel.id}/join</p>
-          <div className="flex flex-row gap-x-4 mt-4 items-center">
-            <Button
-              variant={"secondary"}
-              onClick={() => copy(`https://modbot.sh/channels/${channel.id}/join`)}
-              className="min-w-[80px]"
-            >
+          <p className="text-base font-medium" style={{ color: color ? `#${color}` : "#ea580c" }}>
+            {getFrameUrl()}
+          </p>
+          <div className="flex flex-row gap-4 mt-4 items-center flex-wrap">
+            <Button variant={"secondary"} onClick={() => copy(getFrameUrl())} className="min-w-[80px]">
               {copied ? "Copied" : "Copy"}
             </Button>
             <Button
               variant={"secondary"}
               onClick={() =>
                 window.open(
-                  `https://warpcast.com/~/developers/frames?url=${encodeURIComponent(
-                    `https://modbot.sh/channels/${channel.id}/join`
-                  )}`,
+                  `https://warpcast.com/~/developers/frames?url=${encodeURIComponent(getFrameUrl())}`,
                   "_blank"
                 )
               }
@@ -81,6 +82,7 @@ export default function Screen() {
             >
               Preview
             </Button>
+            <ColorPicker setColor={setColor} />
           </div>
         </div>
       </div>

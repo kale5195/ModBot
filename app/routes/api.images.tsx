@@ -8,8 +8,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const message = url.searchParams.get("message") || "Hello";
   const channel = url.searchParams.get("channel") || "";
-
-  const imageBase64 = await generateFrame({ message, channel });
+  const color = url.searchParams.get("c") || "ea580c";
+  const imageBase64 = await generateFrame({ message, channel, color });
   const base64Data = imageBase64.split(",")[1];
   const imageBuffer = Buffer.from(base64Data, "base64");
 
@@ -22,16 +22,14 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   });
 }
 
-export async function generateFrame(props: { message: string; channel?: string }) {
+export async function generateFrame(props: { message: string; channel?: string; color?: string }) {
   const response = await fetch(`${getSharedEnv().hostUrl}/fonts/kode-mono-bold.ttf`);
   const fontBuffer = await response.arrayBuffer();
   const styles: CSSProperties = {
     display: "flex",
     color: "white",
     fontFamily: "Kode Mono",
-    backgroundColor: "rgba(237,3,32,0.87) 20.8%",
-    backgroundImage:
-      "radial-gradient(circle farthest-corner at 10% 20%, rgba(237,3,32,0.87) 20.8%, rgba(242,121,1,0.84) 74.4%)",
+    backgroundColor: props.color ? `#${props.color}` : "#ea580c", // #000 #472B82 #7c65c1
     height: "100%",
     width: "100%",
     padding: 72,
