@@ -4,7 +4,13 @@ import { frameResponse, getSetCache, getSharedEnv, parseMessage } from "~/lib/ut
 import invariant from "tiny-invariant";
 import { validateCast } from "~/lib/automod.server";
 import { User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
-import { isBannedByChannel, isChannelInvited, isChannelMember, isFollowingChannel } from "~/lib/warpcast.server";
+import {
+  getWarpcastChannel,
+  isBannedByChannel,
+  isChannelInvited,
+  isChannelMember,
+  isFollowingChannel,
+} from "~/lib/warpcast.server";
 
 function getFrameImageUrl(props: { message: string; channel?: string; color?: string | null }) {
   const { message, channel, color } = props;
@@ -234,7 +240,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
       };
     };
     console.log("error", JSON.stringify(error, null, 2));
-    const errorMessage = error.response?.data?.message?.[0]?.message || "Internal error, try again later";
+    const wcChannel = await getWarpcastChannel({ channel: channelId });
+    const hasModerator = wcChannel.moderatorFids.includes(861203);
+    const errorMessage = hasModerator
+      ? error.response?.data?.message?.[0]?.message || "Internal error, try again later"
+      : "Please ask channel owner set @modbot as moderator";
     return frameResponse({
       title: "Internal error",
       description: errorMessage,
@@ -242,17 +252,26 @@ export async function action({ request, params }: ActionFunctionArgs) {
         message: errorMessage,
         color,
       }),
-      buttons: [
-        {
-          text: "Try again",
-        },
-        {
-          text: "Contact Dev",
-          link: `https://warpcast.com/~/inbox/create/3346?text=${encodeURIComponent(
-            `Internal error when joining /${channelId}?`
-          )}`,
-        },
-      ],
+      buttons: hasModerator
+        ? [
+            {
+              text: "Try again",
+            },
+            {
+              text: "Contact Dev",
+              link: `https://warpcast.com/~/inbox/create/3346?text=${encodeURIComponent(
+                `Internal error when joining /${channelId}?`
+              )}`,
+            },
+          ]
+        : [
+            {
+              text: "DC Owner",
+              link: `https://warpcast.com/~/inbox/create/${wcChannel.leadFid}?text=${encodeURIComponent(
+                `Please set @modbot as moderator for /${channelId}?`
+              )}`,
+            },
+          ],
     });
   }
 }

@@ -22,16 +22,8 @@ export type WarpcastChannel = {
 export const warpcastChannelCacheKey = (channel: string) => `warpcast-channel-${channel.toLowerCase()}`;
 
 export async function getWarpcastChannel(props: { channel: string }): Promise<WarpcastChannel> {
-  return getSetCache({
-    key: warpcastChannelCacheKey(props.channel),
-    ttlSeconds: 60 * 5,
-    get: async () => {
-      const rsp = await http.get(
-        `https://api.warpcast.com/v1/channel?channelId=${props.channel.toLowerCase()}`
-      );
-      return rsp.data.result.channel;
-    },
-  });
+  const rsp = await http.get(`https://api.warpcast.com/v1/channel?channelId=${props.channel.toLowerCase()}`);
+  return rsp.data.result.channel;
 }
 
 export async function getWarpcastChannels() {
@@ -47,7 +39,7 @@ export async function getWarpcastChannels() {
   });
 }
 
-export async function isChannelInvited(props: { channel: string, fid: number }) {
+export async function isChannelInvited(props: { channel: string; fid: number }) {
   const { channel, fid } = props;
   const rsp = await http.get<{ result: { invites: [] } }>(
     `https://api.warpcast.com/fc/channel-invites?channelId=${channel}&fid=${fid}`
@@ -86,10 +78,9 @@ export async function getOwnedChannels(props: { fid: number }) {
 export async function getCast(props: { hash: string; username: string }) {
   return http
     .get<{ result: { casts: Array<{ text: string; timestamp: number }> } }>(
-      `https://client.warpcast.com/v2/user-thread-casts?castHashPrefix=${props.hash.substring(
-        0,
-        10
-      )}&username=${props.username}`
+      `https://client.warpcast.com/v2/user-thread-casts?castHashPrefix=${props.hash.substring(0, 10)}&username=${
+        props.username
+      }`
     )
     .then((rsp) => rsp.data.result?.casts[0]);
 }
