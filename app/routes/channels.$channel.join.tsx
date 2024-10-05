@@ -201,7 +201,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
                 text: "Try again",
               },
               {
-                text: "Check Rules",
+                text: "Check Reason",
                 link: `${getSharedEnv().hostUrl}/channels/${channelId}?fid=${user.fid}`,
               },
               ...(needChannelFanToken
@@ -276,7 +276,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
         text: `Join Now`,
       },
       {
-        text: "Check rules",
+        text: "Who can join?",
         link: `${getSharedEnv().hostUrl}/channels/${channelId}`,
       },
     ],
