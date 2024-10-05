@@ -3,7 +3,7 @@ import { base, mainnet, optimism, zora } from "viem/chains";
 import { http } from "./http.server";
 
 export async function nftsByWallets(props: { chains: string[]; contractAddresses: string[]; wallets: string[] }) {
-  const url = new URL(`https://api.simplehash.com/api/v0/nfts/owners`);
+  const url = new URL(`https://preview.recaster.org/api/nft-proxy`);
   url.searchParams.set("chains", props.chains.join(","));
   url.searchParams.set("contract_addresses", props.contractAddresses.join(","));
   url.searchParams.set("wallet_addresses", props.wallets.join(","));
