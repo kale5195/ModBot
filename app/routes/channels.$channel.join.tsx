@@ -201,7 +201,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
                 text: "Try again",
               },
               {
-                text: "Rules",
+                text: "Check Rules",
                 link: `${getSharedEnv().hostUrl}/channels/${channelId}?fid=${user.fid}`,
               },
               ...(needChannelFanToken
@@ -213,7 +213,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
                   ]
                 : [
                     {
-                      text: "DM Moderator",
+                      text: "DC Moderator",
                       link: `https://warpcast.com/~/inbox/create/${channel.userId}?text=${encodeURIComponent(
                         `Could you add me to /${channelId}?`
                       )}`,

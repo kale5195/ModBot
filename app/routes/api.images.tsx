@@ -32,7 +32,10 @@ export async function generateFrame(props: { message: string; channel?: string; 
     backgroundColor: props.color ? `#${props.color}` : "#ea580c", // #000 #472B82 #7c65c1
     height: "100%",
     width: "100%",
-    padding: 72,
+    paddingTop: 72,
+    paddingBottom: 72,
+    paddingLeft: 20,
+    paddingRight: 20,
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
