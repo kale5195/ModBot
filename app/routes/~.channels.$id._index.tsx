@@ -16,8 +16,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Skeleton } from "~/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { ModerationStats30Days, getModerationStats30Days } from "~/lib/stats.server";
-import { Badge } from "~/components/ui/badge";
-import { CopyIcon, Check } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { useClipboard } from "~/lib/utils";
 import ColorPicker from "~/components/color-picker";

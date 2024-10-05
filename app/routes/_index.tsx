@@ -19,13 +19,10 @@ import { Button } from "~/components/ui/button";
 import { authenticator } from "~/lib/auth.server";
 import { getSharedEnv } from "~/lib/utils.server";
 import { Farcaster } from "~/components/icons/farcaster";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import invariant from "tiny-invariant";
-import { db } from "~/lib/db.server";
-import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { FarcasterIcon } from "~/components/FarcasterIcon";
 import { User } from "@prisma/client";
-import { MagicWandIcon } from "@radix-ui/react-icons";
 
 export const meta: MetaFunction<typeof loader> = (data) => {
   return [
@@ -65,35 +62,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
     });
   }
 
-  const [activeChannels] = await Promise.all([
-    db.moderatedChannel.findMany({
-      select: {
-        id: true,
-        imageUrl: true,
-      },
-      where: {
-        id: {
-          in: [
-            "samantha",
-            "base",
-            "coop-recs",
-            "rainbow",
-            "seaport",
-            "farcasther",
-            "degen",
-            "fitness",
-            "higher",
-            "zk",
-            "replyguys",
-            "ogs",
-            "wake",
-          ],
-        },
-      },
-      take: 10,
-    }),
-  ]);
-
   const user = await authenticator.isAuthenticated(request);
 
   return typedjson({
@@ -101,28 +69,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
     user,
     invite,
     error,
-    activeChannels,
   });
 }
 
 export default function Home() {
-  const { user, env, error, activeChannels } = useTypedLoaderData<typeof loader>();
-  // const coin = useRef<HTMLAudioElement>();
-
-  // useEffect(() => {
-  //   if (!coin.current) {
-  //     coin.current = new Audio("/1up.wav");
-  //   }
-  //   const audio = coin.current;
-  //   audio.preload = "auto";
-  //   audio.load();
-  // }, []);
-
-  // const playSound = () => {
-  //   // Clone the audio node and play it
-  //   const audioClone = coin.current?.cloneNode() as HTMLAudioElement;
-  //   audioClone.play().catch((error) => console.error("Error playing the sound:", error));
-  // };
+  const { user, env, error } = useTypedLoaderData<typeof loader>();
 
   return (
     <main
@@ -274,16 +225,7 @@ export default function Home() {
               />
             </div>
           </div>
-          {/* <div className="pt-16">
-            <LoginButton user={user} error={error} env={env} />
-          </div> */}
         </div>
-
-        {/* <div className="py-7 max-w-5xl mx-auto">
-          <PricingTable />
-        </div> */}
-
-        {/* footer */}
 
         <footer
           className="p-7 text-xs py-12 w-full"

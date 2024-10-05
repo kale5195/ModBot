@@ -11,7 +11,6 @@ import { RuleDisplayForm } from "~/components/rule-display-form";
 import { RuleSet } from "~/lib/types";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "@remix-run/react";
-import { getChannelImageUrl } from "~/lib/utils";
 import { Card, CardHeader, CardContent } from "~/components/ui/card";
 
 export const meta: MetaFunction<typeof loader> = (data) => {
@@ -83,7 +82,7 @@ export default function Channels() {
       </Link>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <img src={getChannelImageUrl(channel.id)} className="w-10 h-10 rounded-full" />
+          <img src={channel.imageUrl || ""} className="w-10 h-10 rounded-full" />
           <a
             href={`https://warpcast.com/~/channel/${channel.id}`}
             className="no-underline"

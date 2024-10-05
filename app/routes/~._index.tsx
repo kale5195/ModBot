@@ -18,7 +18,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "~/components/ui/dialog";
-import { cn, getChannelImageUrl, PlanType, userPlans } from "~/lib/utils";
+import { cn, PlanType, userPlans } from "~/lib/utils";
 import { refreshAccountStatus } from "~/lib/subscription.server";
 import { ModeratedChannel } from "@prisma/client";
 
@@ -116,11 +116,11 @@ export default function FrameConfig() {
               <AlertDescription>
                 <p>
                   Upgrade to{" "}
-                  <a href="https://hypersub.withfabric.xyz/s/automod/2" target="_blank" rel="noreferrer">
+                  <a href="https://warpcast.com/haole" target="_blank" rel="noreferrer">
                     Prime
                   </a>{" "}
                   or{" "}
-                  <a href="https://hypersub.withfabric.xyz/s/automod" target="_blank" rel="noreferrer">
+                  <a href="https://warpcast.com/haole" target="_blank" rel="noreferrer">
                     Ultra
                   </a>{" "}
                   for way more.
@@ -146,11 +146,11 @@ export default function FrameConfig() {
               <AlertDescription>
                 <p>
                   Automated moderation is currently paused. Upgrade to{" "}
-                  <a href="https://hypersub.withfabric.xyz/s/automod/2" target="_blank" rel="noreferrer">
+                  <a href="https://warpcast.com/haole" target="_blank" rel="noreferrer">
                     Prime
                   </a>{" "}
                   or{" "}
-                  <a href="https://hypersub.withfabric.xyz/s/automod" target="_blank" rel="noreferrer">
+                  <a href="https://warpcast.com/haole" target="_blank" rel="noreferrer">
                     Ultra
                   </a>
                   .
