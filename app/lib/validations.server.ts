@@ -22,6 +22,8 @@ import { paragraphRulesDefinitions, paragraphRulesFunction } from "~/rules/parag
 import { powerbadgeRulesDefinitions, powerbadgeRulesFunction } from "~/rules/powerbadge";
 import { airstackRulesDefinitions, airstackRulesFunction } from "~/rules/airstack";
 import { botOrNotRulesDefinitions, botOrNotRulesFunction } from "~/rules/bot-or-not";
+import { channelMemberRulesDefinitions, channelMemberRulesFunction } from "~/rules/membership";
+import { getWarpcastChannel } from "~/lib/warpcast.server";
 
 export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
   ...botOrNotRulesDefinitions,
@@ -37,8 +39,26 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
   ...userFidRulesDefinitions,
   ...ercTokenRulesDefinitions,
   ...iceBreakerRulesDefinitions,
+  ...channelMemberRulesDefinitions,
 } as const;
 
+export const ruleFunctions: Record<RuleName, CheckFunction> = {
+  ...botOrNotRulesFunction,
+  ...airstackRulesFunction,
+  ...powerbadgeRulesFunction,
+  ...paragraphRulesFunction,
+  ...regularRulesFunction,
+  ...userFollowRulesFunction,
+  ...userProfileRulesFunction,
+  ...openrankRulesFunction,
+  ...hypersubRulesFunction,
+  ...userFidRulesFunction,
+  ...fantokenRulesFunction,
+  ...ercTokenRulesFunction,
+  ...iceBreakerRulesFunction,
+  ...channelMemberRulesFunction,
+  // webhook: webhook,
+};
 export type ActionDefinition = {
   friendlyName: string;
   description: string;
@@ -249,22 +269,22 @@ export const RuleSchema: z.ZodType<Rule> = BaseRuleSchema.extend({
       message: "Your channel doesn't have a Fan Token yet. Contact /airstack",
     }
   )
-  // .refine(
-  //   async (data) => {
-  //     if (data.name === "userFollowsChannel") {
-  //       const channel = await getWarpcastChannel({ channel: data.args.channelSlug }).catch(() => null);
+  .refine(
+    async (data) => {
+      if (data.name === "userIsChannelMember") {
+        const channel = await getWarpcastChannel({ channel: data.args.channelSlug }).catch(() => null);
 
-  //       if (!channel) {
-  //         return false;
-  //       }
-  //     }
+        if (!channel) {
+          return false;
+        }
+      }
 
-  //     return true;
-  //   },
-  //   {
-  //     message: `Couldn't find that channel. Sure you got it right?`,
-  //   }
-  // )
+      return true;
+    },
+    {
+      message: `Couldn't find that channel. Sure you got it right?`,
+    }
+  )
   .refine(
     async (data) => {
       if (data.name === "requiresErc721") {
@@ -386,23 +406,6 @@ export const ModeratedChannelSchema = z
         'You need least one rule that includes casts.\n\nIf you just want to specify what to exclude, add the "Always Include" rule.',
     }
   );
-
-export const ruleFunctions: Record<RuleName, CheckFunction> = {
-  ...botOrNotRulesFunction,
-  ...airstackRulesFunction,
-  ...powerbadgeRulesFunction,
-  ...paragraphRulesFunction,
-  ...regularRulesFunction,
-  ...userFollowRulesFunction,
-  ...userProfileRulesFunction,
-  ...openrankRulesFunction,
-  ...hypersubRulesFunction,
-  ...userFidRulesFunction,
-  ...fantokenRulesFunction,
-  ...ercTokenRulesFunction,
-  ...iceBreakerRulesFunction,
-  // webhook: webhook,
-};
 
 export const actionFunctions: Record<ActionType, ActionFunction> = {
   hideQuietly: hideQuietly,
