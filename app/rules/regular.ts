@@ -74,7 +74,7 @@ export const regularRulesDefinitions: Record<RuleName, RuleDefinition> = {
     authorIcon: `/icons/modbot.png`,
     allowMultiple: true,
     category: "inclusion",
-    friendlyName: "Anyone can join",
+    friendlyName: "Anyone Can Join",
     checkType: "cast",
     description: "Anyone can join your channel.",
     hidden: false,
