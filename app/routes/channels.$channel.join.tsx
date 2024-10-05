@@ -126,7 +126,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         }),
         buttons: [
           {
-            text: "Accept Invite",
+            text: "Check Notifications",
             link: `https://warpcast.com/~/notifications`,
           },
         ],
@@ -192,13 +192,17 @@ export async function action({ request, params }: ActionFunctionArgs) {
         action === "like"
           ? [
               {
-                text: "Accept Invite",
+                text: "Check Notifications",
                 link: `https://warpcast.com/~/notifications`,
               },
             ]
           : [
               {
                 text: "Try again",
+              },
+              {
+                text: "Check Reasons",
+                link: `${getSharedEnv().hostUrl}/channels/${channelId}?fid=${user.fid}`,
               },
               ...(needChannelFanToken
                 ? [
@@ -207,11 +211,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
                       target: `https://moxie-frames.airstack.xyz/stim/frame?f=3&r=19&t=cid_${channelId}`,
                     },
                   ]
-                : []),
-              {
-                text: "Check Reasons",
-                link: `${getSharedEnv().hostUrl}/channels/${channelId}?fid=${user.fid}`,
-              },
+                : [
+                    {
+                      text: "Direct Cast Moderator",
+                      target: `https://warpcast.com/~/inbox/create/${channel.userId}?text=${encodeURIComponent(
+                        `Could you add me to /${channelId}?`
+                      )}`,
+                    },
+                  ]),
             ],
     });
   } catch (e) {

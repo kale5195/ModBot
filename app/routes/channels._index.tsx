@@ -11,7 +11,12 @@ export const meta: MetaFunction = () => [
   },
 ];
 export async function loader() {
-  const channels = await db.moderatedChannel.findMany();
+  const channels = await db.moderatedChannel.findMany({
+    select: {
+      id: true,
+      imageUrl: true,
+    },
+  });
 
   return typedjson({ channels });
 }
