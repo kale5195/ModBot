@@ -32,6 +32,7 @@ export const ruleNames = [
   "hasIcebreakerQBuilder",
   "hasIcebreakerVerified",
   "hasIcebreakerCredential",
+  "hasIcebreakerLinkedAccount",
 ] as const;
 
 export type RuleName = (typeof ruleNames)[number];
@@ -99,7 +100,6 @@ export type CheckFunctionArgs = {
   user: User;
   rule: Rule;
 };
-
 
 export type SelectOption = {
   label: string;

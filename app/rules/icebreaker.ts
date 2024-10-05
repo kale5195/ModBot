@@ -170,7 +170,35 @@ async function hasIcebreakerQBuilder({ user: member }: CheckFunctionArgs) {
   };
 }
 
-type RuleName = "hasIcebreakerCredential" | "hasIcebreakerHuman" | "hasIcebreakerQBuilder" | "hasIcebreakerVerified";
+async function hasIcebreakerLinkedAccount({ user: member, rule }: CheckFunctionArgs) {
+  const { account, verified } = rule.args as { account: string; verified: boolean };
+
+  const user = await getIcebreakerbyFid(member.fid);
+
+  if (!user) {
+    return {
+      result: false,
+      message: `@${member.username} not found in Icebreaker`,
+    };
+  }
+
+  const userHasLinkedAccount =
+    user.channels?.some((channel) => channel.type === account && (!verified || channel.isVerified)) ?? false;
+
+  return {
+    result: userHasLinkedAccount,
+    message: userHasLinkedAccount
+      ? `@${member.username} has linked ${verified ? "and verified " : " "}${account}`
+      : `@${member.username} does not have linked ${verified ? "and verified " : " "}${account}`,
+  };
+}
+
+type RuleName =
+  | "hasIcebreakerCredential"
+  | "hasIcebreakerHuman"
+  | "hasIcebreakerQBuilder"
+  | "hasIcebreakerVerified"
+  | "hasIcebreakerLinkedAccount";
 
 export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
   hasIcebreakerCredential: {
@@ -240,12 +268,42 @@ export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
     authorUrl: "https://icebreaker.xyz",
     authorIcon: `/icons/icebreaker.png`,
     category: "all",
-    friendlyName: "Icebreaker Verified",
+    friendlyName: "Icebreaker Work Domain Verified",
     checkType: "user",
-    description: "Check if the user has the Icebreaker Verified credential",
+    description: "Check if the user has the Icebreaker Verified credential for a work domain",
     hidden: false,
     invertable: true,
     args: {},
+  },
+
+  hasIcebreakerLinkedAccount: {
+    name: "hasIcebreakerLinkedAccount",
+    allowMultiple: true,
+    author: "Icebreaker",
+    authorUrl: "https://icebreaker.xyz",
+    authorIcon: `/icons/icebreaker.png`,
+    category: "all",
+    friendlyName: "Icebreaker Linked Account",
+    checkType: "user",
+    description: "Check if the user has a specific type of linked account",
+    hidden: false,
+    invertable: true,
+    args: {
+      account: {
+        type: "string",
+        friendlyName: "Account",
+        description: "The type of account required. Consult Icebreaker Alloy for all types supported",
+        placeholder: "Choose one of linkedin, twitter, github, etc.",
+        required: true,
+      },
+      verified: {
+        type: "boolean",
+        defaultValue: false,
+        friendlyName: "Require verified account",
+        description: "If enabled, only passes if the account has been verified",
+        required: false,
+      },
+    },
   },
 } as const;
 
@@ -254,4 +312,5 @@ export const iceBreakerRulesFunction: Record<RuleName, CheckFunction> = {
   hasIcebreakerQBuilder: hasIcebreakerQBuilder,
   hasIcebreakerVerified: hasIcebreakerVerified,
   hasIcebreakerCredential: hasIcebreakerCredential,
+  hasIcebreakerLinkedAccount: hasIcebreakerLinkedAccount,
 } as const;
