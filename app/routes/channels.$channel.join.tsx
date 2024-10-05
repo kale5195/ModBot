@@ -246,6 +246,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
         {
           text: "Try again",
         },
+        {
+          text: "Contact Dev",
+          link: `https://warpcast.com/~/inbox/create/3346?text=${encodeURIComponent(
+            `Internal error when joining /${channelId}?`
+          )}`,
+        },
       ],
     });
   }

@@ -16,6 +16,9 @@ export async function loader() {
       id: true,
       imageUrl: true,
     },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
 
   return typedjson({ channels });
