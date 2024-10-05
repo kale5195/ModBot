@@ -244,7 +244,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const hasModerator = wcChannel.moderatorFids.includes(861203);
     const errorMessage = hasModerator
       ? error.response?.data?.message?.[0]?.message || "Internal error, try again later"
-      : "Please ask channel owner set @modbot as moderator";
+      : "Ask channel owner set @modbot as moderator";
     return frameResponse({
       title: "Internal error",
       description: errorMessage,
@@ -268,7 +268,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
             {
               text: "DC Owner",
               link: `https://warpcast.com/~/inbox/create/${wcChannel.leadFid}?text=${encodeURIComponent(
-                `Please set @modbot as moderator for /${channelId}?`
+                `Please set @modbot as moderator for /${channelId}, otherwise I can't join your channel`
               )}`,
             },
           ],
