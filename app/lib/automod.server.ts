@@ -211,30 +211,16 @@ export async function validateCast({
   const logs: Array<ModerationLog> = [];
 
   if (!moderatedChannel) {
-    Sentry.captureMessage(`Moderated channel not found`, {
-      extra: {
-        user,
-      },
-    });
     throw new Error("Moderated channel not found");
   }
 
-  // moderatedChannel = await db.moderatedChannel.findFirstOrThrow({
-  //   where: {
-  //     id: moderatedChannel.id,
-  //   },
-  //   include: {
-  //     user: true,
-  //   },
-  // });
-
   if (!user) {
-    Sentry.captureMessage(`User not found`);
+    throw new Error("User not found");
   }
 
   const isExcluded = moderatedChannel.excludeUsernamesParsed?.some((u) => u.value === user.fid);
-  const channelOwner = await getWarpcastChannelOwner({ channel: moderatedChannel.id });
-  const isOwner = channelOwner === user.fid;
+
+  const isOwner = Number(moderatedChannel.userId) === user.fid;
 
   if (isExcluded || isOwner) {
     const message = isOwner ? `@${user.username} is the channel owner` : `@${user.username} is in the bypass list.`;
@@ -255,7 +241,7 @@ export async function validateCast({
     const log = await logModerationAction(
       moderatedChannel.id,
       "hideQuietly",
-      "No automated curation rules configured.",
+      `/${moderatedChannel.id} is not configured to use ModBot`,
       user,
       simulation
     );
@@ -340,27 +326,6 @@ export async function validateCast({
           console.error(e?.response?.data || e?.message || e);
           throw e;
         });
-
-        // if (moderatedChannel.slowModeHours > 0) {
-        //   await db.cooldown.upsert({
-        //     where: {
-        //       affectedUserId_channelId: {
-        //         channelId: moderatedChannel.id,
-        //         affectedUserId: String(user.fid),
-        //       },
-        //     },
-        //     create: {
-        //       channelId: moderatedChannel.id,
-        //       affectedUserId: String(user.fid),
-        //       active: true,
-        //       expiresAt: new Date(Date.now() + moderatedChannel.slowModeHours * 60 * 60 * 1000),
-        //     },
-        //     update: {
-        //       active: true,
-        //       expiresAt: new Date(Date.now() + moderatedChannel.slowModeHours * 60 * 60 * 1000),
-        //     },
-        //   });
-        // }
       }
       logs.push(
         await logModerationAction(
