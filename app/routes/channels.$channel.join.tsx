@@ -137,7 +137,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         buttons: [
           {
             text: "Check Notifications",
-            link: `https://warpcast.com/~/notifications`,
+            link: `https://warpcast.com/~/notifications/channel-role-invites?groupId=channels%21channel-role-invite%3Amembers`,
           },
         ],
       });
@@ -203,7 +203,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
           ? [
               {
                 text: "Check Notifications",
-                link: `https://warpcast.com/~/notifications`,
+                link: `https://warpcast.com/~/notifications/channel-role-invites?groupId=channels%21channel-role-invite%3Amember`,
               },
             ]
           : [
