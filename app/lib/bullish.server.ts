@@ -6,7 +6,6 @@ import { SimulateArgs, SweepArgs } from "~/routes/~.channels.$id.tools";
 import { db } from "./db.server";
 import { neynar, pageChannelCasts } from "./neynar.server";
 import { ValidateCastArgsV2 } from "./types";
-import { toggleWebhook } from "~/routes/api.channels.$id.toggleEnable";
 import { getCast, getWarpcastChannel, publishCast } from "./warpcast.server";
 import { modbotFid } from "~/routes/~.channels.$id";
 import { syncSubscriptions } from "./subscription.server";

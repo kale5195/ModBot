@@ -3,10 +3,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/no-unescaped-entities */
-import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { Action, ActionType, actionDefinitions, ruleDefinitions } from "~/lib/validations.server";
 import { Rule, RuleDefinition, RuleName, SelectOption } from "~/rules/rules.type";
-import { loader as jobStatusLoader } from "~/routes/api.channels.$id.simulations.$jobId";
 import { Input } from "~/components/ui/input";
 import { FieldLabel, SliderField } from "~/components/ui/fields";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -30,9 +28,6 @@ import { Button } from "./ui/button";
 import { useEffect, useRef, useState } from "react";
 import { Textarea } from "./ui/textarea";
 import { Dialog, DialogTitle, DialogContent, DialogDescription, DialogHeader } from "./ui/dialog";
-import { action } from "~/routes/api.channels.$id.simulations";
-import { JobState as BullJobState } from "bullmq";
-import { SimulationResult } from "~/routes/~.channels.$id.tools";
 import { ClientOnly } from "remix-utils/client-only";
 import { Alert } from "./ui/alert";
 import { DialogTrigger } from "@radix-ui/react-dialog";
@@ -178,103 +173,11 @@ export function CurationForm(props: {
             </div>
           </fieldset>
 
-          {/* <div className="py-6">
-            <hr />
-          </div> */}
-
-          {/* <fieldset disabled={isSubmitting} className="space-y-6">
-            <div>
-              <p className="font-medium">Bypass</p>
-              <p className="text-gray-500 text-sm">
-                Users in this list will always have their casts curated into Main.
-              </p>
-            </div>
-
-            {props.cohostRole && (
-              <SliderField label="Cohosts" description="Always include casts from cohosts in Main">
-                <Controller
-                  name={`excludeCohosts`}
-                  control={control}
-                  render={({ field }) => <Switch onCheckedChange={field.onChange} checked={field.value} />}
-                />
-              </SliderField>
-            )}
-
-            <ClientOnly>
-              {() => (
-                <FieldLabel
-                  labelProps={{
-                    className: "w-full",
-                  }}
-                  label={
-                    <div className="flex justify-between gap-4 w-full">
-                      <p className="font-medium flex-auto">Farcaster Usernames</p>
-                      <Link
-                        className="text-[8px] no-underline hover:underline uppercase tracking-wide"
-                        target="_blank"
-                        rel="noreferrer"
-                        to={props.bypassInstallLink}
-                      >
-                        Install Cast Action
-                        <ArrowUpRight className="inline w-2 h-2 ml-[2px] -mt-[2px] text-primary" />
-                      </Link>
-                    </div>
-                  }
-                  description="Example: if you add jtgi, jtgi's casts will skip all moderation and always be included in Main"
-                  className="flex-col items-start w-full"
-                >
-                  <UserPicker name="excludeUsernames" isMulti={true} />
-                </FieldLabel>
-              )}
-            </ClientOnly>
-          </fieldset>
-
-          <div className="py-6">
-            <hr />
-          </div>
-
-          <fieldset disabled={isSubmitting} className="space-y-6">
-            <div>
-              <p className="font-medium">Slow Mode</p>
-              <p className="text-gray-500 text-sm">Limit how often a user's cast is shown in Main.</p>
-            </div>
-
-            <FieldLabel
-              label="Cooldown Period"
-              description="Example: Let's say you enter 2 hours, if a user's cast is included in Main at 9:00 PM, only casts created after 11:00 PM will be eligible for Main. Affects root casts only, replies cannot be moderated."
-              className="flex-col items-start"
-            >
-              <div className="flex items-center">
-                <Input
-                  className="w-full sm:max-w-[100px] rounded-r-none border-r-0"
-                  type="number"
-                  placeholder="0"
-                  {...register("slowModeHours")}
-                />
-                <p className="flex text-sm h-9 px-3 py-[7px] bg-gray-100 text-gray-600 border border-gray-200 rounded-md rounded-l-none">
-                  Hours
-                </p>
-              </div>
-            </FieldLabel>
-          </fieldset> */}
-
           <div className="py-6">
             <hr />
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            {/* {props.defaultValues.id || channelId ? (
-              <SimulateButton
-                // @ts-ignore
-                channelId={props.defaultValues.id || channelId}
-                actionDefs={props.actionDefinitions}
-              />
-            ) : (
-              <Button variant={"secondary"} className="w-full" disabled>
-                Simulate
-              </Button>
-            )} */}
-
             <Button type="submit" size={"lg"} className="w-full" disabled={fetcher.state !== "idle"}>
               {fetcher.state !== "idle" ? (
                 <Loader className="w-4 h-4 animate-spin" />
@@ -289,215 +192,6 @@ export function CurationForm(props: {
       </FormProvider>
     </div>
   );
-}
-
-function SimulateButton(props: { channelId: string; actionDefs: typeof actionDefinitions }) {
-  const [open, setIsOpen] = useState<boolean>(false);
-  const [fetcherKey, setFetcherKey] = useState<string | null>(String(new Date().getTime()));
-
-  const submitJobFetcher = useFetcher<typeof action>({
-    key: `start-sim-${fetcherKey}`,
-  });
-
-  const jobStatusFetcher = useFetcher<typeof jobStatusLoader>({
-    key: `job-status-${fetcherKey}`,
-  });
-
-  const form = useFormContext<FormValues>();
-  const interval = useRef<any>();
-  const [simulating, setSimulating] = useState(false);
-  const [result, setResult] = useState<SimulationResult | null>(null);
-
-  const onSubmit = () => {
-    setSimulating(true);
-    const data = form.getValues();
-    submitJobFetcher.submit(prepareFormValues(data), {
-      encType: "application/json",
-      method: "post",
-      action: `/api/channels/${props.channelId}/simulations`,
-    });
-  };
-
-  useEffect(() => {
-    if (submitJobFetcher.data && "jobId" in submitJobFetcher.data && submitJobFetcher.data.jobId) {
-      const jobId = submitJobFetcher.data.jobId;
-      interval.current = setInterval(() => {
-        jobStatusFetcher.load(`/api/channels/${props.channelId}/simulations/${jobId}`);
-      }, 2000);
-    }
-
-    return () => {
-      if (interval.current) {
-        clearInterval(interval.current);
-      }
-    };
-  }, [submitJobFetcher.state]);
-
-  useEffect(() => {
-    if (isFinished(jobStatusFetcher.data)) {
-      clearInterval(interval.current);
-      setResult(jobStatusFetcher.data.result);
-      setSimulating(false);
-    }
-  }, [jobStatusFetcher.data]);
-
-  const teardown = () => {
-    setResult(null);
-    setSimulating(false);
-    setFetcherKey(String(new Date().getTime()));
-  };
-
-  return (
-    <ClientOnly>
-      {() => (
-        <>
-          <Dialog
-            open={open}
-            onOpenChange={(open) => {
-              setIsOpen(open);
-
-              if (!open) {
-                teardown();
-              }
-            }}
-          >
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Simulation</DialogTitle>
-                <DialogDescription>
-                  Run the last 50 root casts in your channel through your new ruleset. No real actions will be
-                  performed.
-                </DialogDescription>
-              </DialogHeader>
-              {isError(submitJobFetcher.data) && (
-                <Alert>
-                  <p>{submitJobFetcher.data.message}</p>
-                </Alert>
-              )}
-              {!isError(submitJobFetcher.data) && (submitJobFetcher.data || submitJobFetcher.state !== "idle") && (
-                <div>
-                  {isFinished(jobStatusFetcher.data) && result && (
-                    <SimulationResultDisplay simulation={result} actionDefinitions={props.actionDefs} />
-                  )}
-
-                  {isFailure(jobStatusFetcher.data) && (
-                    <div className="flex flex-col items-center gap-4 p-8 border rounded-lg">
-                      <ServerCrash className="w-12 h-12" />
-                      <p className="text-center text-sm">Something went wrong. Sorry.</p>
-                    </div>
-                  )}
-
-                  {simulating && (
-                    <div className="flex flex-col items-center gap-4 p-8 border rounded-lg">
-                      <Bot className="w-12 h-12 animate-bounce" />
-                      <p className="text-center text-sm">Hang tight, this takes about 15 seconds...</p>
-                    </div>
-                  )}
-                </div>
-              )}
-              {isFinished(jobStatusFetcher.data) && (
-                <>
-                  <div className="py-2">
-                    <hr />
-                  </div>
-                  <Button
-                    variant={"secondary"}
-                    onClick={() => {
-                      setIsOpen(false);
-                      teardown();
-                    }}
-                  >
-                    Okay
-                  </Button>
-                </>
-              )}
-
-              {!isFailure(jobStatusFetcher.data) && !simulating && !result && (
-                <Button type="button" onClick={() => onSubmit()}>
-                  Start Simulation
-                </Button>
-              )}
-            </DialogContent>
-          </Dialog>
-          <Button size={"lg"} className="w-full" type="button" variant="secondary" onClick={() => setIsOpen(true)}>
-            Simulate
-          </Button>
-        </>
-      )}
-    </ClientOnly>
-  );
-}
-
-function SimulationResultDisplay(props: { simulation: SimulationResult; actionDefinitions: typeof actionDefinitions }) {
-  const actionCounts: Record<string, { proposed: number; existing: number }> = {};
-
-  let proposedCastsActedOn = 0;
-  let existingCastsActedOn = 0;
-  for (const result of props.simulation) {
-    for (const proposed of result.proposed) {
-      actionCounts[proposed.action] = actionCounts[proposed.action] ?? { proposed: 0, existing: 0 };
-
-      actionCounts[proposed.action].proposed++;
-    }
-
-    for (const existing of result.existing) {
-      actionCounts[existing.action] = actionCounts[existing.action] ?? { proposed: 0, existing: 0 };
-
-      actionCounts[existing.action].existing++;
-    }
-
-    proposedCastsActedOn += result.proposed.length;
-    existingCastsActedOn += result.existing.length;
-  }
-
-  if (proposedCastsActedOn + existingCastsActedOn === 0) {
-    return <Alert>No actions would be taken</Alert>;
-  }
-
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[50px]">Action</TableHead>
-          <TableHead className="w-[50px]">Current</TableHead>
-          <TableHead className="w-[50px]">Proposed</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {Object.entries(actionCounts).map(([action, { proposed, existing }]) => (
-          <TableRow key={action}>
-            <TableCell>{props.actionDefinitions[action as ActionType].friendlyName}</TableCell>
-            <TableCell>{existing}</TableCell>
-            <TableCell>{proposed}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-      <TableFooter>
-        <TableCell>Casts Impacted</TableCell>
-        <TableCell>{existingCastsActedOn}</TableCell>
-        <TableCell>{proposedCastsActedOn}</TableCell>
-      </TableFooter>
-    </Table>
-  );
-}
-
-type JobState = {
-  jobId: string;
-  state: "unknown" | BullJobState;
-  progress: number;
-  result: SimulationResult | null;
-};
-
-function isError(data?: any): data is { message: string } {
-  return data && "message" in data;
-}
-
-function isFinished(data?: any): data is JobState {
-  return data && "state" in data && (data.state === "completed" || data.state === "failed");
-}
-
-function isFailure(data?: any): data is JobState {
-  return data && "state" in data && data.state === "failed";
 }
 
 function prepareFormValues(data: FormValues) {

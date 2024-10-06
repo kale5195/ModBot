@@ -12,7 +12,8 @@
     "test": "exit 0",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "PORT=3009 remix-serve ./build/index.js",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "prepare": "husky"
   },
   "dependencies": {
     "@airstack/node": "^0.0.7",
@@ -115,6 +116,7 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "happy-dom": "^13.3.8",
+    "husky": "^9.1.6",
     "prisma": "^5.8.1",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
