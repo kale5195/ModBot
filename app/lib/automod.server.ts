@@ -465,25 +465,30 @@ async function evaluateRules(
         return { passedRule: false, explanation: `${failure.explanation}`, rule };
       }
     } else if (rule.operation === "OR") {
-      const results = await Promise.all(
-        rule.conditions.map((subRule) => evaluateRules(moderatedChannel, user, subRule))
-      );
+      const results: Array<{
+        passedRule: boolean;
+        explanation: string;
+        rule: Rule;
+      }> = [];
 
-      const onePassed = results.find((r) => r.passedRule);
-      if (onePassed) {
-        return onePassed;
-      } else {
-        const explanation =
-          results.length > 1
-            ? `Failed all checks: ${results.map((e) => e.explanation).join(", ")}`
-            : results[0].explanation;
-
-        return {
-          passedRule: false,
-          explanation,
-          rule,
-        };
+      for (const subRule of rule.conditions) {
+        const result = await evaluateRules(moderatedChannel, user, subRule);
+        results.push(result);
+        if (result.passedRule) {
+          return result;
+        }
       }
+
+      const explanation =
+        results.length > 1
+          ? `Failed all checks: ${results.map((e) => e.explanation).join(", ")}`
+          : results[0].explanation;
+
+      return {
+        passedRule: false,
+        explanation,
+        rule,
+      };
     }
   }
 
