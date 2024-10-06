@@ -3,7 +3,6 @@ import { db } from "~/lib/db.server";
 import { frameResponse, getSetCache, getSharedEnv, parseMessage, parseMessageWithAirstack } from "~/lib/utils.server";
 import invariant from "tiny-invariant";
 import { validateCast } from "~/lib/automod.server";
-import { User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import {
   getWarpcastChannel,
   isBannedByChannel,
@@ -73,7 +72,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
         ],
       });
     }
-    console.log(data);
     // neynar
     // const message = await parseMessage(data);
     // const user = message.action.interactor as User;
