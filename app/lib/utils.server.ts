@@ -313,7 +313,9 @@ export async function parseMessageWithAirstack(payload: any) {
   }
   return {
     fid: data.interactedByFid,
-    verifications: data.interactedBy.userAssociatedAddresses.filter((a) => a !== data.interactedBy.userAddress),
+    verifications: data.interactedBy.userAssociatedAddresses.filter(
+      (a) => a !== data.interactedBy.userAddress && a.startsWith("0x")
+    ),
     custody_address: data.interactedBy.userAddress,
     username: data.interactedBy.profileHandle,
     display_name: data.interactedBy.profileDisplayName,
