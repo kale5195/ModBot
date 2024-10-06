@@ -1,11 +1,35 @@
+import axios from "axios";
+import { getSetCache } from "~/lib/utils.server";
 import { CheckFunction, CheckFunctionArgs, RuleDefinition } from "~/rules/rules.type";
+
+async function getPowerBadge() {
+  const user = getSetCache({
+    key: `powerbadge`,
+    get: async () => {
+      const response = await axios.get<{ result: { fids: number[] } }>(
+        `https://api.neynar.com/v2/farcaster/user/power_lite`,
+        {
+          headers: {
+            api_key: process.env.NEYNAR_API_KEY!,
+          },
+        }
+      );
+      return response.data.result.fids;
+    },
+    ttlSeconds: 60 * 60 * 4,
+  });
+
+  return user;
+}
 
 async function userHoldsPowerBadge(args: CheckFunctionArgs) {
   const { user } = args;
-
+  const { fid } = user;
+  const powerBadge = await getPowerBadge();
+  const hasPowerBadge = powerBadge.includes(fid);
   return {
-    result: user.power_badge,
-    message: user.power_badge ? "User holds a power badge" : "User does not hold a power badge",
+    result: hasPowerBadge,
+    message: hasPowerBadge ? "User holds a power badge" : "User does not hold a power badge",
   };
 }
 

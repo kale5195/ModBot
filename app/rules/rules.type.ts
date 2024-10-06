@@ -1,4 +1,3 @@
-import { User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { ModeratedChannel } from "@prisma/client";
 import { PlanType } from "~/lib/utils";
 import { z } from "zod";
@@ -95,6 +94,21 @@ export const BaseRuleSchema = z.object({
 
 export type Rule = z.infer<typeof BaseRuleSchema> & {
   conditions?: Rule[];
+};
+export type User = {
+  fid: number;
+  verifications: string[];
+  custody_address: string;
+  username: string;
+  display_name?: string;
+  follower_count: number;
+  following_count: number;
+  pfp_url?: string;
+  profile: {
+    bio: {
+      text: string;
+    };
+  };
 };
 export type CheckFunctionArgs = {
   channel: ModeratedChannel;

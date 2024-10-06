@@ -4,11 +4,10 @@ import { z } from "zod";
 import { inviteToChannel } from "./neynar.server";
 import { validateErc1155, validateErc20, validateErc721 } from "./utils.server";
 import { db } from "./db.server";
-import { User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 
 import { searchChannelFanToken } from "./airstack.server";
 import { hideQuietly, mute, addToBypass, downvote, cooldown, grantRole, ban, unlike } from "./automod.server";
-import { BaseRuleSchema, CheckFunctionArgs, Rule, RuleDefinition, RuleName } from "~/rules/rules.type";
+import { BaseRuleSchema, CheckFunctionArgs, Rule, RuleDefinition, RuleName, User } from "~/rules/rules.type";
 import { iceBreakerRulesDefinitions, iceBreakerRulesFunction } from "~/rules/icebreaker";
 import { ercTokenRulesDefinitions, ercTokenRulesFunction } from "~/rules/erc-tokens";
 import { fantokenRulesDefinitions, fantokenRulesFunction } from "~/rules/fantoken";

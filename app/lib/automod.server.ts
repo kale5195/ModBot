@@ -1,11 +1,11 @@
-import { Cast, User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
+import { Cast } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import * as Sentry from "@sentry/remix";
 import { ModeratedChannel, ModerationLog } from "@prisma/client";
 import { v4 as uuid } from "uuid";
 import { db } from "~/lib/db.server";
 import { neynar } from "~/lib/neynar.server";
 import { getModerators } from "~/lib/utils.server";
-import { Rule } from "~/rules/rules.type";
+import { Rule, User } from "~/rules/rules.type";
 import { Action, actionFunctions, isCohost, ruleFunctions } from "~/lib/validations.server";
 import { FullModeratedChannel, WebhookCast } from "~/lib/types";
 import { getWarpcastChannelOwner } from "~/lib/warpcast.server";

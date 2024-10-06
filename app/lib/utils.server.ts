@@ -273,11 +273,17 @@ export async function parseMessageWithAirstack(payload: any) {
     input: {filter: {messageBytes: $messageBytes}}
   ) {
     isValid
-    message {
-      data {
-        fid
-      }
+    interactedBy {
+      followerCount
+      followingCount
+      profileHandle
+      userAddress
+      userAssociatedAddresses
+      profileBio
+      profileDisplayName
+      profileImage
     }
+    interactedByFid
   }
 }`,
       variables: { messageBytes: payload.trustedData.messageBytes },
@@ -287,11 +293,17 @@ export async function parseMessageWithAirstack(payload: any) {
     data: {
       FarcasterValidateFrameMessage: {
         isValid: boolean;
-        message: {
-          data: {
-            fid: string;
-          };
+        interactedBy: {
+          followerCount: number;
+          followingCount: number;
+          profileHandle: string;
+          userAddress: string;
+          userAssociatedAddresses: string[];
+          profileBio: string;
+          profileDisplayName: string;
+          profileImage: string;
         };
+        interactedByFid: number;
       };
     };
   };
@@ -299,7 +311,21 @@ export async function parseMessageWithAirstack(payload: any) {
   if (!data.isValid) {
     throw new Error("Invalid message");
   }
-  return data.message.data.fid;
+  return {
+    fid: data.interactedByFid,
+    verifications: data.interactedBy.userAssociatedAddresses.filter((a) => a !== data.interactedBy.userAddress),
+    custody_address: data.interactedBy.userAddress,
+    username: data.interactedBy.profileHandle,
+    display_name: data.interactedBy.profileDisplayName,
+    follower_count: data.interactedBy.followerCount,
+    following_count: data.interactedBy.followingCount,
+    pfp_url: data.interactedBy.profileImage,
+    profile: {
+      bio: {
+        text: data.interactedBy.profileBio,
+      },
+    },
+  };
 }
 export async function redirectWithMessage({
   request,
