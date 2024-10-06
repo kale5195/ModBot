@@ -61,7 +61,7 @@ export const userFidRulesDefinitions: Record<RuleName, RuleDefinition> = {
     category: "all",
     friendlyName: "User in List",
     checkType: "user",
-    description: "Check if the cast author is on a list",
+    description: "Check if the user is on a list",
     hidden: false,
     invertable: true,
     args: {

@@ -29,7 +29,7 @@ export const paragraphRulesDefinitions: Record<RuleName, RuleDefinition> = {
     category: "all",
     friendlyName: "Subscribes on Paragraph",
     checkType: "user",
-    description: "Check if the cast author has an active subscription on paragraph.xyz",
+    description: "Check if the user has an active subscription on paragraph.xyz",
     hidden: false,
     invertable: false,
     args: {

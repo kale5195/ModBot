@@ -121,7 +121,7 @@ export const userFollowRulesDefinitions: Record<RuleName, RuleDefinition> = {
     category: "all",
     friendlyName: "Following",
     checkType: "user",
-    description: "Check if the cast author follows certain accounts",
+    description: "Check if the user follows certain accounts",
     hidden: false,
     invertable: false,
     args: {
@@ -131,7 +131,7 @@ export const userFollowRulesDefinitions: Record<RuleName, RuleDefinition> = {
         friendlyName: "Farcaster Usernames",
         placeholder: "Enter a username...",
         description:
-          "Example: If you enter jtgi and riotgoools, it will check that the cast author follows either jtgi or riotgools.",
+          "Example: If you enter jtgi and riotgoools, it will check that the user follows either jtgi or riotgools.",
       },
     },
   },

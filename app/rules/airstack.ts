@@ -40,7 +40,7 @@ export const airstackRulesDefinitions: Record<RuleName, RuleDefinition> = {
     category: "all",
     friendlyName: "FarRank by Airstack",
     checkType: "user",
-    description: "Check if a user's Airstack FarRank is high enough.",
+    description: "Check if the user's Airstack FarRank is high enough.",
     invertable: false,
     args: {
       minRank: {

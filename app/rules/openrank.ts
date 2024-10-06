@@ -98,7 +98,7 @@ export const openrankRulesDefinitions: Record<RuleName, RuleDefinition> = {
     category: "all",
     friendlyName: "Global Ranking by OpenRank",
     checkType: "cast",
-    description: "Require the cast author to have a sufficient global ranking.",
+    description: "Require the user to have a sufficient global ranking.",
     hidden: false,
     invertable: false,
     args: {
@@ -122,7 +122,7 @@ export const openrankRulesDefinitions: Record<RuleName, RuleDefinition> = {
     friendlyName: "Channel Ranking by OpenRank",
     channelGated: ["memes", "design", "sonata"],
     checkType: "cast",
-    description: "Require the cast author to have a sufficient channel ranking.",
+    description: "Require the user to have a sufficient channel ranking.",
     hidden: false,
     invertable: false,
     args: {

@@ -45,7 +45,7 @@ export const fantokenRulesDefinitions: Record<RuleName, RuleDefinition> = {
     category: "inclusion",
     friendlyName: "Moxie Fan Token",
     checkType: "user",
-    description: "Check if the cast author holds a Moxie fan token",
+    description: "Check if the user holds a Moxie fan token",
     hidden: false,
     invertable: false,
     args: {
@@ -76,7 +76,7 @@ export const fantokenRulesDefinitions: Record<RuleName, RuleDefinition> = {
     category: "inclusion",
     friendlyName: "Moxie Channel Fan Token",
     checkType: "cast",
-    description: "Check if the cast author holds the fan token for your channel",
+    description: "Check if the user holds the fan token for your channel",
     hidden: false,
     invertable: false,
     args: {

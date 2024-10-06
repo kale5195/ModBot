@@ -40,7 +40,7 @@ export const botOrNotRulesDefinitions: Record<RuleName, RuleDefinition> = {
     checkType: "user",
     category: "all",
     friendlyName: "Proof of Human, by Bot or Not",
-    description: "Check if the cast author is a human using Bot Or Not",
+    description: "Check if the user is a human using Bot Or Not",
     hidden: false,
     fidGated: [5179],
     invertable: false,
