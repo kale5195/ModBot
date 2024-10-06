@@ -78,7 +78,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
     // airstack
     const user = await parseMessageWithAirstack(data);
-    console.log(user);
+    // console.log(user);
     // check if following
     const isFollowing = await isFollowingChannel({ channel: channelId, fid: user.fid });
     if (!isFollowing) {
@@ -211,7 +211,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
                 text: "Try again",
               },
               {
-                text: "Check Reason",
+                text: "Check why",
                 link: `${getSharedEnv().hostUrl}/channels/${channelId}?fid=${user.fid}`,
               },
               ...(needChannelFanToken
