@@ -8,14 +8,13 @@ Sentry.init({
   tracesSampleRate: 0,
   replaysSessionSampleRate: 0,
   replaysOnErrorSampleRate: 0.1,
-  enabled: process.env.NODE_ENV === "production",
+  enabled: false,
   integrations: [
     Sentry.browserTracingIntegration({
       useEffect,
       useLocation,
       useMatches,
     }),
-    Sentry.replayIntegration(),
   ],
 });
 

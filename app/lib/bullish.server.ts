@@ -2,7 +2,7 @@
 import { Job, JobsOptions, Queue, UnrecoverableError, Worker } from "bullmq";
 import * as Sentry from "@sentry/remix";
 import IORedis from "ioredis";
-import { SimulateArgs, SweepArgs, recover, simulate, sweep } from "~/routes/~.channels.$id.tools";
+import { SimulateArgs, SweepArgs } from "~/routes/~.channels.$id.tools";
 import { db } from "./db.server";
 import { neynar, pageChannelCasts } from "./neynar.server";
 import { ValidateCastArgsV2 } from "./types";
@@ -350,7 +350,6 @@ export const simulationWorker = new Worker(
     //   Sentry.captureException(e);
     //   throw e;
     // }
-
     // return result;
   },
   {
@@ -388,12 +387,10 @@ export const syncWorker = new Worker(
     //     active: true,
     //   },
     // });
-
     // if (!moderatedChannel) {
     //   console.error(`[${job.data.channelId}] sync: moderated channel not found`);
     //   return;
     // }
-
     // let rootCastsChecked = 0;
     // for await (const page of pageChannelCasts({ id: job.data.channelId })) {
     //   if (process.env.NODE_ENV === "development") {
@@ -407,23 +404,19 @@ export const syncWorker = new Worker(
     //       },
     //     },
     //   });
-
     //   for (const rootCast of page.casts) {
     //     if (process.env.NODE_ENV === "development") {
     //       console.log(`[${job.data.channelId}] sync: processing cast ${rootCast.hash}`);
     //     }
-
     //     if (rootCastsChecked >= job.data.rootCastsToProcess) {
     //       return;
     //     }
-
     //     if (alreadyProcessed.some((log) => log.hash === rootCast.hash)) {
     //       if (process.env.NODE_ENV === "development") {
     //         console.log(`[${job.data.channelId}] sync: cast ${rootCast.hash} already processed`);
     //       }
     //       continue;
     //     }
-
     //     castQueue.add(
     //       "processCast",
     //       {
@@ -432,7 +425,6 @@ export const syncWorker = new Worker(
     //       },
     //       defaultProcessCastJobArgs(rootCast.hash)
     //     );
-
     //     rootCastsChecked++;
     //   }
     // }
@@ -471,4 +463,3 @@ function init() {
     propagationDelayQueue.add("propagationDelayCheck", {}, { repeat: { pattern: "*/10 * * * *" } });
   }
 }
-

@@ -15,7 +15,7 @@ export function handleError(error: unknown, { request }: { request: Request }) {
 Sentry.init({
   dsn: "https://5473e1495403d0b381b2556a80b3775f@o4506520941756416.ingest.sentry.io/4506827315937280",
   tracesSampleRate: 0,
-  enabled: process.env.NODE_ENV === "production",
+  enabled: false,
 });
 
 const ABORT_DELAY = 30_000;

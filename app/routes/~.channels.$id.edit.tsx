@@ -19,8 +19,6 @@ import { v4 as uuid } from "uuid";
 import { CurationForm } from "~/components/curation-form";
 import { addToBypassAction } from "~/lib/cast-actions.server";
 import { actionToInstallLink } from "~/lib/utils";
-import { toggleWebhook } from "./api.channels.$id.toggleEnable";
-import { recoverQueue, sweepQueue } from "~/lib/bullish.server";
 import { RuleSet } from "~/lib/types";
 
 export async function action({ request, params }: ActionFunctionArgs) {

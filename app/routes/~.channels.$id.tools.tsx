@@ -5,12 +5,9 @@ import invariant from "tiny-invariant";
 import {
   errorResponse,
   formatZodError,
-  getSetCache,
   getSharedEnv,
   requireUser,
   requireUserCanModerateChannel as requireUserCanModerateChannel,
-  sleep,
-  successResponse,
 } from "~/lib/utils.server";
 import { Form } from "@remix-run/react";
 import { z } from "zod";
@@ -19,7 +16,6 @@ import { getChannel, neynar, pageChannelCasts } from "~/lib/neynar.server";
 import { db } from "~/lib/db.server";
 import { getSession } from "~/lib/auth.server";
 import { Loader2 } from "lucide-react";
-import { castQueue, defaultProcessCastJobArgs, recoverQueue, sweepQueue } from "~/lib/bullish.server";
 import { ModerationLog } from "@prisma/client";
 import { FullModeratedChannel, WebhookCast } from "~/lib/types";
 import { Input } from "~/components/ui/input";
@@ -29,11 +25,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Alert } from "~/components/ui/alert";
 import { ActionType, actionDefinitions } from "~/lib/validations.server";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
-import { CastWithInteractions, User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { validateCast } from "~/lib/automod.server";
-
-const SWEEP_LIMIT = 100;
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   invariant(params.id, "id is required");
@@ -43,7 +35,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     userId: user.id,
     channelId: params.id,
   });
-  const isActive = await isSweepActive(moderatedChannel.id);
 
   // only channels that have a signer can sweep as far back
   // as they want, because otherwise you can burn through
@@ -57,7 +48,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
   return typedjson({
     user,
-    isSweepActive: isActive,
     moderatedChannel,
     actionDefinitions,
     allowSweepTimeRange,
@@ -90,51 +80,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     });
   }
 
-  if (result.data.intent === "sweep") {
-    const result = z
-      .object({
-        untilTimeUtc: z.string().optional(),
-      })
-      .safeParse(rawData);
-
-    if (!result.success) {
-      return errorResponse({
-        request,
-        message: formatZodError(result.error),
-      });
-    }
-
-    if (await isSweepActive(moderatedChannel.id)) {
-      return successResponse({
-        request,
-        message: "Sweep already in progress. Hang tight.",
-      });
-    }
-
-    console.log(`${user.name} started a sweep in ${moderatedChannel.id}`);
-
-    await sweepQueue.add(
-      "sweep",
-      {
-        channelId: moderatedChannel.id,
-        moderatedChannel,
-        untilTimeUtc: result.data.untilTimeUtc,
-        limit: result.data.untilTimeUtc ? undefined : SWEEP_LIMIT,
-      },
-      {
-        removeOnComplete: true,
-        removeOnFail: true,
-        jobId: `sweep-${moderatedChannel.id}`,
-        attempts: 3,
-      }
-    );
-
-    return successResponse({
-      request,
-      session,
-      message: "Sweeping! This will take a while. Monitor progress in the logs.",
-    });
-  } else if (result.data.intent === "testCast") {
+  if (result.data.intent === "testCast") {
     const fidOrUsername = rawData.fidOrUsername as string;
     if (!fidOrUsername) {
       return errorResponse({
@@ -163,73 +109,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function Screen() {
-  const { isSweepActive, actionDefinitions, user, moderatedChannel, allowSweepTimeRange } =
-    useTypedLoaderData<typeof loader>();
-
-  const sweepOptions = useMemo(
-    () => [
-      { label: "6 hours ago", value: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString() },
-      { label: "12 hours ago", value: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString() },
-      { label: "24 hours ago", value: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() },
-      { label: "36 hours ago", value: new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString() },
-    ],
-    []
-  );
-
-  const showOptions = allowSweepTimeRange.includes(moderatedChannel.id) || user.id === "5179";
+  const { actionDefinitions } = useTypedLoaderData<typeof loader>();
 
   return (
     <main className="space-y-6">
       <div>
         <p className="font-semibold">Tools</p>
       </div>
-
-      {/* <hr />
-
-      <div className="space-y-3">
-        <div>
-          <p className="font-medium">Sweep</p>
-          <p className="text-sm text-gray-500">
-            Apply your moderation rules to the last {SWEEP_LIMIT} casts in Recent. Casts that were manually
-            curated or hidden by moderators will be unaffected.
-          </p>
-        </div>
-
-        <Form method="post" className="space-y-4">
-          {showOptions && (
-            <FieldLabel label="Until Time" className="items-start flex-col">
-              <Select name="untilTimeUtc" defaultValue={sweepOptions[0].value}>
-                <SelectTrigger className="w-[150px] sm:w-[200px] md:w-[400px] text-left">
-                  <SelectValue placeholder={`Select a time`} />
-                </SelectTrigger>
-                <SelectContent>
-                  {sweepOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FieldLabel>
-          )}
-          <Button
-            className="w-full sm:w-auto min-w-[150px]"
-            name="intent"
-            disabled={isSweepActive}
-            value="sweep"
-            variant={"secondary"}
-          >
-            {isSweepActive ? (
-              <>
-                <Loader2 className="animate-spin inline w-4 h-4 mr-2" />
-                Sweeping...
-              </>
-            ) : (
-              "Sweep"
-            )}
-          </Button>
-        </Form>
-      </div> */}
 
       <hr />
 
@@ -349,93 +235,6 @@ export type SweepArgs = {
 
 export async function sweep(args: SweepArgs) {}
 
-/**
- * Recover is similar to sweep but it only processes
- * casts that have not yet been moderated. This is
- * useful post incident or post downtime.
- */
-export async function recover(
-  args: SweepArgs & {
-    reprocessModeratedCasts?: boolean;
-    skipSignerCheck?: boolean;
-  }
-) {
-  const channel = await getChannel({ name: args.channelId });
-
-  let castsChecked = 0;
-  for await (const page of pageChannelCasts({ id: args.channelId })) {
-    let alreadyProcessedHashes = new Set();
-    if (!args.reprocessModeratedCasts) {
-      const alreadyProcessed = await db.moderationLog.findMany({
-        select: {
-          castHash: true,
-        },
-        where: {
-          castHash: {
-            in: page.casts.map((cast) => cast.hash),
-          },
-        },
-      });
-
-      alreadyProcessedHashes = new Set(
-        alreadyProcessed.filter((log): log is { castHash: string } => !!log.castHash).map((log) => log.castHash)
-      );
-    } else {
-      alreadyProcessedHashes = new Set();
-    }
-
-    const unprocessedCasts = page.casts.filter((cast) => !alreadyProcessedHashes.has(cast.hash));
-
-    for (const cast of unprocessedCasts) {
-      if (isFinished(channel.id, cast, castsChecked, args)) {
-        console.log(`${channel.id} recover: finished.`);
-        return;
-      }
-
-      try {
-        await castQueue.add(
-          "processCast",
-          {
-            channel,
-            moderatedChannel: args.moderatedChannel,
-            cast,
-            skipSignerCheck: args.skipSignerCheck,
-          },
-          defaultProcessCastJobArgs(cast.hash)
-        );
-      } catch (e) {
-        console.error(e);
-      }
-
-      castsChecked++;
-    }
-  }
-}
-
-export async function isSweepActive(channelId: string) {
-  const job = await getSweepJob(channelId);
-  if (!job) {
-    return false;
-  }
-
-  const state = await job.getState();
-  return state === "active";
-}
-
-export async function isRecoverActive(channelId: string) {
-  const job = await recoverQueue.getJob(`recover-${channelId}`);
-  if (!job) {
-    return false;
-  }
-
-  const state = await job.getState();
-  return state === "active";
-}
-
-async function getSweepJob(channelId: string) {
-  return sweepQueue.getJob(`sweep-${channelId}`);
-}
-
 export type SimulateArgs = {
   channelId: string;
   moderatedChannel: FullModeratedChannel | null;
@@ -489,30 +288,4 @@ export async function simulate(args: SimulateArgs) {
   //   }
   // }
   // return aggregatedResults;
-}
-
-function isFinished(channelId: string, cast: CastWithInteractions, castsChecked: number, args: SweepArgs) {
-  if (args.untilTimeUtc) {
-    const castTime = new Date(cast.timestamp).getTime();
-    const untilTime = new Date(args.untilTimeUtc).getTime();
-
-    if (castTime < untilTime) {
-      console.log(`${channelId} sweep/recover: reached untilTime ${args.untilTimeUtc}, stopping.`);
-      return true;
-    }
-  }
-
-  if (args.untilCastHash) {
-    if (cast.hash === args.untilCastHash) {
-      console.log(`${channelId} sweep/recover: reached untilCastHash ${args.untilCastHash}, stopping.`);
-      return true;
-    }
-  }
-
-  if (castsChecked >= args.limit) {
-    console.log(`${channelId} sweep/recover: reached limit of ${args.limit} casts checked, stopping.`);
-    return true;
-  }
-
-  return false;
 }

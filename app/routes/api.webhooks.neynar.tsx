@@ -1,7 +1,7 @@
 import { ActionFunctionArgs, json } from "@remix-run/node";
 import { requireValidSignature } from "~/lib/utils.server";
 
-import { webhookQueue } from "~/lib/bullish.server";
+// import { webhookQueue } from "~/lib/bullish.server";
 import { WebhookCast } from "~/lib/types";
 import { isRuleTargetApplicable } from "~/lib/automod.server";
 
@@ -38,17 +38,17 @@ export async function action({ request }: ActionFunctionArgs) {
     return json({ message: "Ignoring reply" });
   }
 
-  webhookQueue.add(
-    "webhookQueue",
-    {
-      webhookNotif,
-      channelName,
-    },
-    {
-      removeOnComplete: true,
-      removeOnFail: 10_000,
-    }
-  );
+  // webhookQueue.add(
+  //   "webhookQueue",
+  //   {
+  //     webhookNotif,
+  //     channelName,
+  //   },
+  //   {
+  //     removeOnComplete: true,
+  //     removeOnFail: 10_000,
+  //   }
+  // );
 
   return json({
     message: "enqueued",
