@@ -1,4 +1,4 @@
-import { Cast as NeynarCast } from "@neynar/nodejs-sdk/build/neynar-api/v2";
+import { CastWithInteractions as NeynarCast } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { Prisma } from "@prisma/client";
 
 import { Action, ActionType } from "./validations.server";

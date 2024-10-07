@@ -152,7 +152,7 @@ model ModerationLog {
   affectedUserAvatarUrl String?
   channelId             String
   castText              String?
-  rule                  String          @default("{}")
+  rule                  String           @default("{}")
   channel               ModeratedChannel @relation(fields: [channelId], references: [id])
 
   @@index([channelId, createdAt])
@@ -197,12 +197,12 @@ model Usage {
 }
 
 model CastLog {
-  hash       String    @id
-  replyCount Int       @default(0)
-  createdAt  DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt  DateTime? @updatedAt @db.Timestamptz(6)
-  status     String
+  hash       String   @id
   channelId  String
+  authorFid  Int
+  data       String   @default("{}")
+  createdAt  Int
+  status     Int      @default(0)
 }
 
 model Signer {

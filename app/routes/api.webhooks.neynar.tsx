@@ -4,6 +4,8 @@ import { requireValidSignature } from "~/lib/utils.server";
 // import { webhookQueue } from "~/lib/bullish.server";
 import { WebhookCast } from "~/lib/types";
 import { isRuleTargetApplicable } from "~/lib/automod.server";
+import { db } from "~/lib/db.server";
+import { isChannelMember } from "~/lib/warpcast.server";
 
 export async function action({ request }: ActionFunctionArgs) {
   const rawPayload = await request.text();
@@ -11,10 +13,6 @@ export async function action({ request }: ActionFunctionArgs) {
     type: string;
     data: WebhookCast;
   };
-
-  if (process.env.NODE_ENV === "development") {
-    console.log(webhookNotif);
-  }
 
   if (webhookNotif.type !== "cast.created") {
     return json({ message: "Invalid webhook type" }, { status: 400 });
@@ -27,7 +25,7 @@ export async function action({ request }: ActionFunctionArgs) {
     incomingSignature: request.headers.get("X-Neynar-Signature")!,
   });
 
-  const channelName = webhookNotif.data.root_parent_url?.split("/").pop();
+  const channelName = webhookNotif.data?.channel?.id;
 
   if (!channelName) {
     console.error(`Couldn't extract channel name: ${webhookNotif.data.root_parent_url}`, webhookNotif.data);
@@ -38,17 +36,40 @@ export async function action({ request }: ActionFunctionArgs) {
     return json({ message: "Ignoring reply" });
   }
 
-  // webhookQueue.add(
-  //   "webhookQueue",
-  //   {
-  //     webhookNotif,
-  //     channelName,
-  //   },
-  //   {
-  //     removeOnComplete: true,
-  //     removeOnFail: 10_000,
-  //   }
-  // );
+  if (process.env.NODE_ENV === "development") {
+    console.log(webhookNotif);
+  }
+  // check if channel member
+  const authorFid = webhookNotif.data.author.fid;
+  const isMember = await isChannelMember({ channel: channelName, fid: authorFid });
+  if (!isMember) {
+    return json({ message: "Ignoring cast from non-member" });
+  }
+  // check casted number in past 30 minutes
+  // TODO Read from config
+  const count = await db.castLog.count({
+    where: {
+      channelId: channelName,
+      authorFid,
+      createdAt: {
+        gte: Math.floor(new Date().getTime() / 1000) - 30 * 60,
+      },
+    },
+  });
+  const shouldHide = count >= 1;
+  await db.castLog.create({
+    data: {
+      hash: webhookNotif.data.hash,
+      channelId: channelName,
+      authorFid: webhookNotif.data.author.fid,
+      data: JSON.stringify(webhookNotif.data),
+      createdAt: Math.floor(new Date(webhookNotif.data.timestamp).getTime() / 1000),
+      status: shouldHide ? 1 : 0,
+    },
+  });
+  if (shouldHide) {
+    console.log(`Hiding cast ${webhookNotif.data.hash} from ${channelName}`);
+  }
 
   return json({
     message: "enqueued",
