@@ -21,7 +21,7 @@ function getFrameImageUrl(props: { message: string; channel?: string; color?: st
 async function rateLimit(key: string): Promise<boolean> {
   const cacheKey = `ratelimit:${key}`;
   const now = Date.now();
-  const ttlSeconds = 30;
+  const ttlSeconds = 3;
   return getSetCache({
     key: cacheKey,
     ttlSeconds,
