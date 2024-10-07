@@ -52,7 +52,7 @@ export async function action({ request }: ActionFunctionArgs) {
       channelId: channelName,
       authorFid,
       createdAt: {
-        gte: Math.floor(new Date().getTime() / 1000) - 30 * 60,
+        gte: Math.floor(new Date().getTime() / 1000) - 3600 * 4,
       },
     },
   });
