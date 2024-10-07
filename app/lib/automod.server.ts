@@ -351,7 +351,14 @@ export async function validateCast({
       });
     }
     logs.push(
-      await logModerationAction(moderatedChannel.id, "hideQuietly", inclusionCheck.explanation, user, simulation)
+      await logModerationAction(
+        moderatedChannel.id,
+        "hideQuietly",
+        inclusionCheck.explanation,
+        user,
+        simulation,
+        inclusionCheck.rule
+      )
     );
   }
 
