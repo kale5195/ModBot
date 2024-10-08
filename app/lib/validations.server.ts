@@ -379,8 +379,6 @@ export type RuleSetSchemaType = z.infer<typeof RuleSetSchema>;
 export const ModeratedChannelSchema = z
   .object({
     id: z.string().transform((id) => id.toLowerCase()),
-    banThreshold: z.coerce.number().nullable(),
-    slowModeHours: z.coerce.number().optional().default(0),
     excludeUsernames: z
       .array(z.object({ value: z.number(), label: z.string(), icon: z.string().optional() }))
       .default([]),

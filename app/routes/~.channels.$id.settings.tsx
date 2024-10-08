@@ -16,6 +16,7 @@ import { Button } from "~/components/ui/button";
 import { db } from "~/lib/db.server";
 import { getSession } from "~/lib/auth.server";
 import { Loader2 } from "lucide-react";
+import { Switch } from "~/components/ui/switch";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   invariant(params.id, "id is required");
@@ -46,10 +47,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const rawData = Object.fromEntries(formData.entries());
   const result = z
     .object({
-      intent: z.enum(["deleteChannel"]),
+      intent: z.enum(["deleteChannel", "updateBannedListSetting"]),
     })
     .safeParse(rawData);
-
   if (!result.success) {
     return errorResponse({
       request,
@@ -71,6 +71,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
       request,
       message: "Channel removed",
     });
+  } else if (result.data.intent === "updateBannedListSetting") {
+    console.log(result.data);
+    return successResponse({
+      request,
+      message: "Updated",
+    });
   } else {
     return errorResponse({
       request,
@@ -81,21 +87,47 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 export default function Screen() {
   const deleteFetcher = useFetcher<typeof loader>();
-
+  const bannedListsFetcher = useFetcher<typeof loader>();
   return (
     <main className="space-y-6">
       <div>
         <p className="font-semibold">Settings</p>
       </div>
-
       <hr />
 
-      <div className="space-y-3">
+      <div className="space-y-3 flex flex-row justify-between pr-10">
+        <div>
+          <p className="font-medium">Follow Channel Banned List</p>
+          <p className="text-sm text-gray-500">Allow banned users to join channel through frames.</p>
+        </div>
+
+        <bannedListsFetcher.Form method="post">
+          <input type="hidden" name="intent" value="updateBannedListSetting" />
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="follow-banned-list"
+              name="followBannedList"
+              onCheckedChange={(checked) => {
+                bannedListsFetcher.submit(
+                  {
+                    intent: "updateBannedListSetting",
+                    followBannedList: checked.toString(),
+                  },
+                  { method: "post" }
+                );
+              }}
+            />
+          </div>
+        </bannedListsFetcher.Form>
+      </div>
+      <hr />
+
+      {/* <div className="space-y-3">
         <div>
           <p className="font-medium">Delete Channel</p>
           <p className="text-sm text-gray-500">
-            This will remove your channel from Automod and all of its data including logs, collaborators,
-            roles, and rules. It's not recoverable.
+            This will remove your channel from Modbot and all of its data including logs, collaborators, roles, and
+            rules. It's not recoverable.
           </p>
         </div>
 
@@ -124,7 +156,7 @@ export default function Screen() {
             )}
           </Button>
         </deleteFetcher.Form>
-      </div>
+      </div> */}
     </main>
   );
 }

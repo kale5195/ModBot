@@ -51,10 +51,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 export type FormValues = {
   id?: string;
-  banThreshold?: number | null;
   excludeUsernames?: Array<SelectOption> | null;
   excludeCohosts: boolean;
-  slowModeHours?: number | null;
 
   inclusionRuleSet: {
     id?: string;
@@ -230,7 +228,6 @@ function prepareFormValues(data: FormValues) {
   const tx = {
     ...data,
     excludeUsernames: data.excludeUsernames || [],
-    banThreshold: data.banThreshold || null,
     inclusionRuleSet: transformRuleSet(data.inclusionRuleSet),
     exclusionRuleSet: transformRuleSet(data.exclusionRuleSet),
     ruleSets: [],

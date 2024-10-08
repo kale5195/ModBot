@@ -34,10 +34,8 @@ import { Avatar, AvatarImage } from "./ui/avatar";
 
 export type FormValues = {
   id?: string;
-  banThreshold?: number | null;
   excludeUsernames?: Array<SelectOption> | null;
   excludeCohosts: boolean;
-  slowModeHours?: number | null;
 
   inclusionRuleSet: {
     id?: string;
