@@ -161,24 +161,26 @@ export async function action({ request, params }: ActionFunctionArgs) {
       });
     }
     // check if banned by channel
-    // const isBanned = await isBannedByChannel({ channel: channelId, fid: user.fid });
-    // if (isBanned) {
-    //   return frameResponse({
-    //     title: `Join ${channelId}`,
-    //     description: `You are banned from /${channelId}`,
-    //     image: getFrameImageUrl({
-    //       message: `You are banned from /${channelId}`,
-    //       channel: channelId,
-    //       color,
-    //     }),
-    //     buttons: [
-    //       {
-    //         text: "Go to channel",
-    //         link: `https://warpcast.com/~/channel/${channelId}`,
-    //       },
-    //     ],
-    //   });
-    // }
+    if (channel.disableBannedList === 0) {
+      const isBanned = await isBannedByChannel({ channel: channelId, fid: user.fid });
+      if (isBanned) {
+        return frameResponse({
+          title: `Join ${channelId}`,
+          description: `You are banned from /${channelId}`,
+          image: getFrameImageUrl({
+            message: `You are banned from /${channelId}`,
+            channel: channelId,
+            color,
+          }),
+          buttons: [
+            {
+              text: "Go to channel",
+              link: `https://warpcast.com/~/channel/${channelId}`,
+            },
+          ],
+        });
+      }
+    }
 
     const logs = await validateCast({
       user: user,

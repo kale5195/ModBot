@@ -124,7 +124,7 @@ export default function ChannelRoot() {
                       title: "Collaborators",
                     }
                   : null,
-                // { to: `/~/channels/${channel.id}/settings`, title: "Settings" },
+                { to: `/~/channels/${channel.id}/settings`, title: "Settings" },
               ].filter(Boolean) as SidebarNavProps["items"]
             }
           />

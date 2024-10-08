@@ -10,13 +10,14 @@ import {
   requireUserCanModerateChannel as requireUserCanModerateChannel,
   successResponse,
 } from "~/lib/utils.server";
-import { useFetcher } from "@remix-run/react";
+import { useFetcher, useLoaderData } from "@remix-run/react";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { db } from "~/lib/db.server";
 import { getSession } from "~/lib/auth.server";
 import { Loader2 } from "lucide-react";
 import { Switch } from "~/components/ui/switch";
+import { useState } from "react";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   invariant(params.id, "id is required");
@@ -72,7 +73,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
       message: "Channel removed",
     });
   } else if (result.data.intent === "updateBannedListSetting") {
-    console.log(result.data);
+    await db.moderatedChannel.update({
+      where: {
+        id: moderatedChannel.id,
+      },
+      data: {
+        disableBannedList: Number(rawData.followBannedList),
+      },
+    });
     return successResponse({
       request,
       message: "Updated",
@@ -86,8 +94,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function Screen() {
+  const { moderatedChannel } = useLoaderData<typeof loader>();
   const deleteFetcher = useFetcher<typeof loader>();
   const bannedListsFetcher = useFetcher<typeof loader>();
+  const [checked, setChecked] = useState(moderatedChannel.disableBannedList === 1);
   return (
     <main className="space-y-6">
       <div>
@@ -95,10 +105,12 @@ export default function Screen() {
       </div>
       <hr />
 
-      <div className="space-y-3 flex flex-row justify-between pr-10">
+      <div className="space-y-3 flex flex-row justify-between gap-x-4">
         <div>
-          <p className="font-medium">Follow Channel Banned List</p>
-          <p className="text-sm text-gray-500">Allow banned users to join channel through frames.</p>
+          <p className="font-medium">Allow Banned Users via Frames</p>
+          <p className="text-sm text-gray-500">
+            When enabled, allows users you've removed from the channel to rejoin channel via frames.
+          </p>
         </div>
 
         <bannedListsFetcher.Form method="post">
@@ -107,11 +119,13 @@ export default function Screen() {
             <Switch
               id="follow-banned-list"
               name="followBannedList"
+              checked={checked}
               onCheckedChange={(checked) => {
+                setChecked(checked);
                 bannedListsFetcher.submit(
                   {
                     intent: "updateBannedListSetting",
-                    followBannedList: checked.toString(),
+                    followBannedList: checked ? 1 : 0,
                   },
                   { method: "post" }
                 );
