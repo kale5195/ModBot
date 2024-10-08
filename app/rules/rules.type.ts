@@ -33,6 +33,7 @@ export const ruleNames = [
   "hasIcebreakerVerified",
   "hasIcebreakerCredential",
   "hasIcebreakerLinkedAccount",
+  "hasPOAP",
 ] as const;
 
 export type RuleName = (typeof ruleNames)[number];
