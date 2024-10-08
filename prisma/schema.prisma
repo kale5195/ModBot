@@ -66,8 +66,8 @@ model ModeratedChannel {
   url               String?
   feedType          String             @default("custom")
   userId            String
-  banThreshold      Int?
-  slowModeHours     Int                @default(0)
+  disableBannedList Int                @default(0)
+  castRuleSet       String             @default("{}")
   excludeCohosts    Boolean            @default(true)
   excludeUsernames  String             @default("[]")
   inclusionRuleSet  String?
@@ -197,12 +197,12 @@ model Usage {
 }
 
 model CastLog {
-  hash       String   @id
-  channelId  String
-  authorFid  Int
-  data       String   @default("{}")
-  createdAt  Int
-  status     Int      @default(0)
+  hash      String @id
+  channelId String
+  authorFid Int
+  data      String @default("{}")
+  createdAt Int
+  status    Int    @default(0)
 }
 
 model Signer {
