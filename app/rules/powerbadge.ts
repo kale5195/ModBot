@@ -48,7 +48,7 @@ export const powerbadgeRulesDefinitions: Record<RuleName, RuleDefinition> = {
     category: "all",
     friendlyName: "Power Badge",
     checkType: "user",
-    description: "Check if the user holds a power badge",
+    description: "Verify if the user has a power badge, issued to users likely not to be spammers",
     invertedDescription: "Check for users who *do* hold the power badge",
     hidden: false,
     invertable: true,

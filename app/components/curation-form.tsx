@@ -254,6 +254,7 @@ function RuleSetEditor(props: {
   });
 
   const [isRuleDialogOpen, setIsRuleDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   return (
     <div>
@@ -315,10 +316,22 @@ function RuleSetEditor(props: {
               <DialogTitle>Add Rule</DialogTitle>
               <DialogDescription>Select a rule to add to the rule set.</DialogDescription>
             </DialogHeader>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
+            <Input
+              type="text"
+              placeholder="Search rules..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="mb-4"
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
               {Object.entries(props.ruleDefinitions)
                 .sort(([_a, adef], [_b, bdef]) => adef.friendlyName.localeCompare(bdef.friendlyName))
                 .filter((args) => !args[1].hidden)
+                .filter(
+                  ([_, ruleDef]) =>
+                    ruleDef.friendlyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    ruleDef.description.toLowerCase().includes(searchTerm.toLowerCase())
+                )
                 .map(([name, ruleDef]) => {
                   const isRuleAvailable = ruleDef.minimumPlan
                     ? meetsMinimumPlan({

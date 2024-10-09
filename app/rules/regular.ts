@@ -72,7 +72,7 @@ export const regularRulesDefinitions: Record<RuleName, RuleDefinition> = {
     author: "modbot",
     authorUrl: "https://modbot.sh",
     authorIcon: `/icons/modbot.png`,
-    allowMultiple: true,
+    allowMultiple: false,
     category: "inclusion",
     friendlyName: "Anyone Can Join",
     checkType: "cast",
