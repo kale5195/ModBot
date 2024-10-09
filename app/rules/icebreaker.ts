@@ -40,6 +40,14 @@ type IcebreakerEvent = {
   imageUrl?: string;
 };
 
+type IcebreakerGuildMembership = {
+  guildId: number;
+  roleIds: number[];
+  isAdmin: boolean;
+  isOwner: boolean;
+  joinedAt: Date;
+};
+
 type IcebreakerProfile = {
   profileID?: string;
   walletAddress: string;
@@ -55,6 +63,7 @@ type IcebreakerProfile = {
   highlights?: IcebreakerHighlight[];
   workExperience?: IcebreakerWorkExperience[];
   events?: IcebreakerEvent[];
+  guilds?: IcebreakerGuildMembership[];
 };
 
 const API_URL = "https://app.icebreaker.xyz/api/v1";
@@ -215,7 +224,7 @@ async function hasPOAP({ user: member, rule }: CheckFunctionArgs) {
     };
   }
 
-  const userHasPOAP = user.events?.some(event => event.source === 'poap' && event.id === eventId) ?? false;
+  const userHasPOAP = user.events?.some((event) => event.source === "poap" && event.id === eventId) ?? false;
 
   return {
     result: userHasPOAP,
@@ -225,13 +234,38 @@ async function hasPOAP({ user: member, rule }: CheckFunctionArgs) {
   };
 }
 
+async function hasGuildRole({ user: member, rule }: CheckFunctionArgs) {
+  const { guildId, roleId } = rule.args as { guildId: number; roleId: number | undefined };
+
+  const user = await getIcebreakerbyFid(member.fid);
+
+  if (!user) {
+    return {
+      result: false,
+      message: `@${member.username} not found in Icebreaker`,
+    };
+  }
+
+  const guild = user.guilds?.find((guild) => guild.guildId === guildId);
+
+  const userHasGuildRole = (guild && (roleId ? guild.roleIds?.includes(roleId) ?? false : true)) ?? false;
+
+  return {
+    result: userHasGuildRole,
+    message: userHasGuildRole
+      ? `@${member.username} has the Guild ${guildId}${roleId ? `with role ${roleId}` : ""}`
+      : `@${member.username} does not have the Guild ${guildId}${roleId ? `with role ${roleId}` : ""}`,
+  };
+}
+
 type RuleName =
   | "hasIcebreakerCredential"
   | "hasIcebreakerHuman"
   | "hasIcebreakerQBuilder"
   | "hasIcebreakerVerified"
   | "hasIcebreakerLinkedAccount"
-  | "hasPOAP";
+  | "hasPOAP"
+  | "hasGuildRole";
 
 const author = "Icebreaker";
 const authorUrl = "https://icebreaker.xyz";
@@ -245,7 +279,7 @@ export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
     authorUrl,
     authorIcon,
     category: "all",
-    friendlyName: "Icebreaker Credential",
+    friendlyName: "Icebreaker: Has Credential",
     checkType: "user",
     description: "Check if the user has a specific Icebreaker credential",
     hidden: false,
@@ -275,7 +309,7 @@ export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
     authorUrl,
     authorIcon,
     category: "all",
-    friendlyName: "Icebreaker Human",
+    friendlyName: "Icebreaker: Has Human",
     checkType: "user",
     description: "Check if the user has the Icebreaker Human credential",
     hidden: false,
@@ -290,7 +324,7 @@ export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
     authorUrl,
     authorIcon,
     category: "all",
-    friendlyName: "Icebreaker QBuilder",
+    friendlyName: "Icebreaker: Has QBuilder",
     checkType: "user",
     description: "Check if the user has the Icebreaker QBuilder credential",
     hidden: false,
@@ -305,7 +339,7 @@ export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
     authorUrl,
     authorIcon,
     category: "all",
-    friendlyName: "Icebreaker Work Domain Verified",
+    friendlyName: "Icebreaker: Has Verified Work Domain",
     checkType: "user",
     description: "Check if the user has the Icebreaker Verified credential for a work domain",
     hidden: false,
@@ -320,7 +354,7 @@ export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
     authorUrl,
     authorIcon,
     category: "all",
-    friendlyName: "Icebreaker Linked Account",
+    friendlyName: "Icebreaker: Has Linked Account",
     checkType: "user",
     description: "Check if the user has a specific type of linked account",
     hidden: false,
@@ -350,7 +384,7 @@ export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
     authorUrl,
     authorIcon,
     category: "all",
-    friendlyName: "Icebreaker POAP",
+    friendlyName: "Icebreaker: Has POAP",
     checkType: "user",
     description: "Check via Icebreaker if the user has a specific POAP",
     hidden: false,
@@ -364,7 +398,37 @@ export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
         required: true,
       },
     },
-  }
+  },
+
+  hasGuildRole: {
+    name: "hasGuildRole",
+    allowMultiple: true,
+    author,
+    authorUrl,
+    authorIcon,
+    category: "all",
+    friendlyName: "Icebreaker: Has Guild Role",
+    checkType: "user",
+    description: "Check via Icebreaker if the user is a member of a Guild",
+    hidden: false,
+    invertable: true,
+    args: {
+      guildId: {
+        type: "number",
+        friendlyName: "Guild ID",
+        description: "The Guild ID to check for",
+        placeholder: "Enter a Guild ID...",
+        required: true,
+      },
+      roleId: {
+        type: "number",
+        friendlyName: "Role ID",
+        description: "Optional role ID to check for",
+        placeholder: "Enter a Role ID...",
+        required: false,
+      },
+    },
+  },
 } as const;
 
 export const iceBreakerRulesFunction: Record<RuleName, CheckFunction> = {
@@ -374,4 +438,5 @@ export const iceBreakerRulesFunction: Record<RuleName, CheckFunction> = {
   hasIcebreakerCredential: hasIcebreakerCredential,
   hasIcebreakerLinkedAccount: hasIcebreakerLinkedAccount,
   hasPOAP: hasPOAP,
+  hasGuildRole: hasGuildRole,
 } as const;
