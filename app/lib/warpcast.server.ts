@@ -1,5 +1,6 @@
 import { getSetCache } from "./utils.server";
 import { http } from "./http.server";
+import { generateAuthToken } from "./authkey.server";
 
 export async function getWarpcastChannelOwner(props: { channel: string }): Promise<number> {
   const channel = await getWarpcastChannel(props);
@@ -85,33 +86,20 @@ export async function getCast(props: { hash: string; username: string }) {
     .then((rsp) => rsp.data.result?.casts[0]);
 }
 
-export async function publishCast(props: { text: string; token: string }) {
-  return http
-    .post<{ result: { cast: { hash: string } } }>(
-      "https://client.warpcast.com/v2/casts",
-      {
-        text: props.text,
+export async function moderateCast(props: { hash: string; action: "hide" | "unhide" }) {
+  const { hash, action } = props;
+  const authToken = await generateAuthToken();
+  const res = await http.post<{ result: { success: boolean } }>(
+    `https://api.warpcast.com/fc/moderate-cast`,
+    {
+      castHash: hash,
+      action,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
       },
-      {
-        headers: {
-          accept: "*/*",
-          "accept-language": "en-US,en;q=0.9,ja;q=0.8",
-          authorization: `Bearer ${props.token}`,
-          "content-type": "application/json; charset=utf-8",
-          "fc-amplitude-device-id": "yOEdRh1gmzkV6rTo6GnDlB",
-          "fc-amplitude-session-id": "1725341913933",
-          priority: "u=1, i",
-          "sec-ch-ua": '"Not)A;Brand";v="99", "Google Chrome";v="127", "Chromium";v="127"',
-          "sec-ch-ua-mobile": "?0",
-          "sec-ch-ua-platform": '"macOS"',
-          "sec-fetch-dest": "empty",
-          "sec-fetch-mode": "cors",
-          "sec-fetch-site": "same-site",
-          Referer: "https://warpcast.com/",
-          "Referrer-Policy": "strict-origin-when-cross-origin",
-        },
-        method: "POST",
-      }
-    )
-    .then((rsp) => rsp.data);
+    }
+  );
+  return res.data.result.success;
 }

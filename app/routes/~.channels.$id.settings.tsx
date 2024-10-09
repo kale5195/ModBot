@@ -109,7 +109,7 @@ export default function Screen() {
         <div>
           <p className="font-medium">Allow Banned Users via Frames</p>
           <p className="text-sm text-gray-500">
-            When enabled, allows users you've removed from the channel to rejoin channel via frames.
+            When enabled, allows users you've removed from the channel to rejoin via frames.
           </p>
         </div>
 
