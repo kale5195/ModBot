@@ -31,6 +31,15 @@ type IcebreakerWorkExperience = {
   isVerified?: boolean;
 };
 
+type IcebreakerEvent = {
+  id: string;
+  source: string;
+  name: string;
+  description?: string;
+  eventUrl?: string;
+  imageUrl?: string;
+};
+
 type IcebreakerProfile = {
   profileID?: string;
   walletAddress: string;
@@ -45,6 +54,7 @@ type IcebreakerProfile = {
   credentials?: IcebreakerCredential[];
   highlights?: IcebreakerHighlight[];
   workExperience?: IcebreakerWorkExperience[];
+  events?: IcebreakerEvent[];
 };
 
 const API_URL = "https://app.icebreaker.xyz/api/v1";
@@ -193,20 +203,47 @@ async function hasIcebreakerLinkedAccount({ user: member, rule }: CheckFunctionA
   };
 }
 
+async function hasPOAP({ user: member, rule }: CheckFunctionArgs) {
+  const { eventId } = rule.args as { eventId: string };
+
+  const user = await getIcebreakerbyFid(member.fid);
+
+  if (!user) {
+    return {
+      result: false,
+      message: `@${member.username} not found in Icebreaker`,
+    };
+  }
+
+  const userHasPOAP = user.events?.some(event => event.source === 'poap' && event.id === eventId) ?? false;
+
+  return {
+    result: userHasPOAP,
+    message: userHasPOAP
+      ? `@${member.username} has the POAP ${eventId}`
+      : `@${member.username} does not have the POAP ${eventId}`,
+  };
+}
+
 type RuleName =
   | "hasIcebreakerCredential"
   | "hasIcebreakerHuman"
   | "hasIcebreakerQBuilder"
   | "hasIcebreakerVerified"
-  | "hasIcebreakerLinkedAccount";
+  | "hasIcebreakerLinkedAccount"
+  | "hasPOAP";
+
+const author = "Icebreaker";
+const authorUrl = "https://icebreaker.xyz";
+const authorIcon = "/icons/icebreaker.png";
 
 export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
   hasIcebreakerCredential: {
     name: "hasIcebreakerCredential",
     allowMultiple: true,
-    author: "Icebreaker",
-    authorUrl: "https://icebreaker.xyz",
-    authorIcon: `/icons/icebreaker.png`,
+    author,
+    authorUrl,
+    authorIcon,
     category: "all",
     friendlyName: "Icebreaker Credential",
     checkType: "user",
@@ -234,9 +271,9 @@ export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
   hasIcebreakerHuman: {
     name: "hasIcebreakerHuman",
     allowMultiple: false,
-    author: "Icebreaker",
-    authorUrl: "https://icebreaker.xyz",
-    authorIcon: `/icons/icebreaker.png`,
+    author,
+    authorUrl,
+    authorIcon,
     category: "all",
     friendlyName: "Icebreaker Human",
     checkType: "user",
@@ -249,9 +286,9 @@ export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
   hasIcebreakerQBuilder: {
     name: "hasIcebreakerQBuilder",
     allowMultiple: false,
-    author: "Icebreaker",
-    authorUrl: "https://icebreaker.xyz",
-    authorIcon: `/icons/icebreaker.png`,
+    author,
+    authorUrl,
+    authorIcon,
     category: "all",
     friendlyName: "Icebreaker QBuilder",
     checkType: "user",
@@ -264,9 +301,9 @@ export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
   hasIcebreakerVerified: {
     name: "hasIcebreakerVerified",
     allowMultiple: false,
-    author: "Icebreaker",
-    authorUrl: "https://icebreaker.xyz",
-    authorIcon: `/icons/icebreaker.png`,
+    author,
+    authorUrl,
+    authorIcon,
     category: "all",
     friendlyName: "Icebreaker Work Domain Verified",
     checkType: "user",
@@ -279,9 +316,9 @@ export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
   hasIcebreakerLinkedAccount: {
     name: "hasIcebreakerLinkedAccount",
     allowMultiple: true,
-    author: "Icebreaker",
-    authorUrl: "https://icebreaker.xyz",
-    authorIcon: `/icons/icebreaker.png`,
+    author,
+    authorUrl,
+    authorIcon,
     category: "all",
     friendlyName: "Icebreaker Linked Account",
     checkType: "user",
@@ -305,6 +342,29 @@ export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
       },
     },
   },
+
+  hasPOAP: {
+    name: "hasPOAP",
+    allowMultiple: true,
+    author,
+    authorUrl,
+    authorIcon,
+    category: "all",
+    friendlyName: "Icebreaker POAP",
+    checkType: "user",
+    description: "Check via Icebreaker if the user has a specific POAP",
+    hidden: false,
+    invertable: true,
+    args: {
+      eventId: {
+        type: "string",
+        friendlyName: "POAP Event ID",
+        description: "The POAP event ID to check for",
+        placeholder: "Enter a POAP event ID...",
+        required: true,
+      },
+    },
+  }
 } as const;
 
 export const iceBreakerRulesFunction: Record<RuleName, CheckFunction> = {
@@ -313,4 +373,5 @@ export const iceBreakerRulesFunction: Record<RuleName, CheckFunction> = {
   hasIcebreakerVerified: hasIcebreakerVerified,
   hasIcebreakerCredential: hasIcebreakerCredential,
   hasIcebreakerLinkedAccount: hasIcebreakerLinkedAccount,
+  hasPOAP: hasPOAP,
 } as const;
