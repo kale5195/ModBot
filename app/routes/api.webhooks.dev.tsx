@@ -15,7 +15,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   //     removeOnFail: 10_000,
   //   }
   // );
-  const res = await moderateCast({ hash: "0x674583f8124989578c20e93790316af71fd3e4db", action: "hide" });
+  const res = await moderateCast({ hash: "0x96f1e3c498ccab877595d3362e5611c13dd0e811", action: "unhide" });
   console.log(res);
   return json({
     message: "enqueued",

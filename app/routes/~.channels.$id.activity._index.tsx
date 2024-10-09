@@ -2,13 +2,6 @@
 import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
 
 import { typeddefer, typedjson, useTypedLoaderData } from "remix-typedjson";
 import invariant from "tiny-invariant";
@@ -18,14 +11,12 @@ import {
   requireUser,
   requireUserCanModerateChannel as requireUserCanModerateChannel,
 } from "~/lib/utils.server";
-import { Form, NavLink } from "@remix-run/react";
+import { Form, Link, NavLink } from "@remix-run/react";
 import { actionDefinitions, like } from "~/lib/validations.server";
 import { Alert } from "~/components/ui/alert";
-import { ArrowUpRight, ChevronLeftIcon, ChevronRightIcon, MoreVerticalIcon, SlidersHorizontalIcon } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { z } from "zod";
-import { useLocalStorage } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
-import { unlike } from "~/lib/automod.server";
 import { inviteToChannel } from "~/lib/neynar.server";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -63,7 +54,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     moderationLogs,
     actionDefinitions: actionDefinitions,
     env: getSharedEnv(),
-
     page,
     pageSize,
     total: totalModerationLogs,
@@ -84,7 +74,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const result = z
     .object({
       logId: z.string(),
-      intent: z.enum(["end-cooldown", "unban", "like", "hideQuietly"]),
+      intent: z.enum(["like"]),
     })
     .safeParse(rawData);
 
@@ -113,7 +103,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   if (result.data.intent === "like") {
-    // invariant(log.castHash, "castHash is required");
     console.log("approve", log.affectedUsername);
     try {
       await inviteToChannel({ channelId: moderatedChannel.id, fid: Number(log.affectedUserFid) });
@@ -125,7 +114,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
         { status: 404 }
       );
     }
-    // await like({ cast: { hash: log.castHash } as any, channel: moderatedChannel.id });
     await db.moderationLog.update({
       where: {
         id: log.id,
@@ -136,23 +124,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
         reason: `Applied manually by @${user.name}`,
       },
     });
-  } else if (result.data.intent === "hideQuietly") {
-    // invariant(log.castHash, "castHash is required");
-    console.log("remove", log.affectedUsername);
-    // await unlike({ cast: { hash: log.castHash } as any, channel: moderatedChannel.id });
-    // await db.moderationLog.create({
-    //   data: {
-    //     action: "hideQuietly",
-    //     affectedUserFid: log.affectedUserFid,
-    //     affectedUsername: log.affectedUsername,
-    //     affectedUserAvatarUrl: log.affectedUserAvatarUrl,
-    //     castHash: log.castHash,
-    //     castText: log.castText,
-    //     actor: user.id,
-    //     channelId: moderatedChannel.id,
-    //     reason: `Applied manually by @${user.name}`,
-    //   },
-    // });
   } else {
     return typedjson(
       {
@@ -168,8 +139,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function Screen() {
-  const { page, pageSize, total, moderationLogs, actionDefinitions } = useTypedLoaderData<typeof loader>();
-  const [showCastText, setShowCastText] = useLocalStorage("showCastText", true);
+  const { page, pageSize, total, moderationLogs, actionDefinitions, channel } = useTypedLoaderData<typeof loader>();
 
   const prevPage = Math.max(page - 1, 0);
   const nextPage = page + 1 > Math.ceil(total / pageSize) ? null : page + 1;
@@ -177,22 +147,19 @@ export default function Screen() {
   return (
     <div>
       <div className="flex justify-between border-b">
-        <div id="log-top">
+        <div id="log-top" className="flex flex-row items-center mb-4">
           <p className="font-semibold">Activity</p>
-        </div>
-
-        {/* <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="rounded-full">
-              <SlidersHorizontalIcon className="w-4 h-4" />
+          <div className="flex gap-2 ml-8">
+            <Button variant={"link"} className="">
+              Members
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
-            <DropdownMenuCheckboxItem checked={showCastText} onCheckedChange={setShowCastText}>
-              Show Cast Text
-            </DropdownMenuCheckboxItem>
-          </DropdownMenuContent>
-        </DropdownMenu> */}
+            <Link to={`/~/channels/${channel.id}/activity/casts`}>
+              <Button variant={"link"} className="text-gray-600">
+                Hidden Casts
+              </Button>
+            </Link>
+          </div>
+        </div>
       </div>
       {moderationLogs.length === 0 ? (
         <Alert className="mt-2">
@@ -233,24 +200,6 @@ export default function Screen() {
                       {actionDefinitions[log.action as keyof typeof actionDefinitions].friendlyName},{" "}
                       {formatText(log.reason)}
                     </p>
-
-                    {log.castText && showCastText && (
-                      <Alert className="my-2 text-sm text-gray-500 italic  break-all">{log.castText}</Alert>
-                    )}
-
-                    {log.castHash && (
-                      <p>
-                        <a
-                          className="text-[8px] no-underline hover:underline uppercase tracking-wide"
-                          href={`https://warpcast.com/${log.affectedUsername}/${log.castHash.substring(0, 10)}`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          View on Warpcast
-                        </a>
-                        <ArrowUpRight className="inline w-2 h-2 mt-[2px] text-primary" />
-                      </p>
-                    )}
                   </div>
                   {log.action === "hideQuietly" && (
                     <Form method="post">
@@ -260,39 +209,6 @@ export default function Screen() {
                       </Button>
                     </Form>
                   )}
-                  {/* {["hideQuietly"].includes(log.action) && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <MoreVerticalIcon className="w-5 h-5" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        {log.action === "like" && (
-                          <Form method="post">
-                            <input type="hidden" name="logId" value={log.id} />
-                            <DropdownMenuItem>
-                              <button
-                                name="intent"
-                                value="hideQuietly"
-                                className="w-full h-full cursor-default text-left"
-                              >
-                                Remove
-                              </button>
-                            </DropdownMenuItem>
-                          </Form>
-                        )}
-                        {log.action === "hideQuietly" && (
-                          <Form method="post">
-                            <input type="hidden" name="logId" value={log.id} />
-                            <DropdownMenuItem>
-                              <button name="intent" value="like" className="w-full h-full cursor-default text-left">
-                                Invite
-                              </button>
-                            </DropdownMenuItem>
-                          </Form>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )} */}
                 </div>
               </div>
             ))}

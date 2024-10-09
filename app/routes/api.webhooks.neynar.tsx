@@ -5,7 +5,7 @@ import { requireValidSignature } from "~/lib/utils.server";
 import { WebhookCast } from "~/lib/types";
 import { isRuleTargetApplicable } from "~/lib/automod.server";
 import { db } from "~/lib/db.server";
-import { isChannelMember } from "~/lib/warpcast.server";
+import { getWarpcastChannel, isChannelMember, moderateCast } from "~/lib/warpcast.server";
 
 export async function action({ request }: ActionFunctionArgs) {
   const rawPayload = await request.text();
@@ -45,7 +45,9 @@ export async function action({ request }: ActionFunctionArgs) {
   if (!isMember) {
     return json({ message: "Ignoring cast from non-member" });
   }
-  // check casted number in past 30 minutes
+  const wcChannel = await getWarpcastChannel({ channel: channelName });
+  const channelModeratorFids = wcChannel.moderatorFids;
+  // check casted number in past 4 hours
   // TODO Read from config
   const count = await db.castLog.count({
     where: {
@@ -56,7 +58,7 @@ export async function action({ request }: ActionFunctionArgs) {
       },
     },
   });
-  const shouldHide = count >= 1;
+  const shouldHide = count >= 1 && !channelModeratorFids.includes(authorFid);
   await db.castLog.create({
     data: {
       hash: webhookNotif.data.hash,
@@ -69,9 +71,10 @@ export async function action({ request }: ActionFunctionArgs) {
   });
   if (shouldHide) {
     console.log(`Hiding cast ${webhookNotif.data.hash} from ${channelName}`);
+    await moderateCast({ hash: webhookNotif.data.hash, action: "hide" });
   }
 
   return json({
-    message: "enqueued",
+    message: "success",
   });
 }

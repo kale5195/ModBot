@@ -93,7 +93,7 @@ export async function moderateCast(props: { hash: string; action: "hide" | "unhi
     `https://api.warpcast.com/fc/moderate-cast`,
     {
       castHash: hash,
-      action,
+      action: action,
     },
     {
       headers: {
@@ -101,5 +101,6 @@ export async function moderateCast(props: { hash: string; action: "hide" | "unhi
       },
     }
   );
+  console.log(hash, res.data.result.success);
   return res.data.result.success;
 }
