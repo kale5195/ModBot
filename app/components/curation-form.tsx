@@ -110,10 +110,6 @@ export function CurationForm(props: {
       <FormProvider {...methods}>
         <form id="channel-form" method="post" className="w-full space-y-7" onSubmit={handleSubmit(onSubmit)}>
           <fieldset disabled={isSubmitting} className="space-y-6 w-full">
-            <div>
-              <p className="font-semibold">Automatic Moderation</p>
-            </div>
-
             <div className="text-md flex items-start gap-2">
               <CheckCircle2 className="text-green-500 inline w-5 h-5 shrink-0 mt-1" />
               <div>

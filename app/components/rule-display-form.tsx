@@ -73,10 +73,6 @@ export function RuleDisplayForm(props: {
       <FormProvider {...methods}>
         <form id="channel-form" method="post" className="w-full space-y-7">
           <fieldset className="space-y-6 w-full">
-            <div>
-              <p className="font-semibold">Automatic Moderation Rules</p>
-            </div>
-
             <div className="text-md flex items-start gap-2">
               <CheckCircle2 className="text-green-500 inline w-5 h-5 shrink-0 mt-1" />
               <div>
@@ -89,7 +85,8 @@ export function RuleDisplayForm(props: {
                   <option value="OR">any</option>
                   <option value="AND">all</option>
                 </select>{" "}
-                of the following rules are met, then invite the user to this channel.
+                of the following rules are met, then invite the user to{" "}
+                <span className="font-semibold">/{props.defaultValues.id}</span>.
               </div>
             </div>
 
@@ -121,7 +118,8 @@ export function RuleDisplayForm(props: {
                   <option value="OR">any</option>
                   <option value="AND">all</option>
                 </select>{" "}
-                of the following rules are met, then reject the user from this channel.
+                of the following rules are met, then reject the user from{" "}
+                <span className="font-semibold">/{props.defaultValues.id}</span>.
               </div>
             </div>
 

@@ -16,7 +16,7 @@ import { Card, CardHeader, CardContent } from "~/components/ui/card";
 export const meta: MetaFunction<typeof loader> = (data) => {
   return [
     {
-      title: `/${data.data.channel.id} channel Rules | ModBot`,
+      title: `Who can join /${data.data.channel.id} | ModBot`,
     },
   ];
 };
