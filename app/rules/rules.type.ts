@@ -34,6 +34,7 @@ export const ruleNames = [
   "hasIcebreakerCredential",
   "hasIcebreakerLinkedAccount",
   "hasPOAP",
+  "hasGuildRole",
 ] as const;
 
 export type RuleName = (typeof ruleNames)[number];
