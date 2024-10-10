@@ -67,6 +67,7 @@ model ModeratedChannel {
   feedType          String             @default("custom")
   userId            String
   disableBannedList Int                @default(0)
+  slowModeHours     Int                @default(0)
   castRuleSet       String             @default("{}")
   excludeCohosts    Boolean            @default(true)
   excludeUsernames  String             @default("[]")

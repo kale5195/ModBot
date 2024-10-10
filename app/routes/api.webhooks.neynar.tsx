@@ -35,7 +35,14 @@ export async function action({ request }: ActionFunctionArgs) {
   if (isRuleTargetApplicable("reply", webhookNotif.data)) {
     return json({ message: "Ignoring reply" });
   }
-
+  const moderatedChannel = await db.moderatedChannel.findUnique({
+    where: {
+      id: channelName,
+    },
+  });
+  if (!moderatedChannel) {
+    return json({ message: "no moderated channel found" });
+  }
   if (process.env.NODE_ENV === "development") {
     console.log(webhookNotif);
   }
@@ -47,18 +54,25 @@ export async function action({ request }: ActionFunctionArgs) {
   }
   const wcChannel = await getWarpcastChannel({ channel: channelName });
   const channelModeratorFids = wcChannel.moderatorFids;
-  // check casted number in past 4 hours
-  // TODO Read from config
-  const count = await db.castLog.count({
-    where: {
-      channelId: channelName,
-      authorFid,
-      createdAt: {
-        gte: Math.floor(new Date().getTime() / 1000) - 3600 * 4,
+  const goodFids =
+    channelModeratorFids.includes(authorFid) ||
+    moderatedChannel.excludeUsernamesParsed.map((u) => u.value).includes(authorFid);
+
+  let shouldHide = false;
+  if (!goodFids && moderatedChannel.slowModeHours > 0) {
+    // check casted number
+    const count = await db.castLog.count({
+      where: {
+        channelId: channelName,
+        authorFid,
+        createdAt: {
+          gte: Math.floor(new Date().getTime() / 1000) - 3600 * moderatedChannel.slowModeHours,
+        },
       },
-    },
-  });
-  const shouldHide = count >= 1 && !channelModeratorFids.includes(authorFid);
+    });
+    shouldHide = count >= 1;
+  }
+
   await db.castLog.create({
     data: {
       hash: webhookNotif.data.hash,

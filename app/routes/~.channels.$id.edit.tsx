@@ -177,7 +177,7 @@ export default function Screen() {
   return (
     <div className="space-y-4 w-full">
       <div className="">
-        <p className="font-semibold">Membership Rules</p>
+        <p className="font-semibold">Member Rules</p>
         <p className="text-gray-500">The following settings control who can join /{channel.id}.</p>
       </div>
 
