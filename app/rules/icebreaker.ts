@@ -235,7 +235,7 @@ async function hasPOAP({ user: member, rule }: CheckFunctionArgs) {
 }
 
 async function hasGuildRole({ user: member, rule }: CheckFunctionArgs) {
-  const { guildId, roleId } = rule.args as { guildId: number; roleId: number | undefined };
+  const { guildId, roleId } = rule.args as { guildId: string; roleId: string | undefined };
 
   const user = await getIcebreakerbyFid(member.fid);
 
@@ -246,15 +246,15 @@ async function hasGuildRole({ user: member, rule }: CheckFunctionArgs) {
     };
   }
 
-  const guild = user.guilds?.find((guild) => guild.guildId === guildId);
+  const guild = user.guilds?.find((guild) => guild.guildId === +guildId);
 
-  const userHasGuildRole = (guild && (roleId ? guild.roleIds?.includes(roleId) ?? false : true)) ?? false;
+  const userHasGuildRole = (guild && (roleId ? guild.roleIds?.includes(+roleId) ?? false : true)) ?? false;
 
   return {
     result: userHasGuildRole,
     message: userHasGuildRole
-      ? `@${member.username} has the Guild ${guildId}${roleId ? `with role ${roleId}` : ""}`
-      : `@${member.username} does not have the Guild ${guildId}${roleId ? `with role ${roleId}` : ""}`,
+      ? `@${member.username} has the Guild ${guildId}${roleId ? ` with role ${roleId}` : ""}`
+      : `@${member.username} does not have the Guild ${guildId}${roleId ? ` with role ${roleId}` : ""}`,
   };
 }
 
@@ -414,17 +414,19 @@ export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
     invertable: true,
     args: {
       guildId: {
-        type: "number",
+        type: "string",
         friendlyName: "Guild ID",
         description: "The Guild ID to check for",
         placeholder: "Enter a Guild ID...",
+        pattern: "^[0-9]+$",
         required: true,
       },
       roleId: {
-        type: "number",
+        type: "string",
         friendlyName: "Role ID",
         description: "Optional role ID to check for",
         placeholder: "Enter a Role ID...",
+        pattern: "^[0-9]*$",
         required: false,
       },
     },
