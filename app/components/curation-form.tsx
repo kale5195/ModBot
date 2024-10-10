@@ -316,13 +316,24 @@ function RuleSetEditor(props: {
               <DialogTitle>Add Rule</DialogTitle>
               <DialogDescription>Select a rule to add to the rule set.</DialogDescription>
             </DialogHeader>
-            <Input
-              type="text"
-              placeholder="Search rules..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="mb-4"
-            />
+            <div className="relative mb-4">
+              <Input
+                type="text"
+                placeholder="Search rules..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pr-8"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
               {Object.entries(props.ruleDefinitions)
                 .sort(([_a, adef], [_b, bdef]) => adef.friendlyName.localeCompare(bdef.friendlyName))
