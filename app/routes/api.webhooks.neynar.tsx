@@ -83,7 +83,7 @@ export async function action({ request }: ActionFunctionArgs) {
       status: shouldHide ? 1 : 0,
     },
   });
-  if (shouldHide) {
+  if (shouldHide && channelModeratorFids.includes(861203)) {
     console.log(`Hiding cast ${webhookNotif.data.hash} from ${channelName}`);
     await moderateCast({ hash: webhookNotif.data.hash, action: "hide" });
   }
