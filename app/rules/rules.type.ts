@@ -16,7 +16,7 @@ export const ruleNames = [
   "holdsChannelFanToken",
   "userProfileContainsText",
   "userDisplayNameContainsText",
-  // "userFollowsChannel",
+  "webhook",
   "userIsChannelMember",
   "userFollowerCount",
   "userDoesNotFollow",

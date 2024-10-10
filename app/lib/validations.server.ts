@@ -23,6 +23,7 @@ import { airstackRulesDefinitions, airstackRulesFunction } from "~/rules/airstac
 import { botOrNotRulesDefinitions, botOrNotRulesFunction } from "~/rules/bot-or-not";
 import { channelMemberRulesDefinitions, channelMemberRulesFunction } from "~/rules/membership";
 import { getWarpcastChannel } from "~/lib/warpcast.server";
+import { webhookRulesDefinitions, webhookRulesFunction } from "~/rules/webhook";
 
 export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
   ...botOrNotRulesDefinitions,
@@ -39,6 +40,7 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
   ...ercTokenRulesDefinitions,
   ...iceBreakerRulesDefinitions,
   ...channelMemberRulesDefinitions,
+  ...webhookRulesDefinitions,
 } as const;
 
 export const ruleFunctions: Record<RuleName, CheckFunction> = {
@@ -56,7 +58,7 @@ export const ruleFunctions: Record<RuleName, CheckFunction> = {
   ...ercTokenRulesFunction,
   ...iceBreakerRulesFunction,
   ...channelMemberRulesFunction,
-  // webhook: webhook,
+  ...webhookRulesFunction,
 };
 export type ActionDefinition = {
   friendlyName: string;
