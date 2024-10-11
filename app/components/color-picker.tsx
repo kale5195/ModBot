@@ -13,10 +13,10 @@ export default function ColorPicker({ setColor }: { setColor: (color: string) =>
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const presetColors = [
-    { code: "#ea580c", value: "" },
-    { code: "#000000", value: "000" },
-    { code: "#472B82", value: "472B82" },
-    { code: "#7c65c1", value: "7c65c1" },
+    { code: "#ea580c", value: "#ea580c" },
+    { code: "#000000", value: "#000000" },
+    { code: "#472B82", value: "#472B82" },
+    { code: "#7c65c1", value: "#7c65c1" },
   ];
 
   const handleColorSelect = (color: string, value: string) => {
@@ -29,7 +29,7 @@ export default function ColorPicker({ setColor }: { setColor: (color: string) =>
     e.preventDefault();
     if (customColor) {
       setSelectedColor(customColor);
-      setColor(customColor.replace("#", ""));
+      setColor(customColor);
       setIsOpen(false);
     }
   };

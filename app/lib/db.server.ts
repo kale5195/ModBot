@@ -46,6 +46,18 @@ const db = singleton("prisma", () =>
             return JSON.parse(data.excludeUsernames);
           },
         },
+        framesParsed: {
+          needs: {
+            frames: true,
+          },
+          compute(data): {
+            bgColor: string;
+          } {
+            const parsed = JSON.parse(data.frames);
+            parsed.bgColor = parsed?.bgColor || "#ea580c";
+            return parsed;
+          },
+        },
       },
       role: {
         permissionsParsed: {

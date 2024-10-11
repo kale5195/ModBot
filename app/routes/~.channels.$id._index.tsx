@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { LoaderFunctionArgs } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { abbreviateNumber } from "js-abbreviation-number";
 
-import { typeddefer, useTypedLoaderData } from "remix-typedjson";
+import { typeddefer, typedjson, useTypedLoaderData } from "remix-typedjson";
 import invariant from "tiny-invariant";
 import {
   getSharedEnv,
   requireUser,
   requireUserCanModerateChannel as requireUserCanModerateChannel,
 } from "~/lib/utils.server";
-import { Await } from "@remix-run/react";
+import { Await, useFetcher, Form } from "@remix-run/react";
 import { actionDefinitions } from "~/lib/validations.server";
 import { Suspense, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
@@ -19,6 +19,20 @@ import { ModerationStats30Days, getModerationStats30Days } from "~/lib/stats.ser
 import { Button } from "~/components/ui/button";
 import { useClipboard } from "~/lib/utils";
 import ColorPicker from "~/components/color-picker";
+import { db } from "~/lib/db.server";
+
+export async function action({ request, params }: ActionFunctionArgs) {
+  const channelId = params.id;
+  invariant(channelId, "Channel ID is required");
+  const formData = await request.formData();
+  const color = formData.get("color") as string;
+
+  await db.moderatedChannel.update({
+    where: { id: channelId },
+    data: { frames: JSON.stringify({ bgColor: color }) },
+  });
+  return typedjson({ success: true });
+}
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   invariant(params.id, "id is required");
@@ -47,9 +61,19 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 export default function Screen() {
   const { channel, moderationStats } = useTypedLoaderData<typeof loader>();
   const { copy, copied } = useClipboard();
-  const [color, setColor] = useState<string | null>(null);
+  const fetcher = useFetcher();
+
   function getFrameUrl() {
-    return `https://modbot.sh/channels/${channel.id}/join${color ? `?c=${color}` : ""}`;
+    const color = channel.framesParsed.bgColor;
+    if (color === "#ea580c") {
+      return `https://modbot.sh/channels/${channel.id}/join`;
+    }
+    return `https://modbot.sh/channels/${channel.id}/join?c=${color.replace("#", "")}`;
+  }
+  function handleColorChange(newColor: string | null) {
+    if (newColor) {
+      fetcher.submit({ color: newColor }, { method: "post" });
+    }
   }
   return (
     <div>
@@ -61,7 +85,7 @@ export default function Screen() {
           moderator.
         </p>
         <div className="mt-2 rounded-lg border bg-card text-card-foreground shadow p-4 ">
-          <p className="text-base font-medium" style={{ color: color ? `#${color}` : "#ea580c" }}>
+          <p className="text-base font-medium" style={{ color: channel.framesParsed.bgColor }}>
             {getFrameUrl()}
           </p>
           <div className="flex flex-row gap-4 mt-4 items-center flex-wrap">
@@ -80,7 +104,7 @@ export default function Screen() {
             >
               Preview
             </Button>
-            <ColorPicker setColor={setColor} />
+            <ColorPicker setColor={handleColorChange} />
           </div>
         </div>
       </div>
