@@ -19,7 +19,7 @@ export default function Disclosure() {
           <strong>Operating Hours:</strong> 10:00 - 16:00 JST (excluding weekends and holidays)
         </p>
         <p>
-          <strong>Email Address:</strong> support@automod.sh
+          <strong>Email Address:</strong> admin@modbot.sh
         </p>
         <p>
           <strong>Head of Operations:</strong> John G
@@ -36,9 +36,9 @@ export default function Disclosure() {
           - <strong>After Shipping:</strong> N/A
         </p>
         <p>
-          - <strong>Defective Goods and Services:</strong> In case of any issues with the service, please
-          contact our support center at support@automod.sh. We will address the issue promptly, offering
-          solutions such as service credits or adjustments as appropriate.
+          - <strong>Defective Goods and Services:</strong> In case of any issues with the service, please contact our
+          support center at admin@modbot.sh. We will address the issue promptly, offering solutions such as service
+          credits or adjustments as appropriate.
         </p>
 
         <h2 className="text-xl font-semibold mt-6">Delivery Times</h2>
@@ -61,8 +61,8 @@ export default function Disclosure() {
           - <strong>Available Quantity:</strong> Unlimited.
         </p>
         <p>
-          - <strong>Operating Environment:</strong> Accessible on any device with internet connectivity and a
-          web browser.
+          - <strong>Operating Environment:</strong> Accessible on any device with internet connectivity and a web
+          browser.
         </p>
       </div>
     </div>

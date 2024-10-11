@@ -128,15 +128,13 @@ export default function Screen() {
       username: user.name,
       avatarUrl: user.avatarUrl,
     },
-    ...comods.filter((h) => h.username !== "automod").sort((a, b) => a.username.localeCompare(b.username)),
+    ...comods.filter((h) => h.username !== "modbot").sort((a, b) => a.username.localeCompare(b.username)),
   ];
 
   return (
     <div>
       <p className="font-semibold">Collaborators</p>
-      <p className="text-gray-500">
-        Collaborators have access to ModBot and can manage all moderation settings.
-      </p>
+      <p className="text-gray-500">Collaborators have access to ModBot and can manage all moderation settings.</p>
 
       <div className="py-4">
         <hr />

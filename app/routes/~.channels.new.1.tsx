@@ -43,7 +43,7 @@ export default function Screen() {
                   <CardTitle>No channels found.</CardTitle>
                   <CardDescription>
                     Looks like you don't have any channels left to setup. If you're expecting a channel to be
-                    here, you must be the channel owner to install automod.
+                    here, you must be the channel owner to install modbot.
                   </CardDescription>
                 </CardHeader>
                 <CardFooter>

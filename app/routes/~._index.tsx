@@ -95,7 +95,7 @@ export default function FrameConfig() {
       {channels.length === 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Welcome to Automod</CardTitle>
+            <CardTitle>Welcome to ModBot</CardTitle>
             <CardDescription>Creating a bot for your channel just takes a few seconds.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col sm:flex-row gap-2">

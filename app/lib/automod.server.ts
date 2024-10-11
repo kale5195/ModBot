@@ -130,70 +130,11 @@ export async function downvote({ channel, user, action }: { channel: string; use
 /**
  * This does not check permissions
  */
-export async function grantRole({ channel, user, action }: { channel: string; user: User; action: Action }) {
-  // const { roleId } = (action as any).args;
-  // await db.role.findFirstOrThrow({
-  //   where: {
-  //     channelId: channel,
-  //     id: roleId,
-  //   },
-  // });
-  // const user = await neynar.lookupUserByUsername(cast.author.username);
-  // return db.delegate.upsert({
-  //   where: {
-  //     fid_roleId_channelId: {
-  //       fid: String(cast.author.fid),
-  //       roleId,
-  //       channelId: channel,
-  //     },
-  //   },
-  //   update: {},
-  //   create: {
-  //     fid: String(cast.author.fid),
-  //     roleId,
-  //     channelId: channel,
-  //     avatarUrl: user.result.user.pfp.url,
-  //     username: cast.author.username,
-  //   },
-  // });
-}
+export async function grantRole({ channel, user, action }: { channel: string; user: User; action: Action }) {}
 
-export async function unlike(props: { user: User; channel: string }) {
-  // const signerAlloc = await db.signerAllocation.findFirst({
-  //   where: {
-  //     channelId: props.channel,
-  //   },
-  //   include: {
-  //     signer: true,
-  //   },
-  // });
-  // const uuid = signerAlloc?.signer.signerUuid || process.env.NEYNAR_SIGNER_UUID!;
-  // console.log(
-  //   `Unliking with @${signerAlloc ? signerAlloc.signer.username : "automod"}, cast: ${props.cast.hash}`
-  // );
-  // await neynar.deleteReactionFromCast(uuid, "like", props.cast.hash);
-}
+export async function unlike(props: { user: User; channel: string }) {}
 
-export async function ban({ channel, user }: { channel: string; user: User; action: Action }) {
-  // indefinite cooldown
-  // return db.cooldown.upsert({
-  //   where: {
-  //     affectedUserId_channelId: {
-  //       affectedUserId: String(cast.author.fid),
-  //       channelId: channel,
-  //     },
-  //   },
-  //   update: {
-  //     active: true,
-  //     expiresAt: null,
-  //   },
-  //   create: {
-  //     affectedUserId: String(cast.author.fid),
-  //     channelId: channel,
-  //     expiresAt: null,
-  //   },
-  // });
-}
+export async function ban({ channel, user }: { channel: string; user: User; action: Action }) {}
 
 export type ValidateCastArgs = {
   moderatedChannel: FullModeratedChannel;

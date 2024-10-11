@@ -250,7 +250,7 @@ export async function parseMessage(payload: any) {
 
   if (process.env.NODE_ENV === "production") {
     const host = new URL(message.action.url).host;
-    if (host !== new URL(getSharedEnv().hostUrl).host && host !== "automod.sh") {
+    if (host !== new URL(getSharedEnv().hostUrl).host && host !== "modbot.sh") {
       throw new Error("No spoofs sir");
     }
   }

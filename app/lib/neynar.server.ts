@@ -35,9 +35,9 @@ export async function registerWebhook({ rootParentUrl }: { rootParentUrl: string
       `https://api.neynar.com/v2/farcaster/webhook/`,
       {
         webhook_id: process.env.NEYNAR_WEBHOOK_ID!,
-        name: "automod",
+        name: "modbot",
         url: `${getSharedEnv().hostUrl}/api/webhooks/neynar`,
-        description: "automod webhook",
+        description: "modbot webhook",
         subscription: {
           "cast.created": {
             author_fids: [],
@@ -86,9 +86,9 @@ export async function unregisterWebhook({ rootParentUrl }: { rootParentUrl: stri
     `https://api.neynar.com/v2/farcaster/webhook/`,
     {
       webhook_id: process.env.NEYNAR_WEBHOOK_ID!,
-      name: "automod",
+      name: "modbot",
       url: `${getSharedEnv().hostUrl}/api/webhooks/neynar`,
-      description: "automod webhook",
+      description: "modbot webhook",
       subscription: {
         "cast.created": {
           author_fids: [],

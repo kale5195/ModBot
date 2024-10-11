@@ -134,16 +134,16 @@ export default function Screen() {
               <PopoverContent>
                 <div className="text-sm space-y-2">
                   <p>
-                    Let's say you run a large channel like <span className="font-mono">/design</span> with
-                    60k+ members. Staying on top of moderation is a job.
+                    Let's say you run a large channel like <span className="font-mono">/design</span> with 60k+ members.
+                    Staying on top of moderation is a job.
                   </p>
                   <p>
-                    You likely have a small population of motivated members who would happily contribute to
-                    moderating the channel.
+                    You likely have a small population of motivated members who would happily contribute to moderating
+                    the channel.
                   </p>
                   <p>
-                    With automod roles, you can create a role with just the right level of access. For
-                    example, only allowing them to hide posts.
+                    With modbot roles, you can create a role with just the right level of access. For example, only
+                    allowing them to hide posts.
                   </p>
                 </div>
               </PopoverContent>

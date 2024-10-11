@@ -5,7 +5,7 @@ const retryDelay = 1000;
 
 export const http = axiosFactory.create({
   headers: {
-    "x-agent": "automod",
+    "x-agent": "modbot",
   },
 });
 
@@ -17,11 +17,7 @@ http.interceptors.response.use(undefined, function axiosRetryInterceptor(err) {
     data: JSON.stringify(err.response?.data),
   });
 
-  if (
-    err.response?.status &&
-    (err.response.status === 429 || err.response.status >= 500) &&
-    !config.__retryCount
-  ) {
+  if (err.response?.status && (err.response.status === 429 || err.response.status >= 500) && !config.__retryCount) {
     config.__retryCount = 0;
   }
 

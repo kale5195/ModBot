@@ -169,7 +169,7 @@ export const userPlans = {
     displayName: "Prime",
     price: "$14.99/mo",
     link: "https://warpcast.com/haole",
-    maxChannels: 6,
+    maxChannels: 10,
     maxCasts: 50_000,
   },
   ultra: {

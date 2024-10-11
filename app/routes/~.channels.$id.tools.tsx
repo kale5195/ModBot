@@ -38,7 +38,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
   // only channels that have a signer can sweep as far back
   // as they want, because otherwise you can burn through
-  // reaction storage for @automod
   const channelsWithSigners = await db.signerAllocation.findMany({
     select: {
       channelId: true,

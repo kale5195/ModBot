@@ -168,17 +168,6 @@ export default function Home() {
           </section>
         </div>
 
-        {/* <div className="p-7 sm:px-12">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full max-w-3xl mx-auto h-full object-cover border-slate-700/80 border-[10px] rounded-[20px] shadow-lg"
-            src="/videos/automod-demo-complete.mp4"
-          />
-        </div> */}
-
         {/* features */}
         <div className="p-7 pt-8 pb-24 sm:px-12">
           <div className="justify-left mx-auto flex max-w-5xl flex-col items-center space-y-6">

@@ -91,9 +91,9 @@ export const userFollowRulesFunction: Record<RuleName, CheckFunction> = {
 export const userFollowRulesDefinitions: Record<RuleName, RuleDefinition> = {
   // userFollowsChannel: {
   //   name: "userFollowsChannel",
-  //   author: "automod",
-  //   authorUrl: "https://automod.sh",
-  //   authorIcon: `${hostUrl}/icons/modbot.png`,
+  //   author: "modbot",
+  //   authorUrl: "https://modbot.sh",
+  //   authorIcon: `/icons/modbot.png`,
   //   allowMultiple: true,
   //   category: "all",
   //   friendlyName: "Follows Channel",
