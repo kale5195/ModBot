@@ -16,6 +16,17 @@ model Order {
   deletedAt DateTime? @db.Timestamptz(6)
 }
 
+model ChannelOrder {
+  id        String    @id @default(cuid())
+  fid       String
+  channelId String
+  address   String
+  txHash    String?
+  status    Int       @default(0)
+  createdAt DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime? @updatedAt @db.Timestamptz(6)
+}
+
 model InviteCode {
   id        String    @id @default(cuid())
   active    Boolean   @default(true)

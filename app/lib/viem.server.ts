@@ -43,7 +43,7 @@ const hamClient = createPublicClient({
   transport: http(hamChain.rpcUrls.default.http[0]),
 });
 
-const baseClient = createPublicClient({
+export const baseClient = createPublicClient({
   chain: base,
   transport: fallback(
     [

@@ -1,0 +1,38 @@
+import { ActionFunctionArgs, json } from "@remix-run/node";
+import invariant from "tiny-invariant";
+import { parseEther } from "viem";
+import { db } from "~/lib/db.server";
+import { parseMessageWithAirstack } from "~/lib/utils.server";
+export async function action({ request, params }: ActionFunctionArgs) {
+  invariant(params.channel, "channel id is required");
+  const channelId = params.channel;
+  const data = await request.json();
+  const user = await parseMessageWithAirstack(data);
+  // parse frames
+  // get price and address from channel
+  const address = "0x8cca7ae86131bab90425eb641d50913ba3a84295";
+  const price = parseEther("0.001").toString();
+  // create order
+  const channelOrder = await db.channelOrder.create({
+    data: {
+      channelId,
+      fid: user.fid.toString(),
+      address,
+    },
+  });
+  const jsonData = { id: channelOrder.id };
+  const hexData = ("0x" + Buffer.from(JSON.stringify(jsonData)).toString("hex")) as `0x${string}`;
+  return json(
+    {
+      chainId: "eip155:8453",
+      method: "eth_sendTransaction",
+      params: {
+        abi: [],
+        value: price,
+        to: address,
+        data: hexData,
+      },
+    },
+    { status: 200 }
+  );
+}
