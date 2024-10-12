@@ -139,7 +139,7 @@ async function holdsErc20(args: CheckFunctionArgs) {
     result: hasEnough,
     message: hasEnough
       ? `User holds ERC-20 (${name || formatHash(contractAddress)})`
-      : `User does not hold enough ERC-20 (${name || formatHash(contractAddress)})`,
+      : `Needs to hold ${minBalance} ERC-20 (${name || formatHash(contractAddress)})`,
   };
 }
 

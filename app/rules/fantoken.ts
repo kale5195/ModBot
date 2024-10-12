@@ -9,7 +9,9 @@ async function holdsChannelFanToken(args: CheckFunctionArgs) {
 
   return {
     result: hasEnough,
-    message: hasEnough ? `Holds /${channel.id} Fan Token` : `Does not hold enough /${channel.id} Channel Fan Token`,
+    message: hasEnough
+      ? `Holds /${channel.id} Fan Token`
+      : `Needs to hold ${minBalance} /${channel.id} Channel Fan Token`,
   };
 }
 
@@ -24,7 +26,7 @@ async function holdsFanToken(args: CheckFunctionArgs) {
   const hasEnough = balance >= minBalance;
   return {
     result: hasEnough,
-    message: hasEnough ? `User holds @${label}'s Fan Token` : `User does not hold enough of @${label}'s Fan Token`,
+    message: hasEnough ? `User holds @${label}'s Fan Token` : `Needs to hold ${minBalance} @${label}'s Fan Token`,
   };
 }
 
