@@ -45,7 +45,7 @@ export const membershipFeeRulesDefinitions: Record<RuleName, RuleDefinition> = {
         friendlyName: "Token Name",
         description: "",
         required: true,
-        defaultValue: "8453",
+        defaultValue: "ETH (Base Chain)",
         options: [{ value: "ETH (Base Chain)", label: "ETH (Base Chain)" }],
       },
       feeAmount: {
