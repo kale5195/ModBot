@@ -1,5 +1,5 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { frameResponse, getSharedEnv, parseMessageWithAirstack } from "~/lib/utils.server";
+import type { ActionFunctionArgs } from "@remix-run/node";
+import { frameResponse, getSharedEnv } from "~/lib/utils.server";
 import invariant from "tiny-invariant";
 import { baseClient } from "~/lib/viem.server";
 import { db } from "~/lib/db.server";
@@ -19,7 +19,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const color = url.searchParams.get("c");
   const transactionIdFromUrl = url.searchParams.get("transactionId") as `0x${string}` | undefined;
   const data = await request.json();
-  const user = await parseMessageWithAirstack(data);
   const transactionId = (data.untrustedData?.transactionId as `0x${string}` | undefined) || transactionIdFromUrl;
   if (!transactionId) {
     return frameResponse({
@@ -47,14 +46,20 @@ export async function action({ request, params }: ActionFunctionArgs) {
       const jsonData = decodedData.slice(jsonStartIndex, jsonEndIndex);
       const parsedData = JSON.parse(jsonData) as { id: string };
       const channelOrderId = parsedData.id;
+      const channelOrder = await db.channelOrder.findUniqueOrThrow({
+        where: { id: channelOrderId },
+      });
+      if (!channelOrder) {
+        throw new Error("Channel order not found");
+      }
       await db.channelOrder.update({
         where: { id: channelOrderId },
         data: { status: 1, txHash: transactionId },
       });
-      await inviteToChannel({ channelId, fid: user.fid });
+      await inviteToChannel({ channelId, fid: Number(channelOrder.fid) });
       await db.moderationLog.updateMany({
         where: {
-          affectedUserFid: user.fid.toString(),
+          affectedUserFid: channelOrder.fid.toString(),
           channelId,
           action: "hideQuietly",
           reason: {
