@@ -597,6 +597,9 @@ export function frameResponse(params: FrameResponseArgs) {
                 } else if (b.tx) {
                   out += `\n<meta property="fc:frame:button:${index + 1}:action" content="tx">`;
                   out += `\n<meta property="fc:frame:button:${index + 1}:target" content="${b.tx}">`;
+                  if (b.postUrl) {
+                    out += `\n<meta property="fc:frame:button:${index + 1}:post_url" content="${b.postUrl}">`;
+                  }
                 } else if (b.isRedirect) {
                   out += `\n<meta property="fc:frame:button:${index + 1}:action" content="post_redirect">`;
                 }

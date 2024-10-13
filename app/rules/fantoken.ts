@@ -5,7 +5,7 @@ async function holdsChannelFanToken(args: CheckFunctionArgs) {
   const { user, rule, channel } = args;
   const { contractAddress, minBalance, symbol } = rule.args;
   const balance = await holdingFanTokenBalance({ fid: user.fid, symbol });
-  const hasEnough = balance >= minBalance;
+  const hasEnough = balance >= parseFloat(minBalance);
 
   return {
     result: hasEnough,
@@ -23,7 +23,7 @@ async function holdsFanToken(args: CheckFunctionArgs) {
   } = rule.args;
 
   const balance = await holdingFanTokenBalance({ fid: user.fid, symbol });
-  const hasEnough = balance >= minBalance;
+  const hasEnough = balance >= parseFloat(minBalance);
   return {
     result: hasEnough,
     message: hasEnough ? `User holds @${label}'s Fan Token` : `Needs to hold ${minBalance} @${label}'s Fan Token`,

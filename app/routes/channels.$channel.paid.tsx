@@ -3,6 +3,7 @@ import { frameResponse, getSharedEnv, parseMessageWithAirstack } from "~/lib/uti
 import invariant from "tiny-invariant";
 import { baseClient } from "~/lib/viem.server";
 import { db } from "~/lib/db.server";
+import { inviteToChannel } from "~/lib/neynar.server";
 
 function getFrameImageUrl(props: { message: string; channel?: string; color?: string | null }) {
   const { message, channel, color } = props;
@@ -18,7 +19,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const color = url.searchParams.get("c");
   const transactionIdFromUrl = url.searchParams.get("transactionId") as `0x${string}` | undefined;
   const data = await request.json();
-  console.log(data.untrustedData);
+  const user = await parseMessageWithAirstack(data);
   const transactionId = (data.untrustedData?.transactionId as `0x${string}` | undefined) || transactionIdFromUrl;
   if (!transactionId) {
     return frameResponse({
@@ -27,6 +28,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
         message: "Transaction ID is required",
         color,
       }),
+      buttons: [
+        {
+          text: "Contact Dev",
+          link: `https://warpcast.com/~/inbox/create/3346?text=${encodeURIComponent(
+            `Transaction error when joining /${channelId}?`
+          )}`,
+        },
+      ],
     });
   }
   try {
@@ -42,54 +51,31 @@ export async function action({ request, params }: ActionFunctionArgs) {
         where: { id: channelOrderId },
         data: { status: 1, txHash: transactionId },
       });
+      await inviteToChannel({ channelId, fid: user.fid });
       return frameResponse({
         title: "Success",
         image: getFrameImageUrl({
-          message: "Successfully joined channel",
+          message: "Invite sent!",
           color,
         }),
+        buttons: [
+          {
+            text: "Check Notifications",
+            link: `https://warpcast.com/~/notifications/channel-role-invites?groupId=channels%21channel-role-invite%3Amember`,
+          },
+        ],
       });
     }
   } catch (e) {
-    console.error(e);
+    console.log("failed to get transaction");
   }
   return frameResponse({
     title: "Pending",
-    image: getFrameImageUrl({
-      message: "Pending transaction",
-      color,
-    }),
+    image: "https://cdn.recaster.org/tx_loading.gif",
     buttons: [
       {
         text: "Refresh",
-        postUrl: `${getSharedEnv().hostUrl}/channels/${channelId}/buy?c=${color}&transactionId=${transactionId}`,
-      },
-      {
-        text: "Contact Dev",
-        link: `https://warpcast.com/~/inbox/create/3346?text=${encodeURIComponent(
-          `Pending transaction when joining /${channelId}?`
-        )}`,
-      },
-    ],
-  });
-}
-
-export async function loader({ params, request }: LoaderFunctionArgs) {
-  invariant(params.channel, "channel id is required");
-  const channelId = params.channel;
-  const url = new URL(request.url);
-  const color = url.searchParams.get("c") || "ea580c";
-  return frameResponse({
-    title: `Welcome to ${channelId}`,
-    description: "Join the channel through ModBot.",
-    image: getFrameImageUrl({
-      message: `Welcome to /${channelId}`,
-    }),
-    postUrl: `${getSharedEnv().hostUrl}/channels/${channelId}/buy?c=${color}`,
-    buttons: [
-      {
-        text: `Join Now`,
-        tx: `${getSharedEnv().hostUrl}/api/transaction/${channelId}`,
+        postUrl: `${getSharedEnv().hostUrl}/channels/${channelId}/paid?c=${color}&transactionId=${transactionId}`,
       },
     ],
   });

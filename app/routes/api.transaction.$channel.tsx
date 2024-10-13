@@ -10,8 +10,21 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const user = await parseMessageWithAirstack(data);
   // parse frames
   // get price and address from channel
-  const address = "0x8cca7ae86131bab90425eb641d50913ba3a84295";
-  const price = parseEther("0.001").toString();
+  const channel = await db.moderatedChannel.findFirst({ where: { id: channelId } });
+  if (!channel) {
+    throw new Error("Channel not found");
+  }
+
+  const rules = channel.inclusionRuleSetParsed?.ruleParsed.conditions?.find(
+    (rule) => rule.name === "membershipFeeRequired"
+  );
+  if (!rules) {
+    throw new Error("Membership fee rule not found");
+  }
+  const { receiveAddress, feeAmount } = rules.args;
+
+  const address = receiveAddress;
+  const price = parseEther(feeAmount).toString();
   // create order
   const channelOrder = await db.channelOrder.create({
     data: {

@@ -191,6 +191,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     // console.log("log", log);
     const action = log.action;
     const needChannelFanToken = log.reason.includes("Channel Fan Token");
+    const needMembershipFee = log.reason.includes("Membership fee required");
     return frameResponse({
       title: `Join ${channelId}`,
       description: "Join the channel through ModBot.",
@@ -209,13 +210,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
               },
             ]
           : [
-              {
-                text: "Try again",
-              },
-              {
-                text: "Check why",
-                link: `${getSharedEnv().hostUrl}/channels/${channelId}?fid=${user.fid}`,
-              },
               ...(needChannelFanToken
                 ? [
                     {
@@ -223,14 +217,33 @@ export async function action({ request, params }: ActionFunctionArgs) {
                       target: `https://moxie-frames.airstack.xyz/stim/frame?f=3&r=19&t=cid_${channelId}`,
                     },
                   ]
-                : [
+                : []),
+              ...(needMembershipFee
+                ? [
                     {
-                      text: "DC Moderator",
-                      link: `https://warpcast.com/~/inbox/create/${channel.userId}?text=${encodeURIComponent(
-                        `Could you add me to /${channelId}?`
-                      )}`,
+                      text: "Pay Membership Fee",
+                      tx: `${getSharedEnv().hostUrl}/api/transaction/${channelId}`,
+                      postUrl: `${getSharedEnv().hostUrl}/channels/${channelId}/paid?c=${color}`,
                     },
-                  ]),
+                  ]
+                : []),
+              ...(!needChannelFanToken && !needMembershipFee
+                ? [
+                    {
+                      text: "Try again",
+                    },
+                    {
+                      text: "Check why",
+                      link: `${getSharedEnv().hostUrl}/channels/${channelId}?fid=${user.fid}`,
+                    },
+                  ]
+                : []),
+              {
+                text: "DC Moderator",
+                link: `https://warpcast.com/~/inbox/create/${channel.userId}?text=${encodeURIComponent(
+                  `Could you add me to /${channelId}?`
+                )}`,
+              },
             ],
     });
   } catch (e) {
