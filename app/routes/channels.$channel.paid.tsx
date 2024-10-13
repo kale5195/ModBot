@@ -52,6 +52,21 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: { status: 1, txHash: transactionId },
       });
       await inviteToChannel({ channelId, fid: user.fid });
+      await db.moderationLog.updateMany({
+        where: {
+          affectedUserFid: user.fid.toString(),
+          channelId,
+          action: "hideQuietly",
+          reason: {
+            contains: "Membership fee required",
+          },
+        },
+        data: {
+          action: "like",
+          actor: "system",
+          reason: `Membership fee paid`,
+        },
+      });
       return frameResponse({
         title: "Success",
         image: getFrameImageUrl({
