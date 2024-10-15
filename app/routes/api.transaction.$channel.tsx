@@ -8,6 +8,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const channelId = params.channel;
   const data = await request.json();
   const user = await parseMessageWithAirstack(data);
+  const paymentAddress = data.untrustedData.address;
   // parse frames
   // get price and address from channel
   const channel = await db.moderatedChannel.findFirst({ where: { id: channelId } });
@@ -23,14 +24,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
   const { receiveAddress, feeAmount } = rules.args;
 
-  const address = receiveAddress;
   const price = parseEther(feeAmount).toString();
   // create order
   const channelOrder = await db.channelOrder.create({
     data: {
       channelId,
       fid: user.fid.toString(),
-      address,
+      address: receiveAddress,
     },
   });
   const jsonData = { id: channelOrder.id };
@@ -42,7 +42,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       params: {
         abi: [],
         value: price,
-        to: address,
+        to: receiveAddress,
         data: hexData,
       },
     },
