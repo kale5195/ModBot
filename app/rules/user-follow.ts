@@ -155,7 +155,7 @@ export const userFollowRulesDefinitions: Record<RuleName, RuleDefinition> = {
         friendlyName: "Usernames",
         placeholder: "Enter a username...",
         description:
-          "Example: If you enter jtgi and riotgoools, it will check that either jtgi or riotgools follow the cast author.",
+          "Example: If you enter jtgi and riotgoools, it will check that either jtgi or riotgools follow the user requesting an invite.",
       },
     },
   },
