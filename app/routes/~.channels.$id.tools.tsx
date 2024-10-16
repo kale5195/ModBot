@@ -121,7 +121,7 @@ export default function Screen() {
       <div className="space-y-3">
         <div>
           <p className="font-medium">Simulate Rules</p>
-          <p className="text-sm text-gray-500">Enter a fid to simulate your moderation rules against.</p>
+          <p className="text-sm text-gray-500">Enter a fid to simulate your moderation rules.</p>
         </div>
       </div>
       <SimulateCast actionDefs={actionDefinitions} />

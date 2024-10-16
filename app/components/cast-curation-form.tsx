@@ -71,12 +71,12 @@ export function CastCurationForm(props: {
           <fieldset disabled={isSubmitting} className="space-y-6">
             <div>
               <p className="font-medium">Slow Mode</p>
-              <p className="text-gray-500 text-sm">Limit how often a user's cast is shown in channel.</p>
+              <p className="text-gray-500 text-sm">Limit how often members can cast in the channel.</p>
             </div>
 
             <FieldLabel
               label="Cooldown Period"
-              description="Example: Let's say you enter 2 hours, if a user's cast is posted at 9:00 PM, the other casts created before 11:00 PM will be hidden. Affects root casts only, replies cannot be moderated."
+              description="Example: Let's say you enter 2 hours, if a user's cast is posted at 9:00 PM, any additional casts until 11:00 PM will be hidden. Affects root casts only, replies cannot be moderated."
               className="flex-col items-start"
             >
               <div className="flex items-center">
@@ -100,7 +100,7 @@ export function CastCurationForm(props: {
             <div>
               <p className="font-medium">Bypass</p>
               <p className="text-gray-500 text-sm">
-                Users in this list will always have their casts into channel, no cooldown.
+                Users in this list will always have their casts appear in the channel, with no cooldown.
               </p>
               <p className="text-primary text-sm"> (Channel Moderators bypass by default, no need to add them here)</p>
             </div>
