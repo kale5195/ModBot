@@ -10,8 +10,8 @@ import {
   requireUser,
   requireUserCanModerateChannel,
 } from "~/lib/utils.server";
-import { actionDefinitions, getRuleDefinitions } from "~/lib/validations.server";
-import { ruleNames } from "~/rules/rules.type";
+import { actionDefinitions, getRuleDefinitions, RuleSetSchema } from "~/lib/validations.server";
+import { Rule, ruleNames } from "~/rules/rules.type";
 import { commitSession, getSession } from "~/lib/auth.server";
 import { db } from "~/lib/db.server";
 import invariant from "tiny-invariant";
@@ -21,6 +21,7 @@ import { actionToInstallLink } from "~/lib/utils";
 import { CastCurationForm } from "~/components/cast-curation-form";
 import { z } from "zod";
 import { toggleWebhook } from "~/routes/api.channels.$id.toggleEnable";
+import { RuleSet } from "~/lib/types";
 
 export async function action({ request, params }: ActionFunctionArgs) {
   invariant(params.id, "id is required");
@@ -32,7 +33,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
   });
 
   const data = await request.json();
-
   if (process.env.NODE_ENV === "development") {
     console.log(JSON.stringify(data, null, 2));
   }
@@ -40,6 +40,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const ch = await z
     .object({
       id: z.string().transform((id) => id.toLowerCase()),
+      castRuleSet: RuleSetSchema,
       slowModeHours: z.coerce.number().default(0),
       excludeUsernames: z
         .array(z.object({ value: z.number(), label: z.string(), icon: z.string().optional() }))
@@ -70,6 +71,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
       data: {
         slowModeHours: ch.data.slowModeHours,
         excludeUsernames: JSON.stringify(ch.data.excludeUsernames),
+        castRuleSet: JSON.stringify({
+          rule: ch.data.castRuleSet?.ruleParsed,
+          actions: ch.data.castRuleSet?.actionsParsed,
+        }),
       },
     }),
     getSession(request.headers.get("Cookie")),
@@ -107,7 +112,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       },
     }),
   ]);
-
   return typedjson({
     user,
     channel,
@@ -123,7 +127,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 export default function Screen() {
   const { user, channel, ruleNames, ruleDefinitions, actionDefinitions, cohostRole, bypassInstallLink } =
     useTypedLoaderData<typeof loader>();
-
   return (
     <div className="w-full">
       <div className="">
@@ -141,8 +144,25 @@ export default function Screen() {
         defaultValues={{
           ...channel,
           excludeUsernames: channel.excludeUsernamesParsed,
+          castRuleSet: patchNewRuleSet(channel.castRuleSetParsed!),
         }}
       />
     </div>
   );
+}
+
+function patchNewRuleSet(
+  ruleSet: RuleSet & {
+    ruleParsed: Rule;
+    actionsParsed: any;
+  }
+) {
+  return {
+    id: ruleSet?.id,
+    target: ruleSet?.target || "root",
+    active: ruleSet?.active || true,
+    ruleParsed: ruleSet?.ruleParsed?.conditions || [],
+    actionsParsed: ruleSet?.actionsParsed?.length ? ruleSet.actionsParsed : [{ type: "hideQuietly" }],
+    logicType: ruleSet?.ruleParsed?.operation || ("OR" as const),
+  };
 }

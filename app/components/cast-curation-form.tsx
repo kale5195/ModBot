@@ -15,17 +15,67 @@ import { Button } from "./ui/button";
 
 import { ClientOnly } from "remix-utils/client-only";
 
-import { ArrowUpRight, Loader } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, Loader } from "lucide-react";
 import { UserPicker } from "./user-picker";
 import { Role, User } from "@prisma/client";
-import { RuleName, Rule, SelectOption } from "~/rules/rules.type";
+import { RuleName, Rule, SelectOption, RuleDefinition } from "~/rules/rules.type";
+import RuleSetEditor from "~/components/rule-editor";
 
 export type FormValues = {
   id?: string;
   excludeUsernames?: Array<SelectOption> | null;
   slowModeHours?: number | null;
+  castRuleSet: {
+    id?: string;
+    active: boolean;
+    target: string;
+    logicType: "AND" | "OR";
+    ruleParsed: Array<Rule>;
+    actionsParsed: Array<Action>;
+  };
 };
 
+function prepareFormValues(data: FormValues) {
+  function transformRuleSet(ruleSet: FormValues["castRuleSet"]) {
+    if (ruleSet.logicType === "AND") {
+      const rule: Rule = {
+        name: "and",
+        type: "LOGICAL",
+        args: {},
+        operation: "AND",
+        conditions: ruleSet.ruleParsed,
+      };
+
+      return {
+        ...ruleSet,
+        rule,
+        ruleParsed: rule,
+      };
+    } else {
+      const rule: Rule = {
+        name: "or",
+        type: "LOGICAL",
+        args: {},
+        operation: "OR",
+        conditions: ruleSet.ruleParsed,
+      };
+
+      return {
+        ...ruleSet,
+        rule,
+        ruleParsed: rule,
+      };
+    }
+  }
+
+  const tx = {
+    ...data,
+    excludeUsernames: data.excludeUsernames || [],
+    castRuleSet: transformRuleSet(data.castRuleSet),
+  };
+
+  return tx;
+}
 export function CastCurationForm(props: {
   user: User;
   actionDefinitions: typeof actionDefinitions;
@@ -51,10 +101,7 @@ export function CastCurationForm(props: {
   } = methods;
 
   const onSubmit = (data: FormValues) => {
-    const tx = {
-      ...data,
-      excludeUsernames: data.excludeUsernames || [],
-    };
+    const tx = prepareFormValues(data);
     fetcher.submit(tx, {
       encType: "application/json",
       method: "post",
@@ -65,6 +112,32 @@ export function CastCurationForm(props: {
     <div className="w-full">
       <FormProvider {...methods}>
         <form id="channel-form" method="post" className="w-full space-y-6" onSubmit={handleSubmit(onSubmit)}>
+          <div className="py-6">
+            <hr />
+          </div>
+          <fieldset disabled={isSubmitting} className="space-y-6 w-full">
+            <div className="text-md flex items-start gap-2">
+              <CheckCircle2 className="text-green-500 inline w-5 h-5 shrink-0 mt-1" />
+              <div>
+                When <span className="p-1 bg-primary/10 rounded-md">any</span> of the following rules are met, then hide
+                the cast.
+              </div>
+            </div>
+
+            <div>
+              <RuleSetEditor
+                user={props.user}
+                actionDefinitions={props.actionDefinitions}
+                ruleDefinitions={ruleCategory(props.ruleDefinitions, "inclusion")}
+                rulesNames={props.ruleNames}
+                watch={watch}
+                control={control}
+                register={register}
+                name="castRuleSet.ruleParsed"
+              />
+            </div>
+          </fieldset>
+
           <div className="py-6">
             <hr />
           </div>
@@ -144,4 +217,14 @@ export function CastCurationForm(props: {
       </FormProvider>
     </div>
   );
+}
+function ruleCategory(defs: typeof ruleDefinitions, category: "inclusion" | "exclusion") {
+  const out: Record<string, RuleDefinition> = {};
+  Object.entries(defs).forEach(([name, def]) => {
+    if (def.category === category || def.category === "all") {
+      out[name] = def;
+    }
+  });
+
+  return out;
 }

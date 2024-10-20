@@ -25,6 +25,20 @@ const db = singleton("prisma", () =>
             }
           },
         },
+        castRuleSetParsed: {
+          needs: {
+            castRuleSet: true,
+          },
+
+          compute(data): (RuleSet & { ruleParsed: Rule; actionsParsed: Array<Action> }) | undefined {
+            if (data.castRuleSet) {
+              const ruleSet = JSON.parse(data.castRuleSet);
+              ruleSet.ruleParsed = ruleSet.rule;
+              ruleSet.actionsParsed = ruleSet.actions;
+              return ruleSet;
+            }
+          },
+        },
         exclusionRuleSetParsed: {
           needs: {
             exclusionRuleSet: true,
