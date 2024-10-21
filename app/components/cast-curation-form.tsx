@@ -19,21 +19,7 @@ import { ArrowUpRight, CheckCircle2, Loader } from "lucide-react";
 import { UserPicker } from "./user-picker";
 import { Role, User } from "@prisma/client";
 import { RuleName, Rule, SelectOption, RuleDefinition } from "~/rules/rules.type";
-import RuleSetEditor from "~/components/rule-editor";
-
-export type FormValues = {
-  id?: string;
-  excludeUsernames?: Array<SelectOption> | null;
-  slowModeHours?: number | null;
-  castRuleSet: {
-    id?: string;
-    active: boolean;
-    target: string;
-    logicType: "AND" | "OR";
-    ruleParsed: Array<Rule>;
-    actionsParsed: Array<Action>;
-  };
-};
+import RuleSetEditor, { FormValues } from "~/components/rule-editor";
 
 function prepareFormValues(data: FormValues) {
   function transformRuleSet(ruleSet: FormValues["castRuleSet"]) {

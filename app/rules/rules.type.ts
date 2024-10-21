@@ -58,7 +58,7 @@ export type RuleDefinition = {
   description: string;
 
   // Where this rule can be used
-  category: "all" | "inclusion" | "exclusion";
+  category: "all" | "inclusion" | "exclusion" | "cast";
 
   // Whether this rule can be used multiple times in a rule set
   // example: containsText can be used many times, power badge can't

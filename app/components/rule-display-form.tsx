@@ -91,8 +91,8 @@ export function RuleDisplayForm(props: {
             </div>
 
             <div>
-              <RuleSetEditor
-                ruleDefinitions={ruleCategory(props.ruleDefinitions, "inclusion")}
+              <RuleSetDisplayEditor
+                ruleDefinitions={props.ruleDefinitions}
                 rulesNames={props.ruleNames}
                 watch={watch}
                 control={control}
@@ -124,8 +124,8 @@ export function RuleDisplayForm(props: {
             </div>
 
             <div>
-              <RuleSetEditor
-                ruleDefinitions={ruleCategory(props.ruleDefinitions, "exclusion")}
+              <RuleSetDisplayEditor
+                ruleDefinitions={props.ruleDefinitions}
                 rulesNames={props.ruleNames}
                 watch={watch}
                 control={control}
@@ -142,7 +142,7 @@ export function RuleDisplayForm(props: {
   );
 }
 
-function RuleSetEditor(props: {
+function RuleSetDisplayEditor(props: {
   ruleDefinitions: typeof ruleDefinitions;
   rulesNames: readonly RuleName[];
   // @ts-ignore -- some build <> local ts mismatch issue theres no way im wasting more life to debug
@@ -388,15 +388,4 @@ function RuleArgs(props: {
       );
     }
   });
-}
-
-function ruleCategory(defs: typeof ruleDefinitions, category: "inclusion" | "exclusion") {
-  const out: Record<string, RuleDefinition> = {};
-  Object.entries(defs).forEach(([name, def]) => {
-    if (def.category === category || def.category === "all") {
-      out[name] = def;
-    }
-  });
-
-  return out;
 }

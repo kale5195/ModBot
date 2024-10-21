@@ -3,25 +3,15 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/no-unescaped-entities */
-import { Action, ActionType, actionDefinitions, ruleDefinitions } from "~/lib/validations.server";
+import { Action, actionDefinitions, ruleDefinitions } from "~/lib/validations.server";
 import { Rule, RuleDefinition, RuleName, SelectOption } from "~/rules/rules.type";
 import { Input } from "~/components/ui/input";
-import { FieldLabel, SliderField } from "~/components/ui/fields";
+import { FieldLabel } from "~/components/ui/fields";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
-import { Link, useFetcher } from "@remix-run/react";
+import { Link } from "@remix-run/react";
 import { userPlans, cn, meetsMinimumPlan, PlanType } from "~/lib/utils";
-import { Switch } from "~/components/ui/switch";
-import {
-  Control,
-  Controller,
-  FormProvider,
-  UseFormRegister,
-  UseFormWatch,
-  useFieldArray,
-  useForm,
-  useFormContext,
-} from "react-hook-form";
+import { Control, Controller, UseFormRegister, UseFormWatch, useFieldArray, useFormContext } from "react-hook-form";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Button } from "./ui/button";
@@ -29,20 +19,8 @@ import { useEffect, useRef, useState } from "react";
 import { Textarea } from "./ui/textarea";
 import { Dialog, DialogTitle, DialogContent, DialogDescription, DialogHeader } from "./ui/dialog";
 import { ClientOnly } from "remix-utils/client-only";
-import { Alert } from "./ui/alert";
 import { DialogTrigger } from "@radix-ui/react-dialog";
-import {
-  ArrowDownToLine,
-  ArrowUpRight,
-  Bot,
-  CheckCircle2,
-  Loader,
-  Gem,
-  PlusIcon,
-  ServerCrash,
-  X,
-  XCircleIcon,
-} from "lucide-react";
+import { Gem, PlusIcon, X } from "lucide-react";
 import { UserPicker } from "./user-picker";
 import { Role, User } from "@prisma/client";
 import { MoxieMemberPicker } from "./moxie-picker";
