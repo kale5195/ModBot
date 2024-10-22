@@ -14,6 +14,7 @@ export type FullModeratedChannel = Prisma.ModeratedChannelGetPayload<typeof Full
   inclusionRuleSetParsed: (RuleSet & { ruleParsed: Rule; actionsParsed: Array<Action> }) | undefined;
   exclusionRuleSetParsed: (RuleSet & { ruleParsed: Rule; actionsParsed: Array<Action> }) | undefined;
   excludeUsernamesParsed: Array<SelectOption> | undefined;
+  castRuleSetParsed: (RuleSet & { ruleParsed: Rule; actionsParsed: Array<Action> }) | undefined;
 };
 
 export type RuleSet = {

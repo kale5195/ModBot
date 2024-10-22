@@ -1,5 +1,6 @@
 import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
 import { webhookQueue } from "~/lib/bullish.server";
+import { validateCast } from "~/lib/cast-mod.server";
 import { db } from "~/lib/db.server";
 import { moderateCast } from "~/lib/warpcast.server";
 
@@ -45,7 +46,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       active_status: "inactive",
       power_badge: false,
     },
-    text: "Is this what /success all about? \n\nI get little to no traction on this app, in spite of me doing HELLA shit in web3 since i’ve been in the space. From Coinbase and Converse collabs, to selling out PFP collections in 24 hrs \n\nOh and been on live TV to talk about my art and this web3 shit 😤\n\nJust want a bit more recognition on here and not to be treated like a bot 😢 ..that too much to ask?",
+    text: "@1 @2 @3 @4 @5 @6 @7 @8 @9 @10 Is this what /success all about? \n\nI get little to no traction on this app, in spite of me doing HELLA shit in web3 since i’ve been in the space. From Coinbase and Converse collabs, to selling out PFP collections in 24 hrs \n\nOh and been on live TV to talk about my art and this web3 shit 😤\n\nJust want a bit more recognition on here and not to be treated like a bot 😢 ..that too much to ask?",
     timestamp: "2024-10-20T00:53:24.000Z",
     embeds: [
       {
@@ -61,10 +62,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
       name: "The Success Syndicate",
       image_url: "https://imagedelivery.net/BXluQx4ige9GuW0Ia56BHw/9b8476f4-0809-4f5f-c629-97dc8745c700/original",
     },
-    mentioned_profiles: [],
+    mentioned_profiles: [{ fid: 7472 }, { fid: 1234 }, { fid: 1235 }, { fid: 1236 }, { fid: 1237 }],
     event_timestamp: "2024-10-20T00:53:24.515Z",
   };
-  //await check
   return json({
     message: "enqueued",
   });

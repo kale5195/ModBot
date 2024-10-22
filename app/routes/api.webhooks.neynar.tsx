@@ -6,6 +6,10 @@ import { WebhookCast } from "~/lib/types";
 import { isRuleTargetApplicable } from "~/lib/automod.server";
 import { db } from "~/lib/db.server";
 import { getWarpcastChannel, isChannelMember, moderateCast } from "~/lib/warpcast.server";
+import { validateCast } from "~/lib/cast-mod.server";
+import { unknown } from "zod";
+import { ModeratedChannel } from "@prisma/client";
+import { Rule } from "~/rules/rules.type";
 
 export async function action({ request }: ActionFunctionArgs) {
   const rawPayload = await request.text();
@@ -59,18 +63,28 @@ export async function action({ request }: ActionFunctionArgs) {
     moderatedChannel.excludeUsernamesParsed.map((u) => u.value).includes(authorFid);
 
   let shouldHide = false;
-  if (!goodFids && moderatedChannel.slowModeHours > 0) {
-    // check casted number
-    const count = await db.castLog.count({
-      where: {
-        channelId: channelName,
-        authorFid,
-        createdAt: {
-          gte: Math.floor(new Date().getTime() / 1000) - 3600 * moderatedChannel.slowModeHours,
+  const rulesLength = moderatedChannel.castRuleSetParsed?.ruleParsed.conditions?.length || 0;
+  const slowMode = moderatedChannel.slowModeHours > 0;
+  if (!goodFids) {
+    if (slowMode) {
+      const count = await db.castLog.count({
+        where: {
+          channelId: channelName,
+          authorFid,
+          createdAt: {
+            gte: Math.floor(new Date().getTime() / 1000) - 3600 * moderatedChannel.slowModeHours,
+          },
         },
-      },
-    });
-    shouldHide = count >= 1;
+      });
+      shouldHide = count >= 1;
+    }
+    if (!shouldHide && rulesLength > 0) {
+      const result = await validateCast({
+        moderatedChannel: moderatedChannel as unknown as ModeratedChannel & { castRuleSetParsed: { ruleParsed: Rule } },
+        cast: webhookNotif.data,
+      });
+      shouldHide = !result.passedRule;
+    }
   }
 
   await db.castLog.create({
