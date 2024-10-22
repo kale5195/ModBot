@@ -66,7 +66,19 @@ type IcebreakerProfile = {
   guilds?: IcebreakerGuildMembership[];
 };
 
+export type UserMetadata = {
+  name: string;
+  value: string | number;
+};
+
+export type UserMetadataApiResponse =
+  | {
+      metadata?: UserMetadata[];
+    }
+  | undefined;
+
 const API_URL = "https://app.icebreaker.xyz/api/v1";
+const TWITTER_API_URL = "https://hook.us1.make.com/h4yqha7yee9juaosenjrmebd956va0ew?twitter=";
 
 async function request<T>(path: string, options?: RequestInit) {
   try {
@@ -77,6 +89,34 @@ async function request<T>(path: string, options?: RequestInit) {
     console.error(err);
     return;
   }
+}
+
+async function getTwitterMetadata(username?: string) {
+  if (!username) {
+    return;
+  }
+
+  const response = await request<UserMetadataApiResponse>(`${TWITTER_API_URL}${username}`);
+
+  return response?.metadata;
+}
+
+function extractTwitterFollowerCount(metadata?: UserMetadata[]) {
+  if (!metadata) {
+    return;
+  }
+
+  const followerCount = metadata?.find(({ name }) => name === "followers_count")?.value as number | undefined;
+  return followerCount;
+}
+
+function extractTwitterCreatedAt(metadata?: UserMetadata[]) {
+  if (!metadata) {
+    return;
+  }
+
+  const createdAt = metadata?.find(({ name }) => name === "created_at")?.value;
+  return createdAt ? new Date(createdAt) : undefined;
 }
 
 type ProfileResponse = {
@@ -212,6 +252,46 @@ async function hasIcebreakerLinkedAccount({ user: member, rule }: CheckFunctionA
   };
 }
 
+async function hasGreaterThanVerifiedTwitterFollowers({ user: member, rule }: CheckFunctionArgs) {
+  const { threshold } = rule.args as { threshold: string };
+
+  if (!threshold || isNaN(+threshold)) {
+    return {
+      result: false,
+      message: "Invalid threshold value",
+    };
+  }
+  const thresholdNumber = +threshold;
+
+  const user = await getIcebreakerbyFid(member.fid);
+
+  if (!user) {
+    return {
+      result: false,
+      message: `@${member.username} not found in Icebreaker`,
+    };
+  }
+  // get twitter followers for user verified twitter account
+  const verifiedTwitterAccount = user.channels?.find(
+    (channel) => channel.type === "twitter" && channel.isVerified
+  )?.value;
+
+  const metadata = verifiedTwitterAccount ? await getTwitterMetadata(verifiedTwitterAccount) : undefined;
+
+  const followerCount = metadata && extractTwitterFollowerCount(metadata);
+
+  const userHasGreaterThanThreshold = !!followerCount && followerCount > thresholdNumber;
+
+  return {
+    result: userHasGreaterThanThreshold,
+    message: followerCount
+      ? `@${member.username} has ${followerCount} followers on Twitter`
+      : metadata
+      ? `Unable to retrieve follower count for @${member.username}`
+      : `Unable to find a verified Twitter account for @${member.username}`,
+  };
+}
+
 async function hasPOAP({ user: member, rule }: CheckFunctionArgs) {
   const { eventId } = rule.args as { eventId: string };
 
@@ -265,7 +345,8 @@ type RuleName =
   | "hasIcebreakerVerified"
   | "hasIcebreakerLinkedAccount"
   | "hasPOAP"
-  | "hasGuildRole";
+  | "hasGuildRole"
+  | "hasGreaterThanVerifiedTwitterFollowers";
 
 const author = "Icebreaker";
 const authorUrl = "https://icebreaker.xyz";
@@ -377,6 +458,29 @@ export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
     },
   },
 
+  hasGreaterThanVerifiedTwitterFollowers: {
+    name: "hasGreaterThanVerifiedTwitterFollowers",
+    allowMultiple: true,
+    author,
+    authorUrl,
+    authorIcon,
+    category: "all",
+    friendlyName: "Icebreaker: Has Greater Than X Verified Twitter Followers",
+    checkType: "user",
+    description: "Check if the user has more than a certain number of followers on their verified Twitter account",
+    hidden: false,
+    invertable: true,
+    args: {
+      threshold: {
+        type: "string",
+        friendlyName: "Follower Threshold",
+        description: "The minimum number of followers required",
+        placeholder: "Enter a number...",
+        required: true,
+      },
+    },
+  },
+
   hasPOAP: {
     name: "hasPOAP",
     allowMultiple: true,
@@ -441,4 +545,5 @@ export const iceBreakerRulesFunction: Record<RuleName, CheckFunction> = {
   hasIcebreakerLinkedAccount: hasIcebreakerLinkedAccount,
   hasPOAP: hasPOAP,
   hasGuildRole: hasGuildRole,
+  hasGreaterThanVerifiedTwitterFollowers: hasGreaterThanVerifiedTwitterFollowers,
 } as const;

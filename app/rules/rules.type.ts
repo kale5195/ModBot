@@ -34,6 +34,7 @@ export const ruleNames = [
   "hasIcebreakerVerified",
   "hasIcebreakerCredential",
   "hasIcebreakerLinkedAccount",
+  "hasGreaterThanVerifiedTwitterFollowers",
   "hasPOAP",
   "hasGuildRole",
   "membershipFeeRequired",
