@@ -114,7 +114,7 @@ export function CastCurationForm(props: {
               <RuleSetEditor
                 user={props.user}
                 actionDefinitions={props.actionDefinitions}
-                ruleDefinitions={ruleCategory(props.ruleDefinitions, "inclusion")}
+                ruleDefinitions={ruleCategory(props.ruleDefinitions)}
                 rulesNames={props.ruleNames}
                 watch={watch}
                 control={control}
@@ -204,10 +204,10 @@ export function CastCurationForm(props: {
     </div>
   );
 }
-function ruleCategory(defs: typeof ruleDefinitions, category: "inclusion" | "exclusion") {
+function ruleCategory(defs: typeof ruleDefinitions) {
   const out: Record<string, RuleDefinition> = {};
   Object.entries(defs).forEach(([name, def]) => {
-    if (def.category === category || def.category === "all") {
+    if (def.category === "cast") {
       out[name] = def;
     }
   });

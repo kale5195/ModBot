@@ -79,10 +79,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }),
     getSession(request.headers.get("Cookie")),
   ]);
-  if (ch.data.slowModeHours !== modChannel.slowModeHours) {
-    console.log("toggling webhook", ch.data.slowModeHours);
-    toggleWebhook({ channelId: modChannel.id, active: ch.data.slowModeHours > 0 }).catch(console.error);
-  }
+  const ruleLength = ch.data.castRuleSet.ruleParsed.conditions?.length || 0;
+  const active = ch.data.slowModeHours > 0 || ruleLength > 0;
+  toggleWebhook({ channelId: modChannel.id, active: active }).catch(console.error);
   session.flash("message", {
     id: uuid(),
     type: "success",

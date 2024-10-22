@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { z } from "zod";
+import RE2 from "re2";
 import { inviteToChannel } from "./neynar.server";
 import { validateErc1155, validateErc20, validateErc721 } from "./utils.server";
 import { db } from "./db.server";
@@ -25,6 +26,7 @@ import { channelMemberRulesDefinitions, channelMemberRulesFunction } from "~/rul
 import { getWarpcastChannel } from "~/lib/warpcast.server";
 import { webhookRulesDefinitions, webhookRulesFunction } from "~/rules/webhook";
 import { membershipFeeRulesDefinitions, membershipFeeRulesFunction } from "~/rules/membership-fee";
+import { castContentRulesDefinitions, castContentRulesFunction } from "~/rules/cast-content";
 
 export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
   ...botOrNotRulesDefinitions,
@@ -43,6 +45,7 @@ export const ruleDefinitions: Record<RuleName, RuleDefinition> = {
   ...channelMemberRulesDefinitions,
   ...webhookRulesDefinitions,
   ...membershipFeeRulesDefinitions,
+  ...castContentRulesDefinitions,
 } as const;
 
 export const ruleFunctions: Record<RuleName, CheckFunction> = {
@@ -62,6 +65,7 @@ export const ruleFunctions: Record<RuleName, CheckFunction> = {
   ...channelMemberRulesFunction,
   ...webhookRulesFunction,
   ...membershipFeeRulesFunction,
+  ...castContentRulesFunction,
 };
 export type ActionDefinition = {
   friendlyName: string;
@@ -288,6 +292,24 @@ export const RuleSchema: z.ZodType<Rule> = BaseRuleSchema.extend({
     {
       message: `Couldn't find that channel. Sure you got it right?`,
     }
+  )
+  .refine(
+    (data) => {
+      if (data.name === "textMatchesPattern") {
+        try {
+          new RE2(data.args.pattern);
+        } catch (e) {
+          return false;
+        }
+
+        return true;
+      } else {
+        return true;
+      }
+    },
+    (value) => ({
+      message: `The pattern "${value.name}" is no good. It should be javascript compatible. Backreferences and lookahead assertions are not supported.`,
+    })
   )
   .refine(
     async (data) => {

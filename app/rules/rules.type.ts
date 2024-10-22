@@ -1,6 +1,7 @@
 import { ModeratedChannel } from "@prisma/client";
 import { PlanType } from "~/lib/utils";
 import { z } from "zod";
+import { Cast } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 
 export const ruleNames = [
   "and",
@@ -36,6 +37,13 @@ export const ruleNames = [
   "hasPOAP",
   "hasGuildRole",
   "membershipFeeRequired",
+  "containsText",
+  "containsEmbeds",
+  "textMatchesPattern",
+  "textMatchesLanguage",
+  "castLength",
+  "containsTooManyMentions",
+  "containsLinks",
 ] as const;
 
 export type RuleName = (typeof ruleNames)[number];
@@ -117,6 +125,7 @@ export type CheckFunctionArgs = {
   channel: ModeratedChannel;
   user: User;
   rule: Rule;
+  cast?: Cast;
 };
 
 export type SelectOption = {
