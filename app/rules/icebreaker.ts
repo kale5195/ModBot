@@ -80,9 +80,10 @@ export type UserMetadataApiResponse =
 const API_URL = "https://app.icebreaker.xyz/api/v1";
 const TWITTER_API_URL = "https://hook.us1.make.com/h4yqha7yee9juaosenjrmebd956va0ew?twitter=";
 
-async function request<T>(path: string, options?: RequestInit) {
+async function request<T>(path: string, options?: RequestInit & { baseUrl?: string }) {
   try {
-    const response = await http.get<T>(`${API_URL}${path}`);
+    const baseUrl = options?.baseUrl || API_URL;
+    const response = await http.get<T>(`${baseUrl}${path}`);
 
     return response.data;
   } catch (err) {
@@ -96,7 +97,7 @@ async function getTwitterMetadata(username?: string) {
     return;
   }
 
-  const response = await request<UserMetadataApiResponse>(`${TWITTER_API_URL}${username}`);
+  const response = await request<UserMetadataApiResponse>(username, { baseUrl: TWITTER_API_URL });
 
   return response?.metadata;
 }
