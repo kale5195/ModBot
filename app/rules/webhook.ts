@@ -19,6 +19,9 @@ export async function webhook(args: CheckFunctionArgs) {
         },
       },
       {
+        headers: {
+          "x-webhook-secret": process.env.THIRDPARTY_WEBHOOK_SECRET,
+        },
         timeout: maxTimeout,
         validateStatus: (status) => (status >= 200 && status < 300) || status === 400,
       }
