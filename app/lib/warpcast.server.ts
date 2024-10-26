@@ -90,7 +90,7 @@ export async function moderateCast(props: { hash: string; action: "hide" | "unhi
   const { hash, action } = props;
   const authToken = await generateAuthToken();
   const res = await http.post<{ result: { success: boolean } }>(
-    `https://api.warpcast.com/fc/moderate-cast`,
+    `https://api.warpcast.com/fc/moderated-casts`,
     {
       castHash: hash,
       action: action,
