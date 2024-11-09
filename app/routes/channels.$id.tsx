@@ -83,12 +83,7 @@ export default function Channels() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <img src={channel.imageUrl || ""} className="w-10 h-10 rounded-full" />
-          <a
-            href={`https://warpcast.com/~/channel/${channel.id}`}
-            className="no-underline"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a href={`https://recaster.org/channel/${channel.id}`} className="no-underline">
             <h1 style={{ fontFamily: "Kode Mono" }}>/{channel.id}</h1>
           </a>
         </div>
