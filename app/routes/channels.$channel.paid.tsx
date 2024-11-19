@@ -3,7 +3,7 @@ import { frameResponse, getSharedEnv } from "~/lib/utils.server";
 import invariant from "tiny-invariant";
 import { baseClient } from "~/lib/viem.server";
 import { db } from "~/lib/db.server";
-import { inviteToChannel } from "~/lib/neynar.server";
+import { inviteToChannel } from "~/lib/warpcast.server";
 
 function getFrameImageUrl(props: { message: string; channel?: string; color?: string | null }) {
   const { message, channel, color } = props;

@@ -17,7 +17,7 @@ import { Alert } from "~/components/ui/alert";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
-import { inviteToChannel } from "~/lib/neynar.server";
+import { inviteToChannel } from "~/lib/warpcast.server";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   invariant(params.id, "id is required");

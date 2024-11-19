@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { z } from "zod";
 import RE2 from "re2";
-import { inviteToChannel } from "./neynar.server";
 import { validateErc1155, validateErc20, validateErc721 } from "./utils.server";
 import { db } from "./db.server";
 
@@ -23,7 +22,7 @@ import { powerbadgeRulesDefinitions, powerbadgeRulesFunction } from "~/rules/pow
 import { airstackRulesDefinitions, airstackRulesFunction } from "~/rules/airstack";
 import { botOrNotRulesDefinitions, botOrNotRulesFunction } from "~/rules/bot-or-not";
 import { channelMemberRulesDefinitions, channelMemberRulesFunction } from "~/rules/membership";
-import { getWarpcastChannel } from "~/lib/warpcast.server";
+import { getWarpcastChannel, inviteToChannel } from "~/lib/warpcast.server";
 import { webhookRulesDefinitions, webhookRulesFunction } from "~/rules/webhook";
 import { membershipFeeRulesDefinitions, membershipFeeRulesFunction } from "~/rules/membership-fee";
 import { castContentRulesDefinitions, castContentRulesFunction } from "~/rules/cast-content";

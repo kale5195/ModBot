@@ -48,6 +48,25 @@ export async function isChannelInvited(props: { channel: string; fid: number }) 
   return rsp.data.result.invites.length > 0;
 }
 
+export async function inviteToChannel(props: { channelId: string; fid: number }) {
+  const { channelId, fid } = props;
+  const authToken = await generateAuthToken();
+  const rsp = await http.post<{ result: { success: boolean } }>(
+    `https://api.warpcast.com/fc/channel-invites`,
+    {
+      channelId,
+      inviteFid: fid,
+      role: "member",
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    }
+  );
+  return rsp.data.result.success;
+}
+
 export async function isFollowingChannel(props: { channel: string; fid: number }) {
   const { channel, fid } = props;
   const rsp = await http.get<{ result: { following: boolean } }>(
