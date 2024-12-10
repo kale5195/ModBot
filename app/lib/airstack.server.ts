@@ -86,6 +86,9 @@ export async function holdingFanTokenBalance({ fid, symbol }: { fid: number; sym
   if (!data?.MoxieUserPortfolios?.MoxieUserPortfolio) {
     return 0;
   }
+  if (data.MoxieUserPortfolios.MoxieUserPortfolio.length > 1) {
+    return 0;
+  }
   const unlocked = Number(data.MoxieUserPortfolios.MoxieUserPortfolio[0].totalUnlockedAmount);
   const locked = Number(data.MoxieUserPortfolios.MoxieUserPortfolio[0].totalLockedAmount);
   const total = unlocked + locked;
