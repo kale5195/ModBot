@@ -59,12 +59,24 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   if (result.data.intent === "deleteChannel") {
-    await db.moderatedChannel.update({
+    await db.comods.deleteMany({
+      where: {
+        channelId: moderatedChannel.id,
+      },
+    });
+    await db.moderationLog.deleteMany({
+      where: {
+        channelId: moderatedChannel.id,
+      },
+    });
+    await db.castLog.deleteMany({
+      where: {
+        channelId: moderatedChannel.id,
+      },
+    });
+    await db.moderatedChannel.delete({
       where: {
         id: moderatedChannel.id,
-      },
-      data: {
-        active: false,
       },
     });
 
@@ -94,7 +106,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function Screen() {
-  const { moderatedChannel } = useLoaderData<typeof loader>();
+  const { moderatedChannel, user } = useLoaderData<typeof loader>();
   const deleteFetcher = useFetcher<typeof loader>();
   const bannedListsFetcher = useFetcher<typeof loader>();
   const [checked, setChecked] = useState(moderatedChannel.disableBannedList === 1);
@@ -136,41 +148,43 @@ export default function Screen() {
       </div>
       <hr />
 
-      {/* <div className="space-y-3">
-        <div>
-          <p className="font-medium">Delete Channel</p>
-          <p className="text-sm text-gray-500">
-            This will remove your channel from Modbot and all of its data including logs, collaborators, roles, and
-            rules. It's not recoverable.
-          </p>
-        </div>
+      {Number(user.id) === Number(moderatedChannel.userId) && (
+        <div className="space-y-3">
+          <div>
+            <p className="font-medium">Delete Channel</p>
+            <p className="text-sm text-gray-500">
+              This will remove your channel from Modbot and all of its data including logs, collaborators, roles, and
+              rules. It's not recoverable.
+            </p>
+          </div>
 
-        <deleteFetcher.Form
-          method="post"
-          onSubmit={(e) => {
-            if (!confirm("Are you sure? This is not recoverable")) {
-              e.preventDefault();
-            }
-          }}
-        >
-          <Button
-            className="w-full sm:w-auto min-w-[150px]  border-destructive text-destructive hover:bg-destructive hover:text-white"
-            name="intent"
-            disabled={deleteFetcher.state !== "idle"}
-            value="deleteChannel"
-            variant={"outline"}
+          <deleteFetcher.Form
+            method="post"
+            onSubmit={(e) => {
+              if (!confirm("Are you sure? This is not recoverable")) {
+                e.preventDefault();
+              }
+            }}
           >
-            {deleteFetcher.state !== "idle" ? (
-              <>
-                <Loader2 className="animate-spin inline w-4 h-4 mr-2" />
-                Deleting...
-              </>
-            ) : (
-              "Delete"
-            )}
-          </Button>
-        </deleteFetcher.Form>
-      </div> */}
+            <Button
+              className="w-full sm:w-auto min-w-[150px]  border-destructive text-destructive hover:bg-destructive hover:text-white"
+              name="intent"
+              disabled={deleteFetcher.state !== "idle"}
+              value="deleteChannel"
+              variant={"outline"}
+            >
+              {deleteFetcher.state !== "idle" ? (
+                <>
+                  <Loader2 className="animate-spin inline w-4 h-4 mr-2" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </Button>
+          </deleteFetcher.Form>
+        </div>
+      )}
     </main>
   );
 }
