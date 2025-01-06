@@ -146,7 +146,7 @@ export const planTypes = ["basic", "prime", "ultra", "vip"] as const;
 export type PlanType = (typeof planTypes)[number];
 
 export function getChannelImageUrl(channelId: string) {
-  return `https://preview.recaster.org/api/avatar/channel/${channelId}?v=2`;
+  return `https://preview.recaster.org/api/avatar/channel/${channelId}?v=3`;
 }
 
 export function meetsMinimumPlan(args: { userPlan: PlanType; minimumPlan: PlanType }) {
