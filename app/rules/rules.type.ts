@@ -30,6 +30,7 @@ export const ruleNames = [
   "requiresErc721",
   "requiresErc20",
   "hasIcebreakerHuman",
+  "hasIcebreakerBot",
   "hasIcebreakerQBuilder",
   "hasIcebreakerVerified",
   "hasIcebreakerCredential",

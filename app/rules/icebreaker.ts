@@ -145,6 +145,28 @@ async function hasIcebreakerHuman({ user: member }: CheckFunctionArgs) {
   };
 }
 
+async function hasIcebreakerBot({ user: member }: CheckFunctionArgs) {
+  const credential = "Feather Ice";
+
+  const user = await getIcebreakerbyFid(member.fid);
+
+  if (!user) {
+    return {
+      result: false,
+      message: `@${member.username} not found in Icebreaker`,
+    };
+  }
+
+  const userHasCredential = hasCredential(credential, user.credentials, true);
+
+  return {
+    result: userHasCredential,
+    message: userHasCredential
+      ? `@${member.username} has the Bot (${credential}) credential`
+      : `@${member.username} does not have the Bot (${credential}) credential`,
+  };
+}
+
 async function hasIcebreakerVerified({ user: member }: CheckFunctionArgs) {
   const credential = "Verified:";
 
@@ -261,6 +283,7 @@ async function hasGuildRole({ user: member, rule }: CheckFunctionArgs) {
 type RuleName =
   | "hasIcebreakerCredential"
   | "hasIcebreakerHuman"
+  | "hasIcebreakerBot"
   | "hasIcebreakerQBuilder"
   | "hasIcebreakerVerified"
   | "hasIcebreakerLinkedAccount"
@@ -312,6 +335,21 @@ export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
     friendlyName: "Icebreaker: Has Human",
     checkType: "user",
     description: "Check if the user has the Icebreaker Human credential",
+    hidden: false,
+    invertable: true,
+    args: {},
+  },
+
+  hasIcebreakerBot: {
+    name: "hasIcebreakerBot",
+    allowMultiple: false,
+    author,
+    authorUrl,
+    authorIcon,
+    category: "all",
+    friendlyName: "Icebreaker: Has Bot",
+    checkType: "user",
+    description: "Check if the user has the Icebreaker Bot (Feather Ice) credential",
     hidden: false,
     invertable: true,
     args: {},
@@ -435,6 +473,7 @@ export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
 
 export const iceBreakerRulesFunction: Record<RuleName, CheckFunction> = {
   hasIcebreakerHuman: hasIcebreakerHuman,
+  hasIcebreakerBot: hasIcebreakerBot,
   hasIcebreakerQBuilder: hasIcebreakerQBuilder,
   hasIcebreakerVerified: hasIcebreakerVerified,
   hasIcebreakerCredential: hasIcebreakerCredential,
