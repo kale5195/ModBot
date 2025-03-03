@@ -96,7 +96,7 @@ export default function Screen() {
               variant={"secondary"}
               onClick={() =>
                 window.open(
-                  `https://warpcast.com/~/developers/frames?url=${encodeURIComponent(getFrameUrl())}`,
+                  `https://warpcast.com/~/developers/frames-legacy?url=${encodeURIComponent(getFrameUrl())}`,
                   "_blank"
                 )
               }

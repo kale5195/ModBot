@@ -1,13 +1,15 @@
+import { User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { ActionFunctionArgs, json } from "@remix-run/node";
 import invariant from "tiny-invariant";
 import { parseEther } from "viem";
 import { db } from "~/lib/db.server";
-import { parseMessageWithAirstack } from "~/lib/utils.server";
+import { parseMessage } from "~/lib/utils.server";
 export async function action({ request, params }: ActionFunctionArgs) {
   invariant(params.channel, "channel id is required");
   const channelId = params.channel;
   const data = await request.json();
-  const user = await parseMessageWithAirstack(data);
+  const message = await parseMessage(data);
+  const user = message.action.interactor as User;
   const paymentAddress = data.untrustedData.address;
   // parse frames
   // get price and address from channel

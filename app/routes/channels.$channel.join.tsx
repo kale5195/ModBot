@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { db } from "~/lib/db.server";
-import { frameResponse, getSetCache, getSharedEnv, parseMessage, parseMessageWithAirstack } from "~/lib/utils.server";
+import { frameResponse, getSetCache, getSharedEnv, parseMessage } from "~/lib/utils.server";
 import invariant from "tiny-invariant";
 import { validateCast } from "~/lib/automod.server";
 import {
@@ -10,6 +10,7 @@ import {
   isChannelMember,
   isFollowingChannel,
 } from "~/lib/warpcast.server";
+import { User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 
 function getFrameImageUrl(props: { message: string; channel?: string; color?: string | null }) {
   const { message, channel, color } = props;
@@ -73,11 +74,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
       });
     }
     // neynar
-    // const message = await parseMessage(data);
-    // const user = message.action.interactor as User;
+    const message = await parseMessage(data);
+    const user = message.action.interactor as User;
 
     // airstack
-    const user = await parseMessageWithAirstack(data);
+    // const user = await parseMessageWithAirstack(data);
     // console.log(user);
     // check if following
     const isFollowing = await isFollowingChannel({ channel: channelId, fid: user.fid });
