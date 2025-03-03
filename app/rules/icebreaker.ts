@@ -66,17 +66,58 @@ type IcebreakerProfile = {
   guilds?: IcebreakerGuildMembership[];
 };
 
-const API_URL = "https://app.icebreaker.xyz/api/v1";
+export type UserMetadata = {
+  name: string;
+  value: string | number;
+};
 
-async function request<T>(path: string, options?: RequestInit) {
+export type UserMetadataApiResponse =
+  | {
+      metadata?: UserMetadata[];
+    }
+  | undefined;
+
+const API_URL = "https://app.icebreaker.xyz/api/v1";
+const TWITTER_API_URL = "https://hook.us1.make.com/h4yqha7yee9juaosenjrmebd956va0ew?twitter=";
+
+async function request<T>(path: string, options?: RequestInit & { baseUrl?: string }) {
   try {
-    const response = await http.get<T>(`${API_URL}${path}`);
+    const baseUrl = options?.baseUrl || API_URL;
+    const response = await http.get<T>(`${baseUrl}${path}`);
 
     return response.data;
   } catch (err) {
     console.error(err);
     return;
   }
+}
+
+async function getTwitterMetadata(username?: string) {
+  if (!username) {
+    return;
+  }
+
+  const response = await request<UserMetadataApiResponse>(username, { baseUrl: TWITTER_API_URL });
+
+  return response?.metadata;
+}
+
+function extractTwitterFollowerCount(metadata?: UserMetadata[]) {
+  if (!metadata) {
+    return;
+  }
+
+  const followerCount = metadata?.find(({ name }) => name === "followers_count")?.value as number | undefined;
+  return followerCount;
+}
+
+function extractTwitterCreatedAt(metadata?: UserMetadata[]) {
+  if (!metadata) {
+    return;
+  }
+
+  const createdAt = metadata?.find(({ name }) => name === "created_at")?.value;
+  return createdAt ? new Date(createdAt) : undefined;
 }
 
 type ProfileResponse = {
@@ -234,6 +275,96 @@ async function hasIcebreakerLinkedAccount({ user: member, rule }: CheckFunctionA
   };
 }
 
+async function hasVerifiedTwitterFollowersGreaterThan({ user: member, rule }: CheckFunctionArgs) {
+  const { threshold } = rule.args as { threshold: string };
+
+  if (!threshold || isNaN(+threshold)) {
+    return {
+      result: false,
+      message: "Invalid threshold value",
+    };
+  }
+  const thresholdNumber = +threshold;
+
+  const user = await getIcebreakerbyFid(member.fid);
+
+  if (!user) {
+    return {
+      result: false,
+      message: `@${member.username} not found in Icebreaker`,
+    };
+  }
+
+  const verifiedTwitterAccount = user.channels?.find(
+    (channel) => channel.type === "twitter" && channel.isVerified
+  )?.value;
+
+  const metadata = verifiedTwitterAccount ? await getTwitterMetadata(verifiedTwitterAccount) : undefined;
+
+  const followerCount = extractTwitterFollowerCount(metadata);
+
+  const userHasGreaterThanThreshold = !!followerCount && followerCount > thresholdNumber;
+
+  return {
+    result: userHasGreaterThanThreshold,
+    message: followerCount
+      ? `@${member.username} has ${followerCount} followers on Twitter`
+      : metadata
+      ? `Unable to retrieve follower count for @${member.username}`
+      : `Unable to find a verified Twitter account for @${member.username}`,
+  };
+}
+
+async function hasVerifiedTwitterCreatedBefore({ user: member, rule }: CheckFunctionArgs) {
+  const { threshold } = rule.args as { threshold: string };
+
+  const isValidDateFormat = (dateString: string) => {
+    const regex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!regex.test(dateString)) return false;
+
+    const date = new Date(dateString);
+    return dateString === date.toISOString().split("T")[0];
+  };
+
+  // Check if threshold can be parsed as a valid date
+  if (!threshold || !isValidDateFormat(threshold)) {
+    return {
+      result: false,
+      message: "Invalid threshold value. Please provide a valid date.",
+    };
+  }
+
+  const thresholdDate = new Date(threshold);
+
+  const user = await getIcebreakerbyFid(member.fid);
+
+  if (!user) {
+    return {
+      result: false,
+      message: `@${member.username} not found in Icebreaker`,
+    };
+  }
+
+  const verifiedTwitterAccount = user.channels?.find(
+    (channel) => channel.type === "twitter" && channel.isVerified
+  )?.value;
+
+  const metadata = verifiedTwitterAccount ? await getTwitterMetadata(verifiedTwitterAccount) : undefined;
+
+  const createdAt = extractTwitterCreatedAt(metadata);
+
+  const userHasGreaterThanThreshold = !!createdAt && createdAt < thresholdDate;
+
+  return {
+    result: userHasGreaterThanThreshold,
+    message: createdAt
+      ? `@${member.username} created Twitter account on ${createdAt.toDateString()}`
+      : metadata
+      ? `Unable to retrieve created date for @${member.username}`
+      : `Unable to find a verified Twitter account for @${member.username}`,
+  };
+}
+
 async function hasPOAP({ user: member, rule }: CheckFunctionArgs) {
   const { eventId } = rule.args as { eventId: string };
 
@@ -287,8 +418,10 @@ type RuleName =
   | "hasIcebreakerQBuilder"
   | "hasIcebreakerVerified"
   | "hasIcebreakerLinkedAccount"
+  | "hasGuildRole"
   | "hasPOAP"
-  | "hasGuildRole";
+  | "hasVerifiedTwitterCreatedBefore"
+  | "hasVerifiedTwitterFollowersGreaterThan";
 
 const author = "Icebreaker";
 const authorUrl = "https://icebreaker.xyz";
@@ -415,6 +548,56 @@ export const iceBreakerRulesDefinitions: Record<RuleName, RuleDefinition> = {
     },
   },
 
+  hasVerifiedTwitterFollowersGreaterThan: {
+    name: "hasVerifiedTwitterFollowersGreaterThan",
+    allowMultiple: false,
+    author,
+    authorUrl,
+    authorIcon,
+    category: "all",
+    friendlyName: "Icebreaker: Has verified Twitter account with greater than X followers",
+    checkType: "user",
+    description: "Check if the user has more than a certain number of followers on their verified Twitter account",
+    hidden: false,
+    invertable: true,
+    args: {
+      threshold: {
+        type: "string",
+        pattern: "^[0-9]*$",
+        defaultValue: "1000",
+        friendlyName: "Follower minimum",
+        description: "The minimum number of followers required",
+        placeholder: "Enter a number...",
+        required: true,
+      },
+    },
+  },
+
+  hasVerifiedTwitterCreatedBefore: {
+    name: "hasVerifiedTwitterCreatedBefore",
+    allowMultiple: false,
+    author,
+    authorUrl,
+    authorIcon,
+    category: "all",
+    friendlyName: "Icebreaker: Has verified Twitter account created before a date",
+    checkType: "user",
+    description: "Check if the user has a verified Twitter account created before a given date",
+    hidden: false,
+    invertable: true,
+    args: {
+      threshold: {
+        type: "string",
+        pattern: "^d{4}-d{2}-d{2}$",
+        defaultValue: "2021-01-01",
+        friendlyName: "Created before",
+        description: "The latest creation date of the Twitter account",
+        placeholder: "Enter a date in YYYY-MM-DD format...",
+        required: true,
+      },
+    },
+  },
+
   hasPOAP: {
     name: "hasPOAP",
     allowMultiple: true,
@@ -478,6 +661,8 @@ export const iceBreakerRulesFunction: Record<RuleName, CheckFunction> = {
   hasIcebreakerVerified: hasIcebreakerVerified,
   hasIcebreakerCredential: hasIcebreakerCredential,
   hasIcebreakerLinkedAccount: hasIcebreakerLinkedAccount,
-  hasPOAP: hasPOAP,
   hasGuildRole: hasGuildRole,
+  hasPOAP: hasPOAP,
+  hasVerifiedTwitterCreatedBefore: hasVerifiedTwitterCreatedBefore,
+  hasVerifiedTwitterFollowersGreaterThan: hasVerifiedTwitterFollowersGreaterThan,
 } as const;
